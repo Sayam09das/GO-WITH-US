@@ -5,15 +5,50 @@ alwaysApply: true
 
 # GO WITH US — Engineering Rules
 
+## Architecture
+
+- Respect the existing monorepo: `apps/web`, `apps/api`, `packages/*`.
+- Keep frontend and backend responsibilities separate.
+- Reuse shared packages when genuinely appropriate; do not create unnecessary abstractions.
+- Follow `docs/FRONTEND_ARCHITECTURE.md` and `docs/BACKEND_ARCHITECTURE.md`.
+
+## TypeScript
+
+- TypeScript strict mode. Avoid `any` unless genuinely unavoidable.
+- Shared types belong in `@gowithus/types`; shared utilities in `@gowithus/utils`.
+
+## Dependencies
+
 - Use **pnpm** workspaces. Do not add npm or yarn lockfiles.
-- TypeScript strict mode. No `any` unless unavoidable and documented.
-- Frontend: Next.js App Router in `apps/web`. Backend: Fastify in `apps/api`.
+- Do not add dependencies without a real requirement.
+- Do not introduce duplicate libraries for the same responsibility.
+
+## Networking
+
 - HTTP client: native **fetch()** only. Do not add Axios.
-- Do not add Redux or other global state libraries.
+
+## State
+
+- Avoid unnecessary global state. Prefer local/component state and URL params.
+- Do not introduce Redux without a documented architectural need.
 - Do not store session tokens in `localStorage`.
-- Respect `docs/` product specs. Do not rewrite docs unless explicitly asked.
+
+## Security
+
+- Never hardcode secrets or commit credentials.
+- Server-only env vars stay on the server; never expose them via `NEXT_PUBLIC_*`.
+- Validate untrusted input at system boundaries.
+
+## UI
+
+- Follow `docs/DESIGN_SYSTEM.md` and `docs/FRONTEND_ARCHITECTURE.md`.
+- Avoid generic SaaS layouts. Keep the travel experience premium, editorial, responsive, accessible, and performant.
 - Do not build travel UI (navbar, hero, cards, search, trips) unless requested.
-- Keep changes scoped. Do not modify unrelated files.
+
+## Code changes
+
+- Inspect existing code before modifying it.
+- Modify only files relevant to the task.
+- Respect `docs/` product specs. Do not rewrite docs unless explicitly asked.
+- Do not create unnecessary documentation.
 - Use Biome for lint/format. Do not add ESLint + Prettier unless required.
-- Never commit secrets. Use `.env.example` placeholders only.
-- Accessibility and responsive behavior are defaults, not afterthoughts.
