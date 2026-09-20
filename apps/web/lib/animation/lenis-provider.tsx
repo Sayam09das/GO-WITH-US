@@ -2,7 +2,7 @@
 
 import Lenis from "lenis";
 import { useEffect } from "react";
-import { gsap, registerGsapPlugins, ScrollTrigger } from "@/lib/animation/gsap";
+import { registerGsapPlugins, ScrollTrigger } from "@/lib/animation/gsap";
 
 interface LenisProviderProps {
   children: React.ReactNode;
@@ -19,7 +19,7 @@ export function LenisProvider({ children }: LenisProviderProps) {
     registerGsapPlugins();
 
     const lenis = new Lenis({
-      autoRaf: false,
+      autoRaf: true,
       lerp: 0.085,
       smoothWheel: true,
       wheelMultiplier: 0.85,
@@ -47,18 +47,13 @@ export function LenisProvider({ children }: LenisProviderProps) {
 
     const onRefresh = () => lenis.resize();
     ScrollTrigger.addEventListener("refresh", onRefresh);
-
-    const tick = (time: number) => {
-      lenis.raf(time);
-    };
-
-    gsap.ticker.add(tick);
-    gsap.ticker.lagSmoothing(0);
+    ScrollTrigger.refresh();
 
     return () => {
-      gsap.ticker.remove(tick);
       ScrollTrigger.removeEventListener("refresh", onRefresh);
+      ScrollTrigger.scrollerProxy(document.documentElement, {});
       lenis.destroy();
+      ScrollTrigger.refresh();
     };
   }, []);
 
