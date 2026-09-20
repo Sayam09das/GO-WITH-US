@@ -24,14 +24,23 @@ Key architectural goals:
 * **Language**: TypeScript
 * **Styling**: Tailwind CSS
 * **UI Library**: React
+* **Base Components**: shadcn/ui (`apps/web/components/ui/*`)
 * **Iconography**: Lucide Icons (`lucide-react`)
 
-### Animation Libraries & Responsibilities
-* **Motion** (`framer-motion` / `motion`): Responsible for standard component interactions, UI state transitions, enter/exit animations, tabs, modals, and drawers.
-* **GSAP**: Responsible for complex coordinated timelines, scroll-linked storytelling, and hero visual sequences.
-* **Lenis**: Responsible for smooth scrolling mechanics.
+### UI Component Sources (see `docs/UI_COMPONENT_SYSTEM.md`)
+* **shadcn/ui**: Primary accessible primitives (Button, Dialog, Card, Input, etc.)
+* **Magic UI**: Premium animated blocks — add per screen need
+* **VengeanceUI**: Visual effects via shadcn registry URL (e.g. animated rays)
+* **21st.dev**: Reference / selective adoption only
+* **UI/UX Pro Max**: Design workflow guidance during implementation
 
-*Rule*: Animation responsibilities are strictly isolated; libraries must never duplicate or compete over the same element's motion behavior.
+### Animation Libraries & Responsibilities (see `docs/ANIMATION_GUIDELINES.md`)
+* **Motion** (`motion`): Component-level transitions on shadcn/ui surfaces
+* **GSAP**: Complex coordinated timelines and scroll-linked editorial moments
+* **Lenis**: Global smooth scrolling only
+* **Magic UI / VengeanceUI**: Internal animation only — do not double-wrap with Motion/GSAP on the same node
+
+*Rule*: One owner per primitive and per animated DOM node. No Axios. No Redux.
 
 ### Backend Context & API Protocol
 * **Backend Runtime**: Node.js + TypeScript + Fastify

@@ -45,8 +45,8 @@ export const colors = {
 } as const;
 
 export const typography = {
-  fontSans: "Inter, ui-sans-serif, system-ui, sans-serif",
-  fontDisplay: "var(--font-display), Georgia, serif",
+  fontSans: "var(--font-sans), Manrope, system-ui, sans-serif",
+  fontDisplay: 'var(--font-display), "Playfair Display", Georgia, serif',
   scale: {
     display: { fontSize: "3.5rem", lineHeight: "1.1", fontWeight: "700", letterSpacing: "-0.02em" },
     headingXl: {

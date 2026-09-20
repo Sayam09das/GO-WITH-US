@@ -1,15 +1,13 @@
-import { Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
+import localFont from "next/font/local";
 
-export const fontSans = Plus_Jakarta_Sans({
-  subsets: ["latin"],
+export const fontSans = localFont({
+  src: "../public/fonts/Manrope-VariableFont_wght.ttf",
   variable: "--font-sans",
   display: "swap",
-  weight: ["400", "500", "600", "700"],
 });
 
-export const fontDisplay = Playfair_Display({
-  subsets: ["latin"],
+export const fontDisplay = localFont({
+  src: "../public/fonts/PlayfairDisplay-VariableFont_wght.ttf",
   variable: "--font-display",
   display: "swap",
-  weight: ["600", "700"],
 });

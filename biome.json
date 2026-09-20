@@ -13,7 +13,8 @@
       "!**/dist",
       "!**/build",
       "!**/coverage",
-      "!**/pnpm-lock.yaml"
+      "!**/pnpm-lock.yaml",
+      "!**/.cursor/skills"
     ]
   },
   "formatter": {

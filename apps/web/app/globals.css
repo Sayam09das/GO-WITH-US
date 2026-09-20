@@ -153,7 +153,7 @@ body {
   background-color: var(--background);
   color: var(--foreground);
   font-family:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    var(--font-sans), Manrope, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   margin: 0;
   padding: 0;
   -webkit-font-smoothing: antialiased;
@@ -198,6 +198,58 @@ img {
 ::selection {
   background-color: rgba(255, 105, 25, 0.2);
   color: var(--heading);
+}
+
+/* Specific Typography Mapping (Playfair Display & Manrope) */
+.hero-heading {
+  font-family: var(--font-display), "Playfair Display", Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+@media (min-width: 640px) {
+  .hero-heading {
+    font-weight: 700;
+  }
+}
+
+.section-heading {
+  font-family: var(--font-display), "Playfair Display", Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.destination-title {
+  font-family: var(--font-sans), Manrope, system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+@media (min-width: 640px) {
+  .destination-title {
+    font-weight: 700;
+  }
+}
+
+.nav-link {
+  font-family: var(--font-sans), Manrope, system-ui, sans-serif;
+  font-weight: 500;
+}
+
+.text-price {
+  font-family: var(--font-sans), Manrope, system-ui, sans-serif;
+  font-weight: 700;
+}
+
+.label-text {
+  font-family: var(--font-sans), Manrope, system-ui, sans-serif;
+  font-weight: 500;
+}
+
+@media (min-width: 640px) {
+  .label-text {
+    font-weight: 600;
+  }
 }
 
 /* Reusable Component Utility Classes */
