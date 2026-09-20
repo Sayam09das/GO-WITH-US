@@ -1,22 +1,21 @@
 "use client";
 
-import { Plane } from "lucide-react";
 import { motion } from "motion/react";
-import { HERO_COPY } from "@/lib/hero";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
-import { HeroSearchBar } from "./hero-search-bar";
+import { ABOUT_COPY, ABOUT_STATS } from "@/lib/landing/about";
+import { AboutStatCard } from "./about-stat-card";
 
 const ENTRANCE_EASE: [number, number, number, number] = [0, 0, 0.2, 1];
 
 const containerVariants = {
   hidden: {},
   visible: {
-    transition: { staggerChildren: 0.07, delayChildren: 0.12 },
+    transition: { staggerChildren: 0.08, delayChildren: 0.05 },
   },
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 22 },
   visible: {
     opacity: 1,
     y: 0,
@@ -24,9 +23,9 @@ const itemVariants = {
   },
 };
 
-function HeroContent() {
+function AboutContent() {
   const reducedMotion = useReducedMotion();
-  const headlineWords = HERO_COPY.headline.split(" ").map((word, index, words) => {
+  const headlineWords = ABOUT_COPY.headline.split(" ").map((word, index, words) => {
     const occurrence = words.slice(0, index).filter((item) => item === word).length;
     return { id: `${word}-${occurrence}`, word };
   });
@@ -35,40 +34,41 @@ function HeroContent() {
     <div className="flex w-full min-w-0 flex-col gap-7 sm:gap-8 lg:gap-10">
       <motion.div
         initial={reducedMotion ? "visible" : "hidden"}
-        animate="visible"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-80px" }}
         variants={containerVariants}
         className="flex flex-col gap-4 sm:gap-5"
       >
-        <motion.p
-          variants={itemVariants}
-          className="label-text inline-flex items-center gap-2 text-primary"
-        >
-          <Plane aria-hidden="true" className="size-4 rotate-[-12deg]" />
-          {HERO_COPY.eyebrow}
+        <motion.p variants={itemVariants} className="label-text text-primary">
+          {ABOUT_COPY.eyebrow}
         </motion.p>
 
-        <h1
-          id="home-hero-heading"
-          className="max-w-xl text-[1.85rem] font-bold leading-[1.14] tracking-tight text-heading min-[400px]:text-[2rem] sm:text-5xl lg:text-[3.25rem]"
+        <h2
+          id="about-section-heading"
+          className="max-w-xl text-[1.75rem] font-bold leading-[1.15] tracking-tight text-heading sm:text-4xl lg:text-[2.65rem]"
         >
           {headlineWords.map(({ id, word }) => (
             <motion.span key={id} variants={itemVariants} className="mr-[0.28em] inline-block">
               {word}
             </motion.span>
           ))}
-        </h1>
+        </h2>
 
         <motion.p
           variants={itemVariants}
-          className="max-w-md text-[0.9375rem] leading-relaxed text-muted-foreground sm:text-base sm:leading-relaxed md:text-lg"
+          className="max-w-lg text-[0.9375rem] leading-relaxed text-muted-foreground sm:text-base sm:leading-relaxed md:text-lg"
         >
-          {HERO_COPY.subheadline}
+          {ABOUT_COPY.description}
         </motion.p>
       </motion.div>
 
-      <HeroSearchBar />
+      <div className="grid grid-cols-1 gap-3 min-[480px]:grid-cols-3 min-[480px]:gap-4">
+        {ABOUT_STATS.map((stat, index) => (
+          <AboutStatCard key={stat.id} stat={stat} index={index} />
+        ))}
+      </div>
     </div>
   );
 }
 
-export { HeroContent };
+export { AboutContent };

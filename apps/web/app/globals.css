@@ -258,11 +258,23 @@ img {
   width: 100%;
   max-width: 1200px;
   margin-inline: auto;
-  padding-inline: 24px;
+  padding-inline: 20px;
+}
+
+@media (min-width: 640px) {
+  .container-travel {
+    padding-inline: 24px;
+  }
 }
 
 .travel-section {
-  padding-block: 80px;
+  padding-block: 56px;
+}
+
+@media (min-width: 640px) {
+  .travel-section {
+    padding-block: 80px;
+  }
 }
 
 .btn-primary {

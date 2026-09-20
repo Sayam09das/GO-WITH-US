@@ -4,10 +4,10 @@ import { useLayoutEffect, useRef } from "react";
 import { gsap, registerGsapPlugins } from "@/lib/animation/gsap";
 import { bindParallax, bindSectionScrollOut } from "@/lib/animation/scroll-parallax";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
-import { HeroCollage } from "./hero-collage";
-import { HeroContent } from "./hero-content";
+import { AboutCollage } from "./about-collage";
+import { AboutContent } from "./about-content";
 
-function HomeHero() {
+function AboutSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const collageRef = useRef<HTMLDivElement>(null);
@@ -28,7 +28,7 @@ function HomeHero() {
       bindSectionScrollOut(content, section);
       bindParallax(collage, {
         trigger: section,
-        speed: "medium",
+        speed: "slow",
       });
     }, sectionRef);
 
@@ -38,19 +38,16 @@ function HomeHero() {
   return (
     <section
       ref={sectionRef}
-      aria-labelledby="home-hero-heading"
-      className="relative overflow-hidden bg-background pb-12 pt-[5.5rem] sm:pb-16 sm:pt-28 lg:pb-24 lg:pt-36"
+      aria-labelledby="about-section-heading"
+      className="travel-section bg-background"
     >
       <div className="container-travel">
-        <div className="flex flex-col gap-10 sm:gap-12 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:items-center lg:gap-10 xl:gap-14">
-          <div ref={contentRef} className="order-1 w-full min-w-0">
-            <HeroContent />
+        <div className="flex flex-col gap-10 sm:gap-12 lg:grid lg:grid-cols-2 lg:items-center lg:gap-14 xl:gap-20">
+          <div ref={collageRef} className="order-2 w-full min-w-0 will-change-transform lg:order-1">
+            <AboutCollage />
           </div>
-          <div
-            ref={collageRef}
-            className="order-2 w-full min-w-0 will-change-transform lg:justify-self-end"
-          >
-            <HeroCollage />
+          <div ref={contentRef} className="order-1 w-full min-w-0 lg:order-2">
+            <AboutContent />
           </div>
         </div>
       </div>
@@ -58,4 +55,4 @@ function HomeHero() {
   );
 }
 
-export { HomeHero };
+export { AboutSection };
