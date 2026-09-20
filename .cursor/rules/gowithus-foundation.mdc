@@ -1,0 +1,19 @@
+---
+description: GO WITH US monorepo engineering conventions
+alwaysApply: true
+---
+
+# GO WITH US — Engineering Rules
+
+- Use **pnpm** workspaces. Do not add npm or yarn lockfiles.
+- TypeScript strict mode. No `any` unless unavoidable and documented.
+- Frontend: Next.js App Router in `apps/web`. Backend: Fastify in `apps/api`.
+- HTTP client: native **fetch()** only. Do not add Axios.
+- Do not add Redux or other global state libraries.
+- Do not store session tokens in `localStorage`.
+- Respect `docs/` product specs. Do not rewrite docs unless explicitly asked.
+- Do not build travel UI (navbar, hero, cards, search, trips) unless requested.
+- Keep changes scoped. Do not modify unrelated files.
+- Use Biome for lint/format. Do not add ESLint + Prettier unless required.
+- Never commit secrets. Use `.env.example` placeholders only.
+- Accessibility and responsive behavior are defaults, not afterthoughts.
