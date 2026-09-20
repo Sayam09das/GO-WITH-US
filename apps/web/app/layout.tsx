@@ -1,3 +1,4 @@
+import { Navbar } from "@/components/navigation";
 import { AppProviders } from "@/components/providers";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildRootMetadata, buildWebSiteJsonLd } from "@/lib/seo";
@@ -15,7 +16,10 @@ export default function RootLayout({
     <html lang="en" className={`${fontSans.variable} ${fontDisplay.variable}`}>
       <body className="min-h-screen bg-background text-foreground font-sans antialiased">
         <JsonLd data={buildWebSiteJsonLd()} />
-        <AppProviders>{children}</AppProviders>
+        <AppProviders>
+          <Navbar />
+          {children}
+        </AppProviders>
       </body>
     </html>
   );
