@@ -421,18 +421,24 @@ Design follows a mobile-first approach:
 
 ## 23. SEO & Metadata
 
-Public routes generate static and dynamic metadata:
+See **`docs/SEO.md`** for the full SEO foundation (title templates, canonical URLs, OG/Twitter, robots, sitemap, JSON-LD, noindex rules, hreflang prep).
+
+Shared helpers live in `apps/web/lib/seo/`. Public routes generate static and dynamic metadata:
 
 ```typescript
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const destination = await getDestinationBySlug(params.slug);
-  return {
-    title: `${destination.title} Travel Guide | GO WITH US`,
-    description: destination.overview,
-    openGraph: {
-      images: [destination.heroImage],
-    },
-  };
+import { buildDestinationTitle, buildPageMetadata, trimDescription } from "@/lib/seo";
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const destination = await getDestinationBySlug(slug);
+  if (!destination) return buildNotFoundMetadata();
+
+  return buildPageMetadata({
+    title: buildDestinationTitle(destination.name),
+    description: trimDescription(destination.overview),
+    path: `/destinations/${slug}`,
+    ogImage: destination.heroImage,
+  });
 }
 ```
 
