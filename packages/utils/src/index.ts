@@ -1,4 +1,7 @@
-/** Join class names without pulling in a UI dependency at the root. */
-export function cn(...classes: Array<string | false | null | undefined>): string {
-  return classes.filter(Boolean).join(" ");
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+/** Join class names with Tailwind conflict resolution. */
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
 }

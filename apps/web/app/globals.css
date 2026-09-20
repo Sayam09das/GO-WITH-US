@@ -1,12 +1,449 @@
 @import "tailwindcss";
 
+@theme {
+  --color-background: #ffffff;
+  --color-foreground: #141414;
+
+  --color-primary: #ff6919;
+  --color-primary-foreground: #ffffff;
+
+  --color-heading: #121212;
+  --color-body: #616161;
+  --color-muted-foreground: #808080;
+
+  --color-secondary: #fff8f5;
+  --color-secondary-foreground: #e65200;
+
+  --color-card: #ffffff;
+  --color-card-foreground: #141414;
+
+  --color-popover: #ffffff;
+  --color-popover-foreground: #141414;
+
+  --color-section: #f7fbf8;
+  --color-section-warm: #fff8f5;
+  --color-soft-orange: #fff5f0;
+  --color-soft-gray: #f7f7f7;
+
+  --color-border: #e8e8e8;
+  --color-input: #e8e8e8;
+  --color-ring: #ff6919;
+
+  --color-rating: #f5ab14;
+
+  --color-success: #1eb854;
+  --color-success-foreground: #ffffff;
+
+  --color-destructive: #e53935;
+  --color-destructive-foreground: #ffffff;
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  --radius-full: 9999px;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 12px 35px rgba(0, 0, 0, 0.09);
+  --shadow-orange: 0 8px 24px rgba(255, 105, 25, 0.18);
+}
+
 :root {
-  --background: #fafafa;
-  --foreground: #0f172a;
+  --background: #ffffff;
+  --foreground: #141414;
+
+  --primary: #ff6919;
+  --primary-foreground: #ffffff;
+
+  --heading: #121212;
+  --body: #616161;
+  --muted-foreground: #808080;
+
+  --secondary: #fff8f5;
+  --secondary-foreground: #e65200;
+
+  --card: #ffffff;
+  --card-foreground: #141414;
+
+  --popover: #ffffff;
+  --popover-foreground: #141414;
+
+  --section: #f7fbf8;
+  --section-warm: #fff8f5;
+  --soft-orange: #fff5f0;
+  --soft-gray: #f7f7f7;
+
+  --border: #e8e8e8;
+  --input: #e8e8e8;
+  --ring: #ff6919;
+
+  --rating: #f5ab14;
+
+  --success: #1eb854;
+  --success-foreground: #ffffff;
+
+  --destructive: #e53935;
+  --destructive-foreground: #ffffff;
+
+  --radius: 0.75rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  --radius-full: 9999px;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.07);
+  --shadow-lg: 0 12px 35px rgba(0, 0, 0, 0.09);
+  --shadow-orange: 0 8px 24px rgba(255, 105, 25, 0.18);
+}
+
+.dark {
+  --background: #10141d;
+  --foreground: #f5f5f5;
+
+  --primary: #ff7529;
+  --primary-foreground: #ffffff;
+
+  --heading: #fafafa;
+  --body: #b8b8b8;
+  --muted-foreground: #999999;
+
+  --secondary: #1e2430;
+  --secondary-foreground: #ff8c47;
+
+  --card: #151a24;
+  --card-foreground: #f5f5f5;
+
+  --popover: #151a24;
+  --popover-foreground: #f5f5f5;
+
+  --section: #121620;
+  --section-warm: #221815;
+  --soft-orange: #281a15;
+  --soft-gray: #1b202a;
+
+  --border: #262d3a;
+  --input: #262d3a;
+  --ring: #ff7529;
+
+  --rating: #f5ab14;
+
+  --success: #24d160;
+  --success-foreground: #ffffff;
+
+  --destructive: #f04844;
+  --destructive-foreground: #ffffff;
+}
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: system-ui, sans-serif;
+  font-family:
+    var(--font-sans), Manrope, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--heading);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+p {
+  color: var(--body);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+::selection {
+  background-color: rgba(255, 105, 25, 0.2);
+  color: var(--heading);
+}
+
+/* Specific Typography Mapping (Playfair Display & Manrope) */
+.hero-heading {
+  font-family: var(--font-display), "Playfair Display", Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+@media (min-width: 640px) {
+  .hero-heading {
+    font-weight: 700;
+  }
+}
+
+.section-heading {
+  font-family: var(--font-display), "Playfair Display", Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.destination-title {
+  font-family: var(--font-sans), Manrope, system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+@media (min-width: 640px) {
+  .destination-title {
+    font-weight: 700;
+  }
+}
+
+.nav-link {
+  font-family: var(--font-sans), Manrope, system-ui, sans-serif;
+  font-weight: 500;
+}
+
+.text-price {
+  font-family: var(--font-sans), Manrope, system-ui, sans-serif;
+  font-weight: 700;
+}
+
+.label-text {
+  font-family: var(--font-sans), Manrope, system-ui, sans-serif;
+  font-weight: 500;
+}
+
+@media (min-width: 640px) {
+  .label-text {
+    font-weight: 600;
+  }
+}
+
+/* Reusable Component Utility Classes */
+.container-travel {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+
+.travel-section {
+  padding-block: 80px;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 22px;
+  border-radius: 8px;
+  background-color: var(--primary);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  box-shadow: var(--shadow-orange);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease;
+}
+
+.btn-primary:hover {
+  background-color: #f55a0b;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(255, 105, 25, 0.24);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding-inline: 20px;
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+  background-color: transparent;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 180ms ease;
+}
+
+.btn-outline:hover {
+  background-color: var(--primary);
+  color: #ffffff;
+}
+
+.section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.section-label::after {
+  content: "";
+  width: 24px;
+  height: 1px;
+  background-color: var(--primary);
+}
+
+.travel-card {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.travel-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.destination-card {
+  overflow: hidden;
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.destination-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+}
+
+.destination-card img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+}
+
+.booking-bar {
+  display: flex;
+  align-items: center;
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 8px;
+  box-shadow: var(--shadow-md);
+}
+
+.booking-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  padding-inline: 14px;
+  border-right: 1px solid var(--border);
+}
+
+.booking-item:last-of-type {
+  border-right: 0;
+}
+
+.icon-orange {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background-color: var(--soft-orange);
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.price-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 6px;
+  background-color: var(--soft-orange);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.rating-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 7px;
+  border-radius: 5px;
+  background-color: rgba(255, 255, 255, 0.9);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.travel-cta {
+  background-color: var(--section-warm);
+  border-radius: var(--radius-2xl);
+  padding: 60px 30px;
+  text-align: center;
+}
+
+.soft-section {
+  background-color: var(--section);
+  border-radius: var(--radius-2xl);
+}
+
+/* Reduced Motion Override */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+    scroll-behavior: auto;
+  }
 }

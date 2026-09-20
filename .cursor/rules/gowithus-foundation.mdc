@@ -41,7 +41,12 @@ alwaysApply: true
 
 ## UI
 
-- Follow `docs/DESIGN_SYSTEM.md` and `docs/FRONTEND_ARCHITECTURE.md`.
+- Follow `docs/DESIGN_SYSTEM.md`, `docs/UI_COMPONENT_SYSTEM.md`, and `docs/FRONTEND_ARCHITECTURE.md`.
+- **shadcn/ui** owns base primitives (Button, Dialog, Card, Input). **Lucide** owns icons.
+- **Magic UI** — premium animated blocks only. **VengeanceUI** — visual effects via registry URL only.
+- **21st.dev** — reference/adopt selectively. **UI/UX Pro Max** — design workflow guidance.
+- Do not duplicate Button/Dialog/Card across libraries. One owner per primitive.
+- Preserve existing `globals.css` colors and typography tokens.
 - Avoid generic SaaS layouts. Keep the travel experience premium, editorial, responsive, accessible, and performant.
 - Do not build travel UI (navbar, hero, cards, search, trips) unless requested.
 

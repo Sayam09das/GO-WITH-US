@@ -1,2 +1,6 @@
-/** Shared UI primitives will be exported from this package in later phases. */
-export {};
+/**
+ * GO WITH US — Shared UI Package
+ * Exports design tokens and shared UI primitives.
+ */
+
+export * from "./tokens";

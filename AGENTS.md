@@ -19,7 +19,7 @@ When implementing, follow documents in this order:
 1. `docs/PRODUCT.md` — non-negotiable product direction
 2. `docs/FEATURES.md` and `docs/USER_FLOWS.md`
 3. `docs/INFORMATION_ARCHITECTURE.md` and `docs/PAGE_SPECIFICATIONS.md`
-4. `docs/DESIGN_SYSTEM.md`, `docs/ANIMATION_GUIDELINES.md`, `docs/CONTENT_GUIDELINES.md`
+4. `docs/DESIGN_SYSTEM.md`, `docs/UI_COMPONENT_SYSTEM.md`, `docs/ANIMATION_GUIDELINES.md`, `docs/CONTENT_GUIDELINES.md`
 5. `docs/FRONTEND_ARCHITECTURE.md`
 6. `docs/API_SPECIFICATION.md`, `docs/DATABASE.md`, `docs/BACKEND_ARCHITECTURE.md`
 7. `docs/AUTHENTICATION.md`, `docs/SECURITY.md`
@@ -37,6 +37,7 @@ If code and docs conflict, stop and align the code to the docs unless the user e
 * HTTP client: native `fetch()` only. **Do not use Axios.**
 * Global client state: URL params, local state, RSC. **Do not add Redux.**
 * Auth: HTTP-only cookies. **Do not store session tokens in localStorage.**
+* UI: shadcn/ui for base primitives, Lucide for icons, Magic UI / VengeanceUI only for their owned roles (see `docs/UI_COMPONENT_SYSTEM.md`).
 * Animation: Motion for UI chrome, GSAP for editorial/hero timelines, Lenis for scrolling. **Do not animate the same node with two libraries.**
 
 ---
