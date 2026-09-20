@@ -340,7 +340,7 @@ Guest users browse destinations, stays, experiences, search, and reviews freely.
 
 ## 35. SEO & Discoverability
 
-Public pages feature semantic HTML tags (`<h1>`–`<h3>`), dynamic metadata generation, and clean canonical URLs (`/destinations/tokyo-japan`).
+See **`docs/SEO.md`** for the full SEO foundation. Public pages feature semantic HTML tags (`<h1>`–`<h3>`), dynamic metadata via `lib/seo`, clean canonical URLs (`/destinations/tokyo-japan`), and JSON-LD on detail pages.
 
 ---
 

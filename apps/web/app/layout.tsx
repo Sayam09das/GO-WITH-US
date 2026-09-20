@@ -1,13 +1,10 @@
-import type { Metadata } from "next";
 import { AppProviders } from "@/components/providers";
+import { JsonLd } from "@/components/seo/json-ld";
+import { buildRootMetadata, buildWebSiteJsonLd } from "@/lib/seo";
 import { fontDisplay, fontSans } from "./fonts";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: "GO WITH US — Travel Discovery & Trip Planning",
-  description:
-    "Discover destinations, explore stays and experiences, save places, and build personalized day-by-day travel itineraries.",
-};
+export const metadata = buildRootMetadata();
 
 export default function RootLayout({
   children,
@@ -17,6 +14,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${fontSans.variable} ${fontDisplay.variable}`}>
       <body className="min-h-screen bg-background text-foreground font-sans antialiased">
+        <JsonLd data={buildWebSiteJsonLd()} />
         <AppProviders>{children}</AppProviders>
       </body>
     </html>

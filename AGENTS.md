@@ -19,7 +19,7 @@ When implementing, follow documents in this order:
 1. `docs/PRODUCT.md` — non-negotiable product direction
 2. `docs/FEATURES.md` and `docs/USER_FLOWS.md`
 3. `docs/INFORMATION_ARCHITECTURE.md` and `docs/PAGE_SPECIFICATIONS.md`
-4. `docs/DESIGN_SYSTEM.md`, `docs/UI_COMPONENT_SYSTEM.md`, `docs/ANIMATION_GUIDELINES.md`, `docs/CONTENT_GUIDELINES.md`
+4. `docs/DESIGN_SYSTEM.md`, `docs/UI_COMPONENT_SYSTEM.md`, `docs/ANIMATION_GUIDELINES.md`, `docs/CONTENT_GUIDELINES.md`, `docs/SEO.md`
 5. `docs/FRONTEND_ARCHITECTURE.md`
 6. `docs/API_SPECIFICATION.md`, `docs/DATABASE.md`, `docs/BACKEND_ARCHITECTURE.md`
 7. `docs/AUTHENTICATION.md`, `docs/SECURITY.md`

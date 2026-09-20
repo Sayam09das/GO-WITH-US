@@ -324,8 +324,10 @@ Never invent or hallucinate:
 
 ## 32. SEO Content
 
-* **Titles**: Dynamic, informative format (`"Kyoto Travel Guide & Trip Planner | GO WITH US"`).
-* **Descriptions**: Concise 150-character summaries containing natural keywords without stuffing.
+Technical SEO (metadata, canonical URLs, robots, sitemap, JSON-LD) is defined in **`docs/SEO.md`**. This section covers editorial copy only.
+
+* **Titles**: Dynamic, informative format (`"Kyoto Travel Guide | GO WITH US"`).
+* **Descriptions**: Concise 140–160 character summaries with natural language — never keyword stuffing.
 
 ---
 
