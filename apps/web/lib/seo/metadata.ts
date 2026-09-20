@@ -96,7 +96,7 @@ export function buildNotFoundMetadata(): Metadata {
   return buildPageMetadata({
     title: buildPageTitle("Page not found"),
     description:
-      "This page could not be found. Explore destinations and start planning your trip with GO WITH US.",
+      "This page isn't on our map. Explore destinations and start planning your trip with GO WITH US.",
     path: "/404",
     noIndex: true,
   });
