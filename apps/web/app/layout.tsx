@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AppProviders } from "@/components/providers";
 import { fontDisplay, fontSans } from "./fonts";
 import "./globals.css";
 
@@ -16,7 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${fontSans.variable} ${fontDisplay.variable}`}>
       <body className="min-h-screen bg-background text-foreground font-sans antialiased">
-        {children}
+        <AppProviders>{children}</AppProviders>
       </body>
     </html>
   );
