@@ -5,23 +5,24 @@ import type * as React from "react";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-transparent font-sans text-[13px] font-semibold tracking-[0.01em] whitespace-nowrap transition-[transform,box-shadow,background-color,color,border-color] duration-[180ms] ease-out outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 motion-reduce:transform-none motion-reduce:transition-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        default:
+          "bg-primary text-primary-foreground shadow-[var(--shadow-orange)] hover:bg-[#f55a0b] hover:-translate-y-px hover:shadow-[0_10px_28px_rgba(255,105,25,0.24)] active:translate-y-0",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:
-          "border border-input bg-background shadow-xs hover:bg-secondary hover:text-secondary-foreground",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-secondary hover:text-secondary-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
+          "border-primary bg-transparent text-primary hover:bg-primary hover:text-primary-foreground",
+        secondary: "border-border bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        ghost: "border-transparent hover:bg-secondary hover:text-secondary-foreground",
+        link: "border-transparent text-primary underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-11 min-h-11 px-4 py-2 has-[>svg]:px-3",
-        sm: "h-9 min-h-9 gap-1.5 rounded-md px-3 has-[>svg]:px-2.5",
-        lg: "h-12 min-h-12 rounded-md px-6 has-[>svg]:px-4",
-        icon: "size-11 min-h-11 min-w-11",
+        default: "h-11 min-h-11 px-[22px] py-2 has-[>svg]:px-3",
+        sm: "h-9 min-h-9 gap-1.5 rounded-lg px-3 text-xs has-[>svg]:px-2.5",
+        lg: "h-12 min-h-12 rounded-lg px-6 text-sm has-[>svg]:px-4",
+        icon: "size-11 min-h-11 min-w-11 rounded-lg",
       },
     },
     defaultVariants: {
