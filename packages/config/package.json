@@ -1,0 +1,16 @@
+{
+  "name": "@gowithus/config",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "exports": {
+    "./tsconfig/base.json": "./tsconfig/base.json",
+    "./tsconfig/nextjs.json": "./tsconfig/nextjs.json",
+    "./tsconfig/node.json": "./tsconfig/node.json"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}
