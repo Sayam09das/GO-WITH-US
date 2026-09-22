@@ -1,7 +1,7 @@
-import { EXPERIENCES_FIXTURE } from "@/data/fixtures/experiences";
+import { EXPERIENCES_FIXTURE } from "@/data/fixtures/loaders/experiences";
 import type { ExperienceListItem } from "@/types/experience";
 
-/** Featured editorial set for the homepage — fixture-backed until REST is wired. */
+/** Featured editorial set for the homepage — JSON fixture-backed until REST is wired. */
 export function getFeaturedExperiences(): ExperienceListItem[] {
   const featured = EXPERIENCES_FIXTURE.find((item) => item.isFeatured);
   const supporting = EXPERIENCES_FIXTURE.filter((item) => !item.isFeatured);
