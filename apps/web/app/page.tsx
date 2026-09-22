@@ -5,6 +5,7 @@ import { FeaturedExperiencesSection } from "@/components/landing/featured-experi
 import { FinalCtaSection } from "@/components/landing/final-cta";
 import { PlacesToStaySection } from "@/components/landing/places-to-stay";
 import { PopularDestinationsSection } from "@/components/landing/popular-destinations";
+import { StayInspiredSection } from "@/components/landing/stay-inspired";
 import { TopDestinationSection } from "@/components/landing/top-destination";
 import { TravelJournalSection } from "@/components/landing/travel-journal";
 import { WhatWeGiveSection } from "@/components/landing/what-we-give";
@@ -22,6 +23,7 @@ export default function HomePage() {
       <TravelJournalSection />
       <BuildYourJourneySection />
       <FinalCtaSection />
+      <StayInspiredSection />
     </main>
   );
 }
