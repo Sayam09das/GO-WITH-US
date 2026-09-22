@@ -1,0 +1,82 @@
+{
+  "destinations": [
+    {
+      "id": "dest-karangan-beach",
+      "slug": "karangan-beach",
+      "title": "Karangan Beach",
+      "location": "Labuan Bajo",
+      "country": "Indonesia",
+      "rating": 5.4,
+      "priceLabel": "$200",
+      "image": {
+        "src": "/landingImg/travelimg/travel-1.jpg",
+        "alt": "Traveler walking along a wooden pier toward overwater bungalows at Karangan Beach"
+      }
+    },
+    {
+      "id": "dest-kepunuh-beach",
+      "slug": "kepunuh-beach",
+      "title": "Kepunuh Beach",
+      "location": "Bali",
+      "country": "Indonesia",
+      "rating": 4.5,
+      "priceLabel": "$250",
+      "image": {
+        "src": "/landingImg/travelimg/travel-2.jpg",
+        "alt": "Aerial view of palm-lined Kepunuh Beach with turquoise water"
+      }
+    },
+    {
+      "id": "dest-kucubung-beach",
+      "slug": "kucubung-beach",
+      "title": "Kucubung Beach",
+      "location": "Labuan Bajo",
+      "country": "Indonesia",
+      "rating": 3.4,
+      "priceLabel": "$350",
+      "image": {
+        "src": "/landingImg/travelimg/travel-3.jpg",
+        "alt": "Rocky coastline and boats along Kucubung Beach"
+      }
+    },
+    {
+      "id": "dest-lumukutan-beach",
+      "slug": "lumukutan-beach",
+      "title": "Lumukutan Beach",
+      "location": "Natuna",
+      "country": "Indonesia",
+      "rating": 5.4,
+      "priceLabel": "$200",
+      "image": {
+        "src": "/landingImg/travelimg/travel-4.jpg",
+        "alt": "Crescent white sand and blue water at Lumukutan Beach"
+      }
+    },
+    {
+      "id": "dest-curuti-beach",
+      "slug": "curuti-beach",
+      "title": "Curuti Beach",
+      "location": "Pontianak",
+      "country": "Indonesia",
+      "rating": 4.5,
+      "priceLabel": "$250",
+      "image": {
+        "src": "/landingImg/travelimg/travel-5.jpg",
+        "alt": "Wide sandy Curuti Beach with green hills in the background"
+      }
+    },
+    {
+      "id": "dest-kapuas-beach",
+      "slug": "kapuas-beach",
+      "title": "Kapuas Beach",
+      "location": "Semarang",
+      "country": "Indonesia",
+      "rating": 3.4,
+      "priceLabel": "$350",
+      "image": {
+        "src": "/landingImg/travelimg/travel-6.jpg",
+        "alt": "Aerial view of a sandbar surrounded by turquoise water at Kapuas Beach"
+      }
+    }
+  ]
+}
