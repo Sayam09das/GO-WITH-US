@@ -2,6 +2,7 @@ import { HomeHero } from "@/components/hero";
 import { AboutSection } from "@/components/landing/about";
 import { BuildYourJourneySection } from "@/components/landing/build-your-journey";
 import { FeaturedExperiencesSection } from "@/components/landing/featured-experiences";
+import { FinalCtaSection } from "@/components/landing/final-cta";
 import { PlacesToStaySection } from "@/components/landing/places-to-stay";
 import { PopularDestinationsSection } from "@/components/landing/popular-destinations";
 import { TopDestinationSection } from "@/components/landing/top-destination";
@@ -20,6 +21,7 @@ export default function HomePage() {
       <FeaturedExperiencesSection />
       <TravelJournalSection />
       <BuildYourJourneySection />
+      <FinalCtaSection />
     </main>
   );
 }
