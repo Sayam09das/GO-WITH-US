@@ -4,6 +4,7 @@ import { Bookmark, CalendarRange, Compass, MapPinned, PlaneTakeoff } from "lucid
 export const BUILD_YOUR_JOURNEY_COPY = {
   eyebrow: "HOW IT WORKS",
   headline: "Build Your Journey",
+  emoji: "🧳",
   supporting:
     "From first spark of inspiration to a trip you are ready to take — discover, save, plan, and go at your own pace.",
   cta: "Create a Trip",
