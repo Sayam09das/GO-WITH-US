@@ -53,6 +53,7 @@ export const FOOTER_LINK_GROUPS: FooterLinkGroup[] = [
       { label: "Feedback", href: "/feedback" },
       { label: "Contact us", href: "/contact" },
       { label: "Accessibility", href: "/accessibility" },
+      { label: "Privacy policy", href: "/privacy" },
     ],
   },
 ];
