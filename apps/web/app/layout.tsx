@@ -1,3 +1,4 @@
+import { SiteFooter } from "@/components/layout";
 import { Navbar } from "@/components/navigation";
 import { AppProviders } from "@/components/providers";
 import { JsonLd } from "@/components/seo/json-ld";
@@ -19,6 +20,7 @@ export default function RootLayout({
         <AppProviders>
           <Navbar />
           {children}
+          <SiteFooter />
         </AppProviders>
       </body>
     </html>
