@@ -1,0 +1,128 @@
+{
+  "stories": [
+    {
+      "id": "journal-coastal-road-amalfi",
+      "slug": "coastal-road-amalfi",
+      "title": "The coastal road less traveled",
+      "destination": "Amalfi Coast, Italy",
+      "excerpt": "Limestone bends, sea air, and the kind of drive that turns distance into part of the story — not just the route to somewhere else.",
+      "category": "destination-guide",
+      "categoryLabel": "Destination Guide",
+      "readLabel": "7 min read",
+      "isFeatured": true,
+      "image": {
+        "src": "/landingImg/travelimg/travel-9.jpg",
+        "alt": "Scenic coastal road along limestone cliffs above the Mediterranean",
+        "objectPosition": "object-center"
+      }
+    },
+    {
+      "id": "journal-marrakech-morning-markets",
+      "slug": "marrakech-morning-markets",
+      "title": "Morning markets and old recipes",
+      "destination": "Marrakech, Morocco",
+      "excerpt": "Spice stalls, shared tables, and the quiet pleasure of eating somewhere before the day fully begins.",
+      "category": "food-travel",
+      "categoryLabel": "Food & Travel",
+      "readLabel": "5 min read",
+      "layoutVariant": "horizontal",
+      "image": {
+        "src": "/landingImg/travelimg/travel-3.jpg",
+        "alt": "Vibrant market spices and colorful goods in Marrakech",
+        "objectPosition": "object-center"
+      }
+    },
+    {
+      "id": "journal-kyoto-weekend-pace",
+      "slug": "kyoto-weekend-pace",
+      "title": "A weekend in a city that never rushes",
+      "destination": "Kyoto, Japan",
+      "excerpt": "Temple paths, late breakfasts, and the gentle discipline of moving through a place without trying to see all of it at once.",
+      "category": "weekend-escape",
+      "categoryLabel": "Weekend Escape",
+      "readLabel": "4 min read",
+      "layoutVariant": "tall",
+      "image": {
+        "src": "/landingImg/travelimg/travel-5.jpg",
+        "alt": "Traditional Kyoto street with wooden architecture and soft morning light",
+        "objectPosition": "object-center"
+      }
+    },
+    {
+      "id": "journal-highlands-road-trip",
+      "slug": "highlands-road-trip-rituals",
+      "title": "Road trip rituals worth keeping",
+      "destination": "Scottish Highlands",
+      "excerpt": "Rain on the windscreen, long silences, and the small routines that make a long drive feel like a journey instead of transit.",
+      "category": "road-trips",
+      "categoryLabel": "Road Trips",
+      "readLabel": "6 min read",
+      "layoutVariant": "compact",
+      "image": {
+        "src": "/landingImg/travelimg/travel-6.jpg",
+        "alt": "Open road through misty Scottish highlands with rolling hills",
+        "objectPosition": "object-center"
+      }
+    },
+    {
+      "id": "journal-venice-evening-culture",
+      "slug": "venice-evening-culture",
+      "title": "Venice after the daytime crowds fade",
+      "destination": "Venice, Italy",
+      "excerpt": "Canals, stone bridges, and the quiet hour when the city feels like it belongs to walkers again.",
+      "category": "local-culture",
+      "categoryLabel": "Local Culture",
+      "readLabel": "6 min read",
+      "image": {
+        "src": "/landingImg/about/about-venice.jpg",
+        "alt": "Evening light on Venetian canals and historic architecture",
+        "objectPosition": "object-[center_35%]"
+      }
+    },
+    {
+      "id": "journal-turquoise-cove-mornings",
+      "slug": "turquoise-cove-mornings",
+      "title": "Three days beneath the turquoise light",
+      "destination": "Labuan Bajo, Indonesia",
+      "excerpt": "Early boats, quiet coves, and evenings when the harbor feels entirely yours — patience rewarded in clear water.",
+      "category": "travel-tips",
+      "categoryLabel": "Travel Tips",
+      "readLabel": "5 min read",
+      "image": {
+        "src": "/landingImg/travelimg/travel-11.jpg",
+        "alt": "Turquoise coastal water with boats near Labuan Bajo",
+        "objectPosition": "object-center"
+      }
+    },
+    {
+      "id": "journal-alpine-ridgeline-dawn",
+      "slug": "alpine-ridgeline-dawn",
+      "title": "Walking routes worth waking early for",
+      "destination": "Dolomites, Italy",
+      "excerpt": "Alpine ridgelines, cold air, and the kind of views that make an early alarm feel like a fair trade.",
+      "category": "destination-guide",
+      "categoryLabel": "Destination Guide",
+      "readLabel": "4 min read",
+      "image": {
+        "src": "/landingImg/travelimg/travel-7.jpg",
+        "alt": "Hiker on an alpine trail with mountain peaks in the distance",
+        "objectPosition": "object-center"
+      }
+    },
+    {
+      "id": "journal-coastal-boardwalk-dusk",
+      "slug": "coastal-boardwalk-dusk",
+      "title": "Coastal evenings that stretch longer",
+      "destination": "San Diego, USA",
+      "excerpt": "Boardwalks, warm light, and the simple pleasure of ending a day near the water.",
+      "category": "weekend-escape",
+      "categoryLabel": "Weekend Escape",
+      "readLabel": "3 min read",
+      "image": {
+        "src": "/landingImg/travelimg/travel-8.jpg",
+        "alt": "Coastal boardwalk at sunset with calm ocean horizon",
+        "objectPosition": "object-center"
+      }
+    }
+  ]
+}
