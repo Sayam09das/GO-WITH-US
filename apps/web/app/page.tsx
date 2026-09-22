@@ -1,5 +1,6 @@
 import { HomeHero } from "@/components/hero";
 import { AboutSection } from "@/components/landing/about";
+import { BuildYourJourneySection } from "@/components/landing/build-your-journey";
 import { FeaturedExperiencesSection } from "@/components/landing/featured-experiences";
 import { PopularDestinationsSection } from "@/components/landing/popular-destinations";
 import { TopDestinationSection } from "@/components/landing/top-destination";
@@ -16,6 +17,7 @@ export default function HomePage() {
       <PopularDestinationsSection />
       <FeaturedExperiencesSection />
       <TravelInspirationSection />
+      <BuildYourJourneySection />
     </main>
   );
 }
