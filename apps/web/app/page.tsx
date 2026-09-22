@@ -5,7 +5,7 @@ import { FeaturedExperiencesSection } from "@/components/landing/featured-experi
 import { PlacesToStaySection } from "@/components/landing/places-to-stay";
 import { PopularDestinationsSection } from "@/components/landing/popular-destinations";
 import { TopDestinationSection } from "@/components/landing/top-destination";
-import { TravelInspirationSection } from "@/components/landing/travel-inspiration";
+import { TravelJournalSection } from "@/components/landing/travel-journal";
 import { WhatWeGiveSection } from "@/components/landing/what-we-give";
 
 export default function HomePage() {
@@ -18,7 +18,7 @@ export default function HomePage() {
       <PopularDestinationsSection />
       <PlacesToStaySection />
       <FeaturedExperiencesSection />
-      <TravelInspirationSection />
+      <TravelJournalSection />
       <BuildYourJourneySection />
     </main>
   );
