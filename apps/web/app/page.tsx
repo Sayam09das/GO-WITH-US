@@ -1,6 +1,8 @@
 import { HomeHero } from "@/components/hero";
 import { AboutSection } from "@/components/landing/about";
+import { BuildYourJourneySection } from "@/components/landing/build-your-journey";
 import { FeaturedExperiencesSection } from "@/components/landing/featured-experiences";
+import { PlacesToStaySection } from "@/components/landing/places-to-stay";
 import { PopularDestinationsSection } from "@/components/landing/popular-destinations";
 import { TopDestinationSection } from "@/components/landing/top-destination";
 import { TravelInspirationSection } from "@/components/landing/travel-inspiration";
@@ -14,8 +16,10 @@ export default function HomePage() {
       <WhatWeGiveSection />
       <TopDestinationSection />
       <PopularDestinationsSection />
+      <PlacesToStaySection />
       <FeaturedExperiencesSection />
       <TravelInspirationSection />
+      <BuildYourJourneySection />
     </main>
   );
 }
