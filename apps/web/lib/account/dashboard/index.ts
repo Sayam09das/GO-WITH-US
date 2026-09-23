@@ -5,6 +5,7 @@ export {
   type DashboardNavItem,
   type DashboardUser,
 } from "./config";
+export { getUpcomingTrip } from "./get-upcoming-trip";
 export { buildDashboardGreeting, getTimeGreeting } from "./greeting";
 export {
   DASHBOARD_HERO_COPY,
@@ -25,3 +26,11 @@ export {
   type DashboardSidebarNavGroup,
   type DashboardSidebarNavItem,
 } from "./sidebar-config";
+export {
+  UPCOMING_TRIP_EMPTY_COPY,
+  UPCOMING_TRIP_FIXTURE,
+  UPCOMING_TRIP_LINKS,
+  UPCOMING_TRIP_SECTION_COPY,
+  type UpcomingTrip,
+  type UpcomingTripImage,
+} from "./upcoming-trip-config";

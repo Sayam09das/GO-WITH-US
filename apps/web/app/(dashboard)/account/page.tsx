@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DashboardHero } from "@/components/account/dashboard/dashboard-hero";
+import { DashboardUpcomingTripSection } from "@/components/account/dashboard/dashboard-upcoming-trip-section";
 import { buildPageMetadata, buildPageTitle } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -10,5 +11,10 @@ export const metadata: Metadata = buildPageMetadata({
 });
 
 export default function AccountOverviewPage() {
-  return <DashboardHero />;
+  return (
+    <>
+      <DashboardHero />
+      <DashboardUpcomingTripSection />
+    </>
+  );
 }

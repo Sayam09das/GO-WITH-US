@@ -6,4 +6,5 @@ export { DashboardMobileTopBar } from "./dashboard-mobile-top-bar";
 export { DashboardProfileMenu } from "./dashboard-profile-menu";
 export { DashboardShell } from "./dashboard-shell";
 export { DashboardSidebar } from "./dashboard-sidebar";
+export { DashboardUpcomingTripSection } from "./dashboard-upcoming-trip-section";
 export { DashboardUtilityBar } from "./dashboard-utility-bar";
