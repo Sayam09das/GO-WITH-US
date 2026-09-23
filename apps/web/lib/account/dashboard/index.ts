@@ -12,6 +12,7 @@ export {
   type ExploreDestinationPanel,
 } from "./explore-config";
 export { getExploreDestinations } from "./get-explore-destinations";
+export { getSavedPlaces } from "./get-saved-places";
 export { getUpcomingTrip } from "./get-upcoming-trip";
 export { buildDashboardGreeting, getTimeGreeting } from "./greeting";
 export {
@@ -21,6 +22,14 @@ export {
   type DashboardHeroVisualConfig,
 } from "./hero-config";
 export { isDashboardNavActive } from "./nav-utils";
+export {
+  SAVED_PLACES_EMPTY_COPY,
+  SAVED_PLACES_FIXTURE,
+  SAVED_PLACES_LINKS,
+  SAVED_PLACES_SECTION_COPY,
+  type SavedPlaceItem,
+  type SavedPlaceType,
+} from "./saved-places-config";
 export {
   DASHBOARD_MOBILE_TAB_ITEMS,
   DASHBOARD_SIDEBAR_GROUPS,

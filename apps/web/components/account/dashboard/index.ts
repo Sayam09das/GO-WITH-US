@@ -5,6 +5,7 @@ export { DashboardMainHeader } from "./dashboard-main-header";
 export { DashboardMobileTabBar } from "./dashboard-mobile-tab-bar";
 export { DashboardMobileTopBar } from "./dashboard-mobile-top-bar";
 export { DashboardProfileMenu } from "./dashboard-profile-menu";
+export { DashboardSavedPlacesSection } from "./dashboard-saved-places-section";
 export { DashboardShell } from "./dashboard-shell";
 export { DashboardSidebar } from "./dashboard-sidebar";
 export { DashboardUpcomingTripSection } from "./dashboard-upcoming-trip-section";
