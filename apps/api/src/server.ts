@@ -1,24 +1,10 @@
-import Fastify from "fastify";
+import { createApp } from "./app.js";
+import { env } from "./config/env.js";
 
-const port = Number(process.env.PORT ?? 4000);
-const host = process.env.HOST ?? "0.0.0.0";
+const app = createApp();
 
-const app = Fastify({
-  logger: true,
+app.listen(env.port, env.host, () => {
+  console.log(`API server listening on http://${env.host}:${env.port}`);
+  console.log(`Health check: http://localhost:${env.port}/health`);
+  console.log(`API base: http://localhost:${env.port}/api/v1`);
 });
-
-app.get("/health", async () => ({
-  status: "ok",
-  service: "gowithus-api",
-}));
-
-async function start() {
-  try {
-    await app.listen({ port, host });
-  } catch (error) {
-    app.log.error(error);
-    process.exit(1);
-  }
-}
-
-start();
