@@ -33,14 +33,6 @@ export const DASHBOARD_HEADER_COPY = {
   },
 } as const;
 
-export const DASHBOARD_NAV_ITEMS: DashboardNavItem[] = [
-  { label: "Overview", href: "/account", match: "/account" },
-  { label: "My Trips", href: "/trips", match: "/trips" },
-  { label: "Bookings", href: "/account/bookings", match: "/account/bookings" },
-  { label: "Saved", href: "/saved", match: "/saved" },
-  { label: "Itinerary", href: "/account/itinerary", match: "/account/itinerary" },
-];
-
 export const DASHBOARD_PROFILE_LINKS = [
   { label: DASHBOARD_HEADER_COPY.profileLinks.profile, href: "/account/profile" },
   { label: DASHBOARD_HEADER_COPY.profileLinks.settings, href: "/account/settings" },

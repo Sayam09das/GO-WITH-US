@@ -1,5 +1,8 @@
 export { DashboardHeader } from "./dashboard-header";
 export { DashboardMainHeader } from "./dashboard-main-header";
+export { DashboardMobileTabBar } from "./dashboard-mobile-tab-bar";
+export { DashboardMobileTopBar } from "./dashboard-mobile-top-bar";
 export { DashboardProfileMenu } from "./dashboard-profile-menu";
-export { DashboardQuickNav } from "./dashboard-quick-nav";
+export { DashboardShell } from "./dashboard-shell";
+export { DashboardSidebar } from "./dashboard-sidebar";
 export { DashboardUtilityBar } from "./dashboard-utility-bar";
