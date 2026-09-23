@@ -1,17 +1,24 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { buildDashboardGreeting, DASHBOARD_HEADER_COPY, DASHBOARD_USER } from "@/lib/account";
+import { cn } from "@/lib/utils";
 
 function DashboardMainHeader() {
+  const pathname = usePathname();
   const greeting = buildDashboardGreeting(DASHBOARD_USER.firstName);
+  const isOverview = pathname === "/account";
 
   return (
     <div
       data-dash-reveal
-      className="flex flex-col gap-8 border-b border-border/60 py-8 will-change-transform sm:py-10 lg:flex-row lg:items-end lg:justify-between lg:gap-10"
+      className={cn(
+        "flex flex-col gap-8 py-8 will-change-transform sm:py-10 lg:flex-row lg:items-end lg:justify-between lg:gap-10",
+        !isOverview && "border-b border-border/60",
+      )}
     >
       <div className="flex max-w-2xl flex-col gap-3 sm:gap-4">
         <p className="label-text text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground">

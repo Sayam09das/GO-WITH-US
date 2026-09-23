@@ -6,6 +6,12 @@ export {
   type DashboardUser,
 } from "./config";
 export { buildDashboardGreeting, getTimeGreeting } from "./greeting";
+export {
+  DASHBOARD_HERO_COPY,
+  DASHBOARD_HERO_LINKS,
+  DASHBOARD_HERO_VISUAL,
+  type DashboardHeroVisualConfig,
+} from "./hero-config";
 export { isDashboardNavActive } from "./nav-utils";
 export {
   DASHBOARD_MOBILE_TAB_ITEMS,

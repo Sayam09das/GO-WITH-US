@@ -1,4 +1,5 @@
 export { DashboardHeader } from "./dashboard-header";
+export { DashboardHero } from "./dashboard-hero";
 export { DashboardMainHeader } from "./dashboard-main-header";
 export { DashboardMobileTabBar } from "./dashboard-mobile-tab-bar";
 export { DashboardMobileTopBar } from "./dashboard-mobile-top-bar";

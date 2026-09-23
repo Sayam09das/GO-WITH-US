@@ -1,6 +1,9 @@
 export {
   buildDashboardGreeting,
   DASHBOARD_HEADER_COPY,
+  DASHBOARD_HERO_COPY,
+  DASHBOARD_HERO_LINKS,
+  DASHBOARD_HERO_VISUAL,
   DASHBOARD_MOBILE_TAB_ITEMS,
   DASHBOARD_PROFILE_LINKS,
   DASHBOARD_SIDEBAR_GROUPS,
@@ -10,6 +13,7 @@ export {
   DASHBOARD_SIDEBAR_USER_LINKS,
   DASHBOARD_SIDEBAR_WIDTH_CLASS,
   DASHBOARD_USER,
+  type DashboardHeroVisualConfig,
   type DashboardMobileTabItem,
   type DashboardNavItem,
   type DashboardSidebarNavGroup,
