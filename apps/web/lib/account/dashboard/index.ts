@@ -32,6 +32,12 @@ export {
 } from "./inspiration-config";
 export { isDashboardNavActive } from "./nav-utils";
 export {
+  DASHBOARD_PLAN_JOURNEY_VISUAL,
+  type DashboardPlanJourneyVisualConfig,
+  PLAN_JOURNEY_LINKS,
+  PLAN_JOURNEY_SECTION_COPY,
+} from "./plan-journey-config";
+export {
   RECENTLY_VIEWED_EMPTY_COPY,
   RECENTLY_VIEWED_FIXTURE,
   RECENTLY_VIEWED_LINKS,

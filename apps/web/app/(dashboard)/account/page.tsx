@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { DashboardExploreSection } from "@/components/account/dashboard/dashboard-explore-section";
 import { DashboardHero } from "@/components/account/dashboard/dashboard-hero";
 import { DashboardInspirationSection } from "@/components/account/dashboard/dashboard-inspiration-section";
+import { DashboardPlanJourneySection } from "@/components/account/dashboard/dashboard-plan-journey-section";
 import { DashboardRecentSection } from "@/components/account/dashboard/dashboard-recent-section";
 import { DashboardSavedPlacesSection } from "@/components/account/dashboard/dashboard-saved-places-section";
 import { DashboardUpcomingTripSection } from "@/components/account/dashboard/dashboard-upcoming-trip-section";
@@ -23,6 +24,7 @@ export default function AccountOverviewPage() {
       <DashboardSavedPlacesSection />
       <DashboardInspirationSection />
       <DashboardRecentSection />
+      <DashboardPlanJourneySection />
     </>
   );
 }
