@@ -1,5 +1,4 @@
-import { SiteFooter } from "@/components/layout";
-import { Navbar } from "@/components/navigation";
+import { SiteChrome } from "@/components/layout/site-chrome";
 import { AppProviders } from "@/components/providers";
 import { JsonLd } from "@/components/seo/json-ld";
 import { buildRootMetadata, buildWebSiteJsonLd } from "@/lib/seo";
@@ -18,9 +17,7 @@ export default function RootLayout({
       <body className="min-h-screen bg-background text-foreground font-sans antialiased">
         <JsonLd data={buildWebSiteJsonLd()} />
         <AppProviders>
-          <Navbar />
-          {children}
-          <SiteFooter />
+          <SiteChrome>{children}</SiteChrome>
         </AppProviders>
       </body>
     </html>

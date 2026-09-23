@@ -1,0 +1,23 @@
+export const RESET_PASSWORD_COPY = {
+  title: "Set a new password",
+  subtitle: "Choose a strong password you haven't used here before.",
+  passwordLabel: "New password",
+  passwordPlaceholder: "Enter a new password",
+  confirmPasswordLabel: "Confirm password",
+  confirmPasswordPlaceholder: "Repeat your new password",
+  submit: "Update password",
+  submitting: "Updating…",
+  backToSignIn: "Back to sign in",
+  requestNewLink: "Request a new reset link",
+  passwordRequired: "Enter a new password.",
+  passwordTooShort: "Password must be at least 8 characters.",
+  confirmPasswordRequired: "Confirm your password.",
+  passwordsMismatch: "Passwords do not match.",
+  missingTokenTitle: "This reset link isn't valid",
+  missingTokenDescription:
+    "The link may have expired or already been used. Request a new one to continue.",
+  successTitle: "Password updated",
+  successDescription: "You're all set. Sign in with your new password to continue.",
+  signIn: "Sign in",
+  resetError: "We couldn't reset your password. Request a new link and try again.",
+} as const;
