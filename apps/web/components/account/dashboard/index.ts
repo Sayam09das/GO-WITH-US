@@ -5,6 +5,7 @@ export { DashboardInspirationSection } from "./dashboard-inspiration-section";
 export { DashboardMainHeader } from "./dashboard-main-header";
 export { DashboardMobileTabBar } from "./dashboard-mobile-tab-bar";
 export { DashboardMobileTopBar } from "./dashboard-mobile-top-bar";
+export { DashboardPlanJourneySection } from "./dashboard-plan-journey-section";
 export { DashboardProfileMenu } from "./dashboard-profile-menu";
 export { DashboardRecentSection } from "./dashboard-recent-section";
 export { DashboardSavedPlacesSection } from "./dashboard-saved-places-section";
