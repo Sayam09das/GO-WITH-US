@@ -1,4 +1,10 @@
 import type { Metadata } from "next";
+import { DashboardExploreSection } from "@/components/account/dashboard/dashboard-explore-section";
+import { DashboardHero } from "@/components/account/dashboard/dashboard-hero";
+import { DashboardInspirationSection } from "@/components/account/dashboard/dashboard-inspiration-section";
+import { DashboardRecentSection } from "@/components/account/dashboard/dashboard-recent-section";
+import { DashboardSavedPlacesSection } from "@/components/account/dashboard/dashboard-saved-places-section";
+import { DashboardUpcomingTripSection } from "@/components/account/dashboard/dashboard-upcoming-trip-section";
 import { buildPageMetadata, buildPageTitle } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -10,12 +16,13 @@ export const metadata: Metadata = buildPageMetadata({
 
 export default function AccountOverviewPage() {
   return (
-    <div className="container-travel py-10 sm:py-12 lg:py-14">
-      <div className="max-w-2xl">
-        <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
-          Your overview will live here — recent trips, saved inspiration, and what to plan next.
-        </p>
-      </div>
-    </div>
+    <>
+      <DashboardHero />
+      <DashboardUpcomingTripSection />
+      <DashboardExploreSection />
+      <DashboardSavedPlacesSection />
+      <DashboardInspirationSection />
+      <DashboardRecentSection />
+    </>
   );
 }
