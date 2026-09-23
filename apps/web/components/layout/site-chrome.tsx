@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { Navbar } from "@/components/navigation";
+import { isAccountDashboardPath } from "@/lib/navigation/account-routes";
 import { isAuthChromePath } from "@/lib/navigation/auth-routes";
 
 interface SiteChromeProps {
@@ -11,7 +12,7 @@ interface SiteChromeProps {
 
 function SiteChrome({ children }: SiteChromeProps) {
   const pathname = usePathname();
-  const hideGlobalChrome = isAuthChromePath(pathname);
+  const hideGlobalChrome = isAuthChromePath(pathname) || isAccountDashboardPath(pathname);
 
   if (hideGlobalChrome) {
     return children;

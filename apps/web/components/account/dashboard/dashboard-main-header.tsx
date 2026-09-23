@@ -1,0 +1,42 @@
+"use client";
+
+import Link from "next/link";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { buildDashboardGreeting, DASHBOARD_HEADER_COPY, DASHBOARD_USER } from "@/lib/account";
+
+function DashboardMainHeader() {
+  const greeting = buildDashboardGreeting(DASHBOARD_USER.firstName);
+
+  return (
+    <div
+      data-dash-reveal
+      className="flex flex-col gap-8 border-b border-border/60 py-8 will-change-transform sm:py-10 lg:flex-row lg:items-end lg:justify-between lg:gap-10"
+    >
+      <div className="flex max-w-2xl flex-col gap-3 sm:gap-4">
+        <p className="label-text text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          {DASHBOARD_HEADER_COPY.eyebrow}
+        </p>
+        <h1 className="hero-heading text-[2rem] font-semibold leading-[1.08] tracking-tight text-heading sm:text-4xl lg:text-[2.75rem]">
+          {greeting}
+        </h1>
+        <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
+          {DASHBOARD_HEADER_COPY.supporting}
+        </p>
+      </div>
+
+      <div className="flex items-center gap-4 lg:flex-col lg:items-end lg:gap-5">
+        <Avatar className="size-14 border border-border/70 bg-primary/5 shadow-xs sm:size-16">
+          <AvatarFallback className="bg-primary/10 text-lg font-semibold text-primary sm:text-xl">
+            {DASHBOARD_USER.initials}
+          </AvatarFallback>
+        </Avatar>
+        <Button asChild variant="outline" size="sm" className="rounded-full px-5">
+          <Link href="/destinations">{DASHBOARD_HEADER_COPY.exploreDestinations}</Link>
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+export { DashboardMainHeader };
