@@ -24,5 +24,18 @@ export const env = {
   port: parsePort(process.env.PORT, 4000),
   host: process.env.HOST ?? "0.0.0.0",
   appOrigin: process.env.APP_ORIGIN ?? "http://localhost:3000",
+  sessionSecret:
+    process.env.SESSION_SECRET ?? "gowithus_dev_session_secret_change_in_production_32bytes_min",
+  databaseUrl: process.env.DATABASE_URL ?? "",
+  directUrl: process.env.DIRECT_URL ?? "",
+  supabaseUrl: process.env.SUPABASE_URL ?? "",
+  supabasePublishableKey: process.env.SUPABASE_PUBLISHABLE_KEY ?? "",
+  supabaseSecretKey: process.env.SUPABASE_SECRET_KEY ?? "",
+  supabaseJwksUrl: process.env.SUPABASE_JWKS_URL ?? "",
+  smtpHost: process.env.SMTP_HOST ?? "",
+  smtpPort: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587,
+  smtpUser: process.env.SMTP_USER ?? "",
+  smtpPass: process.env.SMTP_PASS ?? "",
+  mailFrom: process.env.MAIL_FROM ?? "",
   isProduction: (process.env.NODE_ENV ?? "development") === "production",
 } as const;
