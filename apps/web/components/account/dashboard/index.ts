@@ -1,3 +1,4 @@
+export { DashboardExploreSection } from "./dashboard-explore-section";
 export { DashboardHeader } from "./dashboard-header";
 export { DashboardHero } from "./dashboard-hero";
 export { DashboardMainHeader } from "./dashboard-main-header";

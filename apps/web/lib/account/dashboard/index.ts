@@ -5,6 +5,13 @@ export {
   type DashboardNavItem,
   type DashboardUser,
 } from "./config";
+export {
+  EXPLORE_DESTINATION_PANELS,
+  EXPLORE_SECTION_COPY,
+  EXPLORE_SECTION_LINKS,
+  type ExploreDestinationPanel,
+} from "./explore-config";
+export { getExploreDestinations } from "./get-explore-destinations";
 export { getUpcomingTrip } from "./get-upcoming-trip";
 export { buildDashboardGreeting, getTimeGreeting } from "./greeting";
 export {
