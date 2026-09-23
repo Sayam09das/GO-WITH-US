@@ -1,5 +1,5 @@
 import destinationsFixture from "@/data/fixtures/destinations.json";
-import type { DestinationListItem } from "@/types/destination";
+import type { DestinationBudgetTier, DestinationListItem } from "@/types/destination";
 
 interface DestinationFixtureImage {
   src: string;
@@ -12,6 +12,11 @@ interface DestinationFixtureRecord {
   title: string;
   location: string;
   country: string;
+  region: string;
+  style: string;
+  category: string;
+  budgetTier: DestinationBudgetTier;
+  popularity: number;
   rating: number;
   priceLabel: string;
   image: DestinationFixtureImage;
@@ -29,6 +34,11 @@ function mapDestinationRecord(record: DestinationFixtureRecord): DestinationList
     title: record.title,
     location: record.location,
     country: record.country,
+    region: record.region,
+    style: record.style,
+    category: record.category,
+    budgetTier: record.budgetTier,
+    popularity: record.popularity,
     rating: record.rating,
     priceLabel: record.priceLabel,
     heroImage: record.image.src,

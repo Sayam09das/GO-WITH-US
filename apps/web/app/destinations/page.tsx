@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import { DestinationsHero } from "@/components/destinations";
+import { Suspense } from "react";
+import { DestinationsCatalogSection, DestinationsHero } from "@/components/destinations";
+import { CatalogPageSkeleton } from "@/components/states";
 import { buildCatalogTitle, buildPageMetadata, trimDescription } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -14,6 +16,9 @@ export default function DestinationsPage() {
   return (
     <main>
       <DestinationsHero />
+      <Suspense fallback={<CatalogPageSkeleton />}>
+        <DestinationsCatalogSection />
+      </Suspense>
     </main>
   );
 }
