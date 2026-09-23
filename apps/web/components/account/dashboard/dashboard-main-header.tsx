@@ -25,14 +25,14 @@ function DashboardMainHeader() {
         </p>
       </div>
 
-      <div className="flex items-center gap-4 lg:flex-col lg:items-end lg:gap-5">
-        <Avatar className="size-14 border border-border/70 bg-primary/5 shadow-xs sm:size-16">
-          <AvatarFallback className="bg-primary/10 text-lg font-semibold text-primary sm:text-xl">
+      <div className="hidden items-center gap-4 lg:flex lg:flex-col lg:items-end lg:gap-5">
+        <Avatar className="size-14 border border-border/70 bg-primary/5 shadow-xs lg:size-16">
+          <AvatarFallback className="bg-primary/10 text-lg font-semibold text-primary lg:text-xl">
             {DASHBOARD_USER.initials}
           </AvatarFallback>
         </Avatar>
         <Button asChild variant="outline" size="sm" className="rounded-full px-5">
-          <Link href="/destinations">{DASHBOARD_HEADER_COPY.exploreDestinations}</Link>
+          <Link href="/account/discover">{DASHBOARD_HEADER_COPY.exploreDestinations}</Link>
         </Button>
       </div>
     </div>
