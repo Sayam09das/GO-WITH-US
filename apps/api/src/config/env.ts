@@ -26,7 +26,9 @@ export const env = {
   appOrigin: process.env.APP_ORIGIN ?? "http://localhost:3000",
   sessionSecret:
     process.env.SESSION_SECRET ?? "gowithus_dev_session_secret_change_in_production_32bytes_min",
-  databaseUrl: process.env.DATABASE_URL ?? "",
+  databaseUrl:
+    process.env.DATABASE_URL ??
+    "postgresql://gowithus:gowithus@localhost:5432/gowithus?schema=public",
   directUrl: process.env.DIRECT_URL ?? "",
   supabaseUrl: process.env.SUPABASE_URL ?? "",
   supabasePublishableKey: process.env.SUPABASE_PUBLISHABLE_KEY ?? "",
