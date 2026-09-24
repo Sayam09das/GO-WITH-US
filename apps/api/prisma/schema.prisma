@@ -1,0 +1,274 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum BudgetTier {
+  budget
+  moderate
+  luxury
+}
+
+enum PropertyType {
+  boutique_hotel @map("boutique-hotel")
+  villa
+  apartment
+  eco_lodge      @map("eco-lodge")
+  lodge
+}
+
+enum ExperienceCategory {
+  tours
+  outdoor
+  cultural
+  food_dining @map("food-dining")
+  attractions
+}
+
+enum ItemType {
+  destination
+  stay
+  experience
+}
+
+enum ItineraryItemType {
+  destination
+  stay
+  experience
+  custom
+}
+
+enum TimeSlot {
+  morning
+  afternoon
+  evening
+}
+
+enum TripStatus {
+  draft
+  upcoming
+  active
+  completed
+}
+
+enum NotificationType {
+  trip_reminder   @map("trip_reminder")
+  itinerary_alert @map("itinerary_alert")
+  system
+}
+
+model User {
+  id               String      @id @default(uuid()) @db.Uuid
+  email            String      @unique @db.Citext
+  passwordHash     String      @map("password_hash")
+  fullName         String      @map("full_name")
+  avatarUrl        String?     @map("avatar_url")
+  bio              String?
+  homeCity         String?     @map("home_city")
+  travelStyles     String[]    @map("travel_styles")
+  budgetPreference BudgetTier? @map("budget_preference")
+  createdAt        DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  savedItems          SavedItem[]
+  trips               Trip[]
+  reviews             Review[]
+  notifications       Notification[]
+  passwordResetTokens PasswordResetToken[]
+
+  @@map("users")
+}
+
+model Destination {
+  id              String     @id @default(uuid()) @db.Uuid
+  slug            String     @unique
+  title           String
+  country         String
+  region          String
+  heroImage       String     @map("hero_image")
+  gallery         String[]
+  overview        String
+  highlights      String[]
+  climateNotes    String?    @map("climate_notes")
+  currency        String?
+  primaryLanguage String?    @map("primary_language")
+  transportTips   String?    @map("transport_tips")
+  budgetTier      BudgetTier @map("budget_tier")
+  bestTimeToVisit String?    @map("best_time_to_visit")
+  categoryTags    String[]   @map("category_tags")
+  travelStyles    String[]   @map("travel_styles")
+  ratingAvg       Decimal?   @map("rating_avg") @db.Decimal(3, 2)
+  reviewCount     Int        @default(0) @map("review_count")
+  isFeatured      Boolean    @default(false) @map("is_featured")
+  isPublished     Boolean    @default(true) @map("is_published")
+  createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  stays       Stay[]
+  experiences Experience[]
+  trips       Trip[]
+
+  @@index([isPublished, isFeatured])
+  @@map("destinations")
+}
+
+model Stay {
+  id                   String       @id @default(uuid()) @db.Uuid
+  destinationId        String       @map("destination_id") @db.Uuid
+  slug                 String       @unique
+  title                String
+  propertyType         PropertyType @map("property_type")
+  locationLabel        String       @map("location_label")
+  heroImage            String       @map("hero_image")
+  gallery              String[]
+  overview             String
+  amenities            String[]
+  priceTier            BudgetTier   @map("price_tier")
+  estimatedNightlyFrom Int?         @map("estimated_nightly_from")
+  ratingAvg            Decimal?     @map("rating_avg") @db.Decimal(3, 2)
+  reviewCount          Int          @default(0) @map("review_count")
+  isFeatured           Boolean      @default(false) @map("is_featured")
+  isPublished          Boolean      @default(true) @map("is_published")
+  createdAt            DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  destination Destination @relation(fields: [destinationId], references: [id])
+
+  @@index([destinationId, isPublished])
+  @@map("stays")
+}
+
+model Experience {
+  id              String             @id @default(uuid()) @db.Uuid
+  destinationId   String             @map("destination_id") @db.Uuid
+  slug            String             @unique
+  title           String
+  category        ExperienceCategory
+  durationLabel   String?            @map("duration_label")
+  durationMinutes Int?               @map("duration_minutes")
+  meetingPoint    String?            @map("meeting_point")
+  heroImage       String             @map("hero_image")
+  gallery         String[]
+  overview        String
+  highlights      String[]
+  priceTier       BudgetTier         @map("price_tier")
+  ratingAvg       Decimal?           @map("rating_avg") @db.Decimal(3, 2)
+  reviewCount     Int                @default(0) @map("review_count")
+  isFeatured      Boolean            @default(false) @map("is_featured")
+  isPublished     Boolean            @default(true) @map("is_published")
+  createdAt       DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  destination Destination @relation(fields: [destinationId], references: [id])
+
+  @@index([destinationId, isPublished])
+  @@map("experiences")
+}
+
+model SavedItem {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  itemType  ItemType @map("item_type")
+  itemId    String   @map("item_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, itemType, itemId])
+  @@index([userId, createdAt(sort: Desc)])
+  @@map("saved_items")
+}
+
+model Trip {
+  id            String     @id @default(uuid()) @db.Uuid
+  userId        String     @map("user_id") @db.Uuid
+  title         String
+  destinationId String?    @map("destination_id") @db.Uuid
+  startDate     DateTime?  @map("start_date") @db.Date
+  endDate       DateTime?  @map("end_date") @db.Date
+  description   String?
+  coverImage    String?    @map("cover_image")
+  status        TripStatus @default(draft)
+  createdAt     DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  destination     Destination?     @relation(fields: [destinationId], references: [id])
+  itineraryItems  ItineraryItem[]
+  notifications   Notification[]
+
+  @@index([userId, status, startDate])
+  @@map("trips")
+}
+
+model ItineraryItem {
+  id            String            @id @default(uuid()) @db.Uuid
+  tripId        String            @map("trip_id") @db.Uuid
+  dayIndex      Int               @map("day_index")
+  dayDate       DateTime?         @map("day_date") @db.Date
+  timeSlot      TimeSlot          @map("time_slot")
+  scheduledTime DateTime?         @map("scheduled_time") @db.Time(6)
+  sortOrder     Int               @map("sort_order")
+  itemType      ItineraryItemType @map("item_type")
+  itemId        String?           @map("item_id") @db.Uuid
+  title         String
+  notes         String?
+  createdAt     DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@index([tripId, dayIndex, sortOrder])
+  @@map("itinerary_items")
+}
+
+model Review {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  itemType  ItemType @map("item_type")
+  itemId    String   @map("item_id") @db.Uuid
+  rating    Int      @db.SmallInt
+  body      String?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, itemType, itemId])
+  @@index([itemType, itemId, createdAt(sort: Desc)])
+  @@map("reviews")
+}
+
+model Notification {
+  id        String           @id @default(uuid()) @db.Uuid
+  userId    String           @map("user_id") @db.Uuid
+  type      NotificationType
+  title     String
+  body      String
+  tripId    String?          @map("trip_id") @db.Uuid
+  readAt    DateTime?        @map("read_at") @db.Timestamptz(6)
+  createdAt DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trip Trip? @relation(fields: [tripId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@map("notifications")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(6)
+  usedAt    DateTime? @map("used_at") @db.Timestamptz(6)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
+}

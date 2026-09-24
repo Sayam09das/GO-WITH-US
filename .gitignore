@@ -6,6 +6,7 @@ dist/
 build/
 .next/
 out/
+apps/api/src/generated/
 *.tsbuildinfo
 
 # Coverage
