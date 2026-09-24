@@ -99,4 +99,20 @@ pnpm exec prisma studio
 
 ## Next step
 
-**Step 4 — Authentication** (Phase 10 in `docs/ROADMAP.md`): sign-up, sign-in, sessions, and protected routes.
+**Step 5 — User & Dashboard APIs**: replace dashboard fixtures with authenticated PostgreSQL-backed endpoints.
+
+---
+
+## Step 4 — Authentication
+
+**Status:** Complete
+
+- Argon2id password hashing
+- PostgreSQL-backed sessions (`sessions` table) with hashed tokens in HTTP-only cookie `gowithus_session`
+- Email verification links (24h, single-use, hashed)
+- Password reset links (1h, single-use, hashed, revokes sessions)
+- Rate limiting on auth mutations (in-memory; Redis-ready later)
+- Helmet, origin guard, Zod validation, security event audit log
+- Frontend auth forms wired to `/api/v1/auth/*`
+
+See endpoint list in `docs/API_SPECIFICATION.md` plus aliases `/register`, `/login`, `/logout`.

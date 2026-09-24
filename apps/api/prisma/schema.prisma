@@ -66,11 +66,32 @@ enum NotificationType {
   system
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum SecurityEventType {
+  REGISTER
+  LOGIN_SUCCESS
+  LOGIN_FAILED
+  LOGOUT
+  LOGOUT_ALL
+  EMAIL_VERIFIED
+  EMAIL_VERIFICATION_SENT
+  PASSWORD_RESET_REQUESTED
+  PASSWORD_RESET_COMPLETED
+  PASSWORD_CHANGED
+  SESSION_REVOKED
+}
+
 model User {
   id               String      @id @default(uuid()) @db.Uuid
   email            String      @unique @db.Citext
   passwordHash     String      @map("password_hash")
   fullName         String      @map("full_name")
+  emailVerified    Boolean     @default(false) @map("email_verified")
+  role             UserRole    @default(USER)
   avatarUrl        String?     @map("avatar_url")
   bio              String?
   homeCity         String?     @map("home_city")
@@ -79,11 +100,14 @@ model User {
   createdAt        DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt        DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  savedItems          SavedItem[]
-  trips               Trip[]
-  reviews             Review[]
-  notifications       Notification[]
-  passwordResetTokens PasswordResetToken[]
+  savedItems              SavedItem[]
+  trips                   Trip[]
+  reviews                 Review[]
+  notifications           Notification[]
+  passwordResetTokens     PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
+  sessions                Session[]
+  securityEvents          SecurityEvent[]
 
   @@map("users")
 }
@@ -275,5 +299,54 @@ model PasswordResetToken {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId, expiresAt])
   @@map("password_reset_tokens")
+}
+
+model EmailVerificationToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(6)
+  usedAt    DateTime? @map("used_at") @db.Timestamptz(6)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@map("email_verification_tokens")
+}
+
+model Session {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  tokenHash  String    @unique @map("token_hash")
+  expiresAt  DateTime  @map("expires_at") @db.Timestamptz(6)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  lastUsedAt DateTime  @default(now()) @map("last_used_at") @db.Timestamptz(6)
+  revokedAt  DateTime? @map("revoked_at") @db.Timestamptz(6)
+  ipAddress  String?   @map("ip_address")
+  userAgent  String?   @map("user_agent")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@index([userId, revokedAt])
+  @@map("sessions")
+}
+
+model SecurityEvent {
+  id        String            @id @default(uuid()) @db.Uuid
+  userId    String?           @map("user_id") @db.Uuid
+  type      SecurityEventType
+  ipAddress String?           @map("ip_address")
+  userAgent String?           @map("user_agent")
+  metadata  Json?
+  createdAt DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([type, createdAt(sort: Desc)])
+  @@map("security_events")
 }

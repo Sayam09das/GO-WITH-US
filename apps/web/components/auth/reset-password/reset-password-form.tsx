@@ -6,6 +6,8 @@ import { type FormEvent, useState } from "react";
 import { AuthBrandHeader, PasswordInput } from "@/components/auth/shared";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { resetPassword } from "@/lib/api/auth";
+import { ApiRequestError } from "@/lib/api/client";
 import { AUTH_PASSWORD_MIN_LENGTH, RESET_PASSWORD_COPY } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
@@ -67,9 +69,21 @@ function ResetPasswordForm() {
 
     setIsSubmitting(true);
 
-    await new Promise((resolve) => window.setTimeout(resolve, 650));
-    setIsSubmitting(false);
-    setIsSuccess(true);
+    try {
+      await resetPassword({
+        token,
+        password,
+        confirmPassword,
+      });
+      setIsSuccess(true);
+    } catch (error) {
+      setFieldErrors({
+        password:
+          error instanceof ApiRequestError ? error.message : RESET_PASSWORD_COPY.passwordRequired,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isSuccess) {
