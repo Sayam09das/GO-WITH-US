@@ -1,10 +1,24 @@
+import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { type Express } from "express";
+import helmet from "helmet";
 import { env } from "./config/env.js";
 import { prisma } from "./lib/db.js";
+import { errorHandler } from "./middleware/error-handler.js";
+import { validateOrigin } from "./middleware/origin-guard.js";
+import { authRouter } from "./modules/auth/auth.routes.js";
 
 export function createApp(): Express {
   const app = express();
+
+  app.set("trust proxy", 1);
+
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginResourcePolicy: { policy: "cross-origin" },
+    }),
+  );
 
   app.use(
     cors({
@@ -13,7 +27,9 @@ export function createApp(): Express {
     }),
   );
 
-  app.use(express.json());
+  app.use(express.json({ limit: "1mb" }));
+  app.use(cookieParser(env.sessionSecret));
+  app.use(validateOrigin);
 
   app.get("/health", (_req, res) => {
     res.json({
@@ -50,7 +66,10 @@ export function createApp(): Express {
     });
   });
 
+  apiRouter.use("/auth", authRouter);
+
   app.use("/api/v1", apiRouter);
+  app.use(errorHandler);
 
   return app;
 }

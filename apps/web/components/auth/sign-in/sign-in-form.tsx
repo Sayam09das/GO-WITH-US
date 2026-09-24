@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import {
   AuthBrandHeader,
@@ -13,10 +14,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { login } from "@/lib/api/auth";
+import { ApiRequestError } from "@/lib/api/client";
 import { AUTH_EMAIL_PATTERN, SIGN_IN_COPY } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 function SignInForm() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -48,9 +52,25 @@ function SignInForm() {
     setIsSubmitting(true);
     setFormError(null);
 
-    await new Promise((resolve) => window.setTimeout(resolve, 650));
-    setIsSubmitting(false);
-    setFormError(SIGN_IN_COPY.invalidCredentials);
+    try {
+      await login({
+        email: trimmedEmail,
+        password,
+        rememberMe,
+      });
+      router.push("/account/profile");
+    } catch (error) {
+      if (error instanceof ApiRequestError && error.code === "EMAIL_NOT_VERIFIED") {
+        router.push(`/verify-email?email=${encodeURIComponent(trimmedEmail)}`);
+        return;
+      }
+
+      setFormError(
+        error instanceof ApiRequestError ? error.message : SIGN_IN_COPY.invalidCredentials,
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

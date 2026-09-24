@@ -293,7 +293,39 @@ Seed scripts should populate realistic destinations, stays, experiences, and rev
 
 ---
 
-## 11. Related Documents
+## 11. Prisma Implementation (Step 3)
+
+The live schema lives in `apps/api/prisma/schema.prisma`. It implements this document’s relational design using consolidated models rather than split tutorial tables.
+
+### Implemented models
+
+| Prisma model | SQL table | Covers |
+| :--- | :--- | :--- |
+| `User` | `users` | Identity + profile (`full_name`, `avatar_url`, `bio`, etc.) |
+| `Destination` | `destinations` | Discovery catalog |
+| `Stay` | `stays` | Accommodations |
+| `Experience` | `experiences` | Activities |
+| `Trip` | `trips` | User trips |
+| `SavedItem` | `saved_items` | Saved destinations, stays, and experiences |
+| `ItineraryItem` | `itinerary_items` | Trip days and scheduled items |
+| `Review` | `reviews` | User reviews |
+| `Notification` | `notifications` | User notifications |
+| `PasswordResetToken` | `password_reset_tokens` | Auth password reset |
+
+### Intentionally excluded from MVP
+
+| Concept | Reason |
+| :--- | :--- |
+| `Booking` | Product is not a booking marketplace (`docs/PRODUCT.md`) |
+| `Story` | Editorial/journal content uses fixtures until a CMS phase |
+| Separate `Profile` table | Profile fields belong on `users` |
+| Separate `TripDay` / `TripItem` tables | Replaced by `itinerary_items` with `day_index` |
+
+See `docs/BACKEND_SETUP.md` for the full tutorial-name mapping and setup verification steps.
+
+---
+
+## 12. Related Documents
 
 * `docs/BACKEND_ARCHITECTURE.md`
 * `docs/API_SPECIFICATION.md`

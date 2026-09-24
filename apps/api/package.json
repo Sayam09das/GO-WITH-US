@@ -16,16 +16,24 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.0.0",
     "@prisma/client": "^7.0.0",
+    "argon2": "^0.43.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
-    "pg": "^8.16.0"
+    "express-rate-limit": "^7.5.1",
+    "helmet": "^8.1.0",
+    "nodemailer": "^7.0.3",
+    "pg": "^8.16.0",
+    "zod": "^3.25.36"
   },
   "devDependencies": {
     "@gowithus/config": "workspace:*",
+    "@types/cookie-parser": "^1.4.8",
     "@types/cors": "^2.8.18",
     "@types/express": "^5.0.2",
     "@types/node": "^22.15.21",
+    "@types/nodemailer": "^6.4.17",
     "@types/pg": "^8.15.2",
     "prisma": "^7.0.0",
     "tsx": "^4.19.4",

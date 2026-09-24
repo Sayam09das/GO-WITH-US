@@ -6,6 +6,8 @@ import { AuthBrandHeader } from "@/components/auth/shared";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { forgotPassword } from "@/lib/api/auth";
+import { ApiRequestError } from "@/lib/api/client";
 import { AUTH_EMAIL_PATTERN, FORGOT_PASSWORD_COPY } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
@@ -27,10 +29,16 @@ function ForgotPasswordForm() {
     setFieldError(null);
     setIsSubmitting(true);
 
-    // UI-only — always show success per AUTHENTICATION.md (no email enumeration).
-    await new Promise((resolve) => window.setTimeout(resolve, 650));
-    setIsSubmitting(false);
-    setIsSubmitted(true);
+    try {
+      await forgotPassword({ email: trimmedEmail });
+      setIsSubmitted(true);
+    } catch (error) {
+      setFieldError(
+        error instanceof ApiRequestError ? error.message : FORGOT_PASSWORD_COPY.invalidEmail,
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isSubmitted) {

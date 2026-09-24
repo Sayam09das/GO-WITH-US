@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import {
   AuthBrandHeader,
@@ -13,10 +14,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { register } from "@/lib/api/auth";
+import { ApiRequestError } from "@/lib/api/client";
 import { AUTH_EMAIL_PATTERN, AUTH_PASSWORD_MIN_LENGTH, SIGN_UP_COPY } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 function SignUpForm() {
+  const router = useRouter();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -70,9 +74,19 @@ function SignUpForm() {
     setIsSubmitting(true);
     setFormError(null);
 
-    await new Promise((resolve) => window.setTimeout(resolve, 700));
-    setIsSubmitting(false);
-    setFormError(SIGN_UP_COPY.createError);
+    try {
+      await register({
+        fullName: trimmedName,
+        email: trimmedEmail,
+        password,
+        confirmPassword,
+      });
+      router.push(`/verify-email?email=${encodeURIComponent(trimmedEmail)}`);
+    } catch (error) {
+      setFormError(error instanceof ApiRequestError ? error.message : SIGN_UP_COPY.createError);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
