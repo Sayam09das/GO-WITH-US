@@ -77,6 +77,7 @@ Follow `docs/BACKEND_ARCHITECTURE.md`:
 
 ### Backend & Delivery
 * `docs/BACKEND_ARCHITECTURE.md`
+* `docs/BACKEND_SETUP.md`
 * `docs/DATABASE.md`
 * `docs/API_SPECIFICATION.md`
 * `docs/AUTHENTICATION.md`

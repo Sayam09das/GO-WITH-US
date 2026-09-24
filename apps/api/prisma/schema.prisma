@@ -1,3 +1,8 @@
+// GO WITH US database schema — canonical models for Step 3.
+// Tutorial mappings: Profile → User fields, TripDay/TripItem → ItineraryItem,
+// SavedDestination/SavedStay → SavedItem. Booking and Story are out of MVP scope.
+// See docs/BACKEND_SETUP.md and docs/DATABASE.md §11.
+
 generator client {
   provider = "prisma-client"
   output   = "../src/generated"
