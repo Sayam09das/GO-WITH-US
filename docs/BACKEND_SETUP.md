@@ -43,6 +43,12 @@ GO WITH US uses a **consolidated relational model** aligned with `docs/DATABASE.
 | `Destination` | `destinations` | Public discovery catalog |
 | `Stay` | `stays` | Accommodations linked to a destination |
 | `Experience` | `experiences` | Activities linked to a destination |
+| `Restaurant` | `restaurants` | Dining linked to a destination |
+| `Story` | `stories` | Editorial travel stories |
+| `Booking` | `bookings` | Stay/experience bookings |
+| `BookingItem` | `booking_items` | Line items on a booking |
+| `Payment` | `payments` | Payment records linked to bookings |
+| `ReviewReport` | `review_reports` | User reports on reviews |
 | `Trip` | `trips` | User-owned trip plans |
 | `SavedItem` | `saved_items` | Polymorphic saved destinations, stays, and experiences |
 | `TripDay` | `trip_days` | Day shells linked to trip date ranges |
@@ -167,7 +173,76 @@ Trip status is computed from dates (`draft`, `upcoming`, `active`, `completed`) 
 
 ## Next step
 
-**Step 9 — Wire trips UI** to the trips API.
+**Step 9 — Wire discovery UI** to experiences, restaurants, and seed catalog data.
+
+---
+
+## Step 9 — Experiences & Restaurants API
+
+**Status:** Complete
+
+**Experiences**
+- `GET /api/v1/experiences` — paginated listing
+- `QUERY /api/v1/experiences/search` — complex JSON search
+- `GET /api/v1/experiences/featured`
+- `GET /api/v1/experiences/:slug` — detail
+- `QUERY /api/v1/experiences/:experienceId/availability` — guidance-based availability
+- `GET/POST /api/v1/experiences/:experienceId/reviews`
+
+**Restaurants**
+- `GET /api/v1/restaurants` — paginated listing
+- `QUERY /api/v1/restaurants/search`
+- `GET /api/v1/restaurants/featured`
+- `GET /api/v1/restaurants/:slug` — detail
+- `GET/POST /api/v1/restaurants/:restaurantId/reviews`
+
+**Saved items**
+- `GET/POST/DELETE /api/v1/users/me/saved-experiences/:experienceId`
+- `GET/POST/DELETE /api/v1/users/me/saved-restaurants/:restaurantId`
+
+Itinerary items accept `restaurantId` via `POST /api/v1/trips/:tripId/days/:dayId/items`.
+
+---
+
+## Step 10 — Bookings & Payments API
+
+**Status:** Complete
+
+- `POST /api/v1/bookings` — create pending booking with server-side pricing and `Idempotency-Key`
+- `GET /api/v1/bookings` — owner list (`?status=upcoming|past|cancelled`)
+- `GET /api/v1/bookings/:bookingId` — booking detail
+- `POST /api/v1/bookings/:bookingId/cancel` — state transition (not delete)
+- `POST /api/v1/payments/create` — create payment intent for a booking
+- `POST /api/v1/payments/webhook` — verified webhook confirms payment + booking
+
+---
+
+## Step 11 — Reviews & Stories API
+
+**Status:** Complete
+
+**Unified reviews**
+- `POST /api/v1/reviews` — create review by target type
+- `PATCH /api/v1/reviews/:reviewId` — owner update
+- `DELETE /api/v1/reviews/:reviewId` — owner delete
+- `POST /api/v1/reviews/:reviewId/report` — report review
+
+**Resource review lists**
+- `GET /api/v1/destinations/:destinationId/reviews`
+- Existing stay/experience/restaurant review routes
+
+**Stories**
+- `GET /api/v1/stories` — published editorial content
+- `GET /api/v1/stories/featured`
+- `GET /api/v1/stories/categories`
+- `GET /api/v1/stories/:slug`
+- `QUERY /api/v1/stories/search`
+
+---
+
+## Next step
+
+**Step 12 — Seed catalog data** and wire frontend discovery/booking flows.
 
 ---
 

@@ -38,5 +38,16 @@ export const destinationSlugParamSchema = z.object({
   slug: z.string().trim().min(1).max(160),
 });
 
+export const destinationIdParamSchema = z.object({
+  destinationId: z.string().trim().min(1).max(160),
+});
+
+export const listDestinationReviewsQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(50).default(10),
+  rating: z.coerce.number().int().min(1).max(5).optional(),
+  sort: z.enum(["recent", "rating"]).default("recent"),
+});
+
 export type DestinationSort = z.infer<typeof sortSchema>;
 export type DestinationSearchInput = z.infer<typeof destinationSearchSchema>;

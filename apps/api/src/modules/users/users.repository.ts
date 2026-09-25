@@ -24,6 +24,20 @@ export const usersRepository = {
     });
   },
 
+  listSavedExperiences(userId: string) {
+    return prisma.savedItem.findMany({
+      where: { userId, itemType: "experience" },
+      orderBy: { createdAt: "desc" },
+    });
+  },
+
+  listSavedRestaurants(userId: string) {
+    return prisma.savedItem.findMany({
+      where: { userId, itemType: "restaurant" },
+      orderBy: { createdAt: "desc" },
+    });
+  },
+
   findSavedDestination(userId: string, destinationId: string) {
     return prisma.savedItem.findUnique({
       where: {
@@ -48,7 +62,35 @@ export const usersRepository = {
     });
   },
 
-  createSavedItem(userId: string, itemType: "destination" | "stay", itemId: string) {
+  findSavedExperience(userId: string, experienceId: string) {
+    return prisma.savedItem.findUnique({
+      where: {
+        userId_itemType_itemId: {
+          userId,
+          itemType: "experience",
+          itemId: experienceId,
+        },
+      },
+    });
+  },
+
+  findSavedRestaurant(userId: string, restaurantId: string) {
+    return prisma.savedItem.findUnique({
+      where: {
+        userId_itemType_itemId: {
+          userId,
+          itemType: "restaurant",
+          itemId: restaurantId,
+        },
+      },
+    });
+  },
+
+  createSavedItem(
+    userId: string,
+    itemType: "destination" | "stay" | "experience" | "restaurant",
+    itemId: string,
+  ) {
     return prisma.savedItem.create({
       data: { userId, itemType, itemId },
     });
@@ -79,6 +121,34 @@ export const usersRepository = {
 
   findStaysByIds(ids: string[]) {
     return prisma.stay.findMany({
+      where: { id: { in: ids }, isPublished: true },
+      include: { destination: true },
+    });
+  },
+
+  findPublishedExperience(id: string) {
+    return prisma.experience.findFirst({
+      where: { id, isPublished: true },
+      include: { destination: true },
+    });
+  },
+
+  findExperiencesByIds(ids: string[]) {
+    return prisma.experience.findMany({
+      where: { id: { in: ids }, isPublished: true },
+      include: { destination: true },
+    });
+  },
+
+  findPublishedRestaurant(id: string) {
+    return prisma.restaurant.findFirst({
+      where: { id, isPublished: true },
+      include: { destination: true },
+    });
+  },
+
+  findRestaurantsByIds(ids: string[]) {
+    return prisma.restaurant.findMany({
       where: { id: { in: ids }, isPublished: true },
       include: { destination: true },
     });

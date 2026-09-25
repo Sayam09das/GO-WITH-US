@@ -7,9 +7,15 @@ import { prisma } from "./lib/db.js";
 import { errorHandler } from "./middleware/error-handler.js";
 import { validateOrigin } from "./middleware/origin-guard.js";
 import { authRouter } from "./modules/auth/auth.routes.js";
+import { bookingsRouter } from "./modules/bookings/bookings.routes.js";
 import { dashboardRouter } from "./modules/dashboard/dashboard.routes.js";
 import { destinationsRouter } from "./modules/destinations/destinations.routes.js";
+import { experiencesRouter } from "./modules/experiences/experiences.routes.js";
+import { paymentsRouter } from "./modules/payments/payments.routes.js";
+import { restaurantsRouter } from "./modules/restaurants/restaurants.routes.js";
+import { reviewsRouter } from "./modules/reviews/reviews.routes.js";
 import { staysRouter } from "./modules/stays/stays.routes.js";
+import { storiesRouter } from "./modules/stories/stories.routes.js";
 import { tripsRouter } from "./modules/trips/trips.routes.js";
 import { usersRouter } from "./modules/users/users.routes.js";
 
@@ -30,7 +36,7 @@ export function createApp(): Express {
       origin: env.appOrigin,
       credentials: true,
       methods: ["GET", "POST", "PATCH", "DELETE", "QUERY", "OPTIONS"],
-      allowedHeaders: ["Content-Type", "Authorization"],
+      allowedHeaders: ["Content-Type", "Authorization", "Idempotency-Key"],
     }),
   );
 
@@ -76,6 +82,12 @@ export function createApp(): Express {
   apiRouter.use("/auth", authRouter);
   apiRouter.use("/destinations", destinationsRouter);
   apiRouter.use("/stays", staysRouter);
+  apiRouter.use("/experiences", experiencesRouter);
+  apiRouter.use("/restaurants", restaurantsRouter);
+  apiRouter.use("/stories", storiesRouter);
+  apiRouter.use("/reviews", reviewsRouter);
+  apiRouter.use("/bookings", bookingsRouter);
+  apiRouter.use("/payments", paymentsRouter);
   apiRouter.use("/users", usersRouter);
   apiRouter.use("/dashboard", dashboardRouter);
   apiRouter.use("/trips", tripsRouter);

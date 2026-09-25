@@ -125,7 +125,22 @@ async function resolveItemPayload(input: CreateItineraryItemInput) {
         }),
       };
     }
-    case "restaurant":
+    case "restaurant": {
+      if (!input.restaurantId) {
+        throw new AppError(400, "VALIDATION_ERROR", "restaurantId is required.");
+      }
+
+      const restaurant = await tripsRepository.findPublishedRestaurant(input.restaurantId);
+      if (!restaurant) {
+        throw new AppError(404, "NOT_FOUND", "Restaurant not found.");
+      }
+
+      return {
+        itemType: input.type,
+        itemId: restaurant.id,
+        title: input.title?.trim() || restaurant.title,
+      };
+    }
     case "custom": {
       const title = input.title?.trim();
       if (!title) {

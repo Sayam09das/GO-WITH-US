@@ -1,4 +1,5 @@
 import { AppError } from "../../lib/errors.js";
+import { reviewCatalog } from "../../lib/review-catalog.js";
 import { destinationsRepository } from "./destinations.repository.js";
 import type { DestinationSearchInput } from "./destinations.schemas.js";
 import {
@@ -105,5 +106,18 @@ export const destinationsService = {
         isSaved: savedIds.has(item.id),
       })),
     };
+  },
+
+  async listReviews(
+    destinationIdOrSlug: string,
+    query: { page: number; limit: number; rating?: number; sort: "recent" | "rating" },
+  ) {
+    const destination = await destinationsRepository.findByIdOrSlug(destinationIdOrSlug);
+
+    if (!destination) {
+      throw new AppError(404, "NOT_FOUND", "Destination not found.");
+    }
+
+    return reviewCatalog.listReviews("destination", destination.id, query);
   },
 };

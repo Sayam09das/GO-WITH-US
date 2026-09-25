@@ -28,6 +28,14 @@ export const stayIdParamSchema = z.object({
   stayId: z.string().uuid(),
 });
 
+export const experienceIdParamSchema = z.object({
+  experienceId: z.string().uuid(),
+});
+
+export const restaurantIdParamSchema = z.object({
+  restaurantId: z.string().uuid(),
+});
+
 export const tripStatusQuerySchema = z.object({
   status: z.enum(["draft", "upcoming", "active", "completed"]).optional(),
 });

@@ -52,6 +52,36 @@ export type SavedStaySummary = {
   savedAt: string;
 };
 
+export type SavedExperienceSummary = {
+  id: string;
+  experienceId: string;
+  slug: string;
+  title: string;
+  category: string;
+  heroImage: string;
+  destination: {
+    id: string;
+    title: string;
+    country: string;
+  };
+  savedAt: string;
+};
+
+export type SavedRestaurantSummary = {
+  id: string;
+  restaurantId: string;
+  slug: string;
+  title: string;
+  cuisine: string;
+  heroImage: string;
+  destination: {
+    id: string;
+    title: string;
+    country: string;
+  };
+  savedAt: string;
+};
+
 export type UserActivityItem = {
   id: string;
   type: string;

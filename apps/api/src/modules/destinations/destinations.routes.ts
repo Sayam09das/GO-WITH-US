@@ -10,6 +10,7 @@ destinationsRouter.get("/", destinationsController.list);
 destinationsRouter.get("/featured", destinationsController.featured);
 destinationsRouter.get("/categories", destinationsController.categories);
 destinationsRouter.all("/search", handleDestinationSearch);
+destinationsRouter.get("/:destinationId/reviews", destinationsController.listReviews);
 destinationsRouter.get("/:slug", destinationsController.getBySlug);
 
 export { destinationsRouter };
