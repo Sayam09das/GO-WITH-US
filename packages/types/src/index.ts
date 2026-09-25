@@ -32,7 +32,8 @@ export type TripSummary = {
   startDate: string | null;
   endDate: string | null;
   coverImage: string | null;
-  status: "draft" | "upcoming" | "active" | "completed";
+  status: "draft" | "upcoming" | "active" | "completed" | "cancelled";
+  itemCount?: number;
 };
 
 export type SavedDestinationSummary = {

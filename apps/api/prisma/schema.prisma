@@ -44,6 +44,7 @@ enum ItineraryItemType {
   destination
   stay
   experience
+  restaurant
   custom
 }
 
@@ -58,6 +59,7 @@ enum TripStatus {
   upcoming
   active
   completed
+  cancelled
 }
 
 enum NotificationType {
@@ -241,6 +243,7 @@ model Trip {
 
   user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   destination     Destination?     @relation(fields: [destinationId], references: [id])
+  tripDays        TripDay[]
   itineraryItems  ItineraryItem[]
   notifications   Notification[]
 
@@ -248,20 +251,37 @@ model Trip {
   @@map("trips")
 }
 
+model TripDay {
+  id        String    @id @default(uuid()) @db.Uuid
+  tripId    String    @map("trip_id") @db.Uuid
+  dayIndex  Int       @map("day_index")
+  dayDate   DateTime? @map("day_date") @db.Date
+  title     String?
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@unique([tripId, dayIndex])
+  @@index([tripId, dayIndex])
+  @@map("trip_days")
+}
+
 model ItineraryItem {
-  id            String            @id @default(uuid()) @db.Uuid
-  tripId        String            @map("trip_id") @db.Uuid
-  dayIndex      Int               @map("day_index")
-  dayDate       DateTime?         @map("day_date") @db.Date
-  timeSlot      TimeSlot          @map("time_slot")
-  scheduledTime DateTime?         @map("scheduled_time") @db.Time(6)
-  sortOrder     Int               @map("sort_order")
-  itemType      ItineraryItemType @map("item_type")
-  itemId        String?           @map("item_id") @db.Uuid
-  title         String
-  notes         String?
-  createdAt     DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt     DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id               String            @id @default(uuid()) @db.Uuid
+  tripId           String            @map("trip_id") @db.Uuid
+  dayIndex         Int               @map("day_index")
+  dayDate          DateTime?         @map("day_date") @db.Date
+  timeSlot         TimeSlot          @map("time_slot")
+  scheduledTime    DateTime?         @map("scheduled_time") @db.Time(6)
+  scheduledEndTime DateTime?         @map("scheduled_end_time") @db.Time(6)
+  sortOrder        Int               @map("sort_order")
+  itemType         ItineraryItemType @map("item_type")
+  itemId           String?           @map("item_id") @db.Uuid
+  title            String
+  notes            String?
+  createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
 
