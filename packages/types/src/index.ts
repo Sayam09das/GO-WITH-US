@@ -77,6 +77,31 @@ export type DashboardOverview = {
   recentActivity: UserActivityItem[];
 };
 
+export type DestinationListItem = {
+  id: string;
+  slug: string;
+  title: string;
+  location: string;
+  country: string;
+  region: string;
+  style: string | null;
+  category: string | null;
+  budgetTier: BudgetTier;
+  popularity: number;
+  rating: number;
+  priceLabel: string;
+  heroImage: string;
+  imageAlt: string;
+  isSaved: boolean;
+};
+
+export type PaginatedMeta = {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+};
+
 export type ApiErrorEnvelope = {
   error: {
     code: string;

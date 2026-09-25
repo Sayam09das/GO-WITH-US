@@ -110,9 +110,23 @@ pnpm exec prisma studio
 
 ---
 
+## Step 6 — Destinations API
+
+**Status:** Complete
+
+- `GET /api/v1/destinations` — paginated listing with optional `featured` and `sort`
+- `GET /api/v1/destinations/featured` — homepage featured destinations
+- `GET /api/v1/destinations/categories` — distinct category tags
+- `QUERY /api/v1/destinations/search` — complex JSON search (idempotent, CORS preflight enabled)
+- `GET /api/v1/destinations/:slug` — detail with stays, experiences, related destinations, optional `isSaved`
+
+Saved destinations remain on `/api/v1/users/me/saved-destinations/*`.
+
+---
+
 ## Next step
 
-**Step 6 — Wire dashboard UI to live API** and replace account/dashboard fixtures.
+**Step 7 — Wire discovery UI** to destinations API and seed catalog data.
 
 ---
 

@@ -54,3 +54,26 @@ export function getAuthUserId(req: Request): string {
 
   return userId;
 }
+
+export function getOptionalAuthUserId(req: Request): string | undefined {
+  return req.authUser?.id;
+}
+
+export function optionalAuth(req: Request, _res: Response, next: NextFunction): void {
+  const token = readSessionToken(req);
+
+  if (!token) {
+    next();
+    return;
+  }
+
+  authService
+    .getMe(token)
+    .then((user) => {
+      req.authUser = user;
+      next();
+    })
+    .catch(() => {
+      next();
+    });
+}

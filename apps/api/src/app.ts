@@ -8,6 +8,7 @@ import { errorHandler } from "./middleware/error-handler.js";
 import { validateOrigin } from "./middleware/origin-guard.js";
 import { authRouter } from "./modules/auth/auth.routes.js";
 import { dashboardRouter } from "./modules/dashboard/dashboard.routes.js";
+import { destinationsRouter } from "./modules/destinations/destinations.routes.js";
 import { tripsRouter } from "./modules/trips/trips.routes.js";
 import { usersRouter } from "./modules/users/users.routes.js";
 
@@ -27,6 +28,8 @@ export function createApp(): Express {
     cors({
       origin: env.appOrigin,
       credentials: true,
+      methods: ["GET", "POST", "PATCH", "DELETE", "QUERY", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
     }),
   );
 
@@ -70,6 +73,7 @@ export function createApp(): Express {
   });
 
   apiRouter.use("/auth", authRouter);
+  apiRouter.use("/destinations", destinationsRouter);
   apiRouter.use("/users", usersRouter);
   apiRouter.use("/dashboard", dashboardRouter);
   apiRouter.use("/trips", tripsRouter);
