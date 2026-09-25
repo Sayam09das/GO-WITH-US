@@ -45,6 +45,7 @@ GO WITH US uses a **consolidated relational model** aligned with `docs/DATABASE.
 | `Experience` | `experiences` | Activities linked to a destination |
 | `Trip` | `trips` | User-owned trip plans |
 | `SavedItem` | `saved_items` | Polymorphic saved destinations, stays, and experiences |
+| `TripDay` | `trip_days` | Day shells linked to trip date ranges |
 | `ItineraryItem` | `itinerary_items` | Day-by-day trip activities and custom notes |
 | `Review` | `reviews` | Polymorphic user reviews |
 | `Notification` | `notifications` | In-app user notifications |
@@ -62,8 +63,8 @@ Use this when comparing generic backend tutorials to GO WITH US:
 | `Stay` | `Stay` | Direct match |
 | `Experience` | `Experience` | Direct match |
 | `Trip` | `Trip` | Direct match |
-| `TripDay` | `ItineraryItem.dayIndex` + `dayDate` | No separate day table; days are derived from trip dates |
-| `TripItem` | `ItineraryItem` | One table for scheduled items and custom notes |
+| `TripDay` | `trip_days` | Explicit day records with titles and dates |
+| `TripItem` | `ItineraryItem` + `sortOrder` | Items stored on `itinerary_items` with `day_index` |
 | `SavedDestination` | `SavedItem` where `itemType = destination` | Polymorphic saves, not per-entity tables |
 | `SavedStay` | `SavedItem` where `itemType = stay` | Polymorphic saves, not per-entity tables |
 | `SavedExperience` | `SavedItem` where `itemType = experience` | Also covered by the same table |
@@ -142,6 +143,31 @@ Saved stays remain on `/api/v1/users/me/saved-stays/*`.
 ## Next step
 
 **Step 8 — Wire stays UI** to the stays API and seed catalog data.
+
+---
+
+## Step 8 — Trips & Itinerary API
+
+**Status:** Complete
+
+- `POST /api/v1/trips` — create trip and auto-generate trip days from dates
+- `GET /api/v1/trips` — owner-scoped list with `status` filters (`draft`, `upcoming`, `ongoing`, `past`, `cancelled`)
+- `GET /api/v1/trips/:tripId` — full trip detail with day-by-day itinerary
+- `PATCH /api/v1/trips/:tripId` — update metadata; validates itinerary fits new date range
+- `DELETE /api/v1/trips/:tripId` — cascade delete with ownership check
+- `GET/POST /api/v1/trips/:tripId/days` — list or append trip days
+- `PATCH /api/v1/trips/:tripId/days/:dayId` — update day title/date
+- `POST/PATCH/DELETE /api/v1/trips/:tripId/days/:dayId/items/*` — itinerary CRUD
+- `PATCH /api/v1/trips/:tripId/days/:dayId/items/reorder` — atomic drag-and-drop ordering
+- `PATCH /api/v1/trips/:tripId/items/:itemId/move` — move item between days
+
+Trip status is computed from dates (`draft`, `upcoming`, `active`, `completed`) unless manually set to `cancelled`.
+
+---
+
+## Next step
+
+**Step 9 — Wire trips UI** to the trips API.
 
 ---
 
