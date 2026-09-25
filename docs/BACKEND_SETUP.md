@@ -404,6 +404,155 @@ Complete restaurant discovery pages, itinerary workspace UI, and end-to-end QA p
 
 ---
 
+## Step 15 — External Travel Providers
+
+### Step 15.1 — Provider Architecture
+
+**Status:** Complete (scaffolding)
+
+External travel APIs are isolated behind a dedicated provider layer. Domain services never call third-party HTTP APIs directly.
+
+**Flow:**
+
+```
+Controller → Domain Service → Provider Interface → Provider Implementation → External API
+```
+
+**Folder layout:**
+
+```
+apps/api/src/providers/
+├── index.ts                         # ProviderFactory (env-driven selection)
+├── provider.types.ts
+├── places/
+│   ├── places.provider.ts           # PlacesProvider interface
+│   ├── places.types.ts              # NormalizedPlace
+│   ├── places.mapper.ts
+│   ├── noop.places.provider.ts
+│   └── foursquare/
+│       ├── foursquare.client.ts     # HTTP only
+│       └── foursquare.provider.ts
+├── accommodation/
+│   ├── accommodation.provider.ts
+│   ├── accommodation.types.ts
+│   ├── accommodation.mapper.ts
+│   ├── noop.accommodation.provider.ts
+│   └── booking/
+│       ├── booking.client.ts
+│       └── booking.provider.ts
+└── experiences/
+    ├── experiences.provider.ts
+    ├── experiences.types.ts
+    ├── experiences.mapper.ts
+    ├── noop.experiences.provider.ts
+    └── amadeus/
+        ├── amadeus.client.ts
+        └── amadeus.provider.ts
+```
+
+**Provider categories:**
+
+| Category | Interface | Default | Used by |
+|----------|-----------|---------|---------|
+| Places | `PlacesProvider` | `noop` | `restaurantsService`, `destinationsService` |
+| Accommodation | `AccommodationProvider` | `noop` | `staysService.getAvailability()` |
+| Experiences | `ExperienceProvider` | `noop` | `experiencesService.getAvailability()` |
+
+**Environment variables** (see `apps/api/.env.example`):
+
+```bash
+PLACES_PROVIDER=              # or foursquare
+ACCOMMODATION_PROVIDER=       # or booking
+EXPERIENCE_PROVIDER=          # or amadeus
+FOURSQUARE_API_KEY=
+BOOKING_API_KEY=
+AMADEUS_CLIENT_ID=
+AMADEUS_CLIENT_SECRET=
+```
+
+Legacy names (`PROVIDER_PLACES`, `AMADEUS_API_KEY`, etc.) are still accepted for backward compatibility.
+
+When provider env vars are unset or set to `none`, noop providers return empty results and domain services fall back to the existing Prisma seed catalog / guidance inventory.
+
+**Integration points (without breaking existing routes):**
+
+- `staysService.getAvailability()` — tries `AccommodationProvider` first, falls back to `buildStayAvailability()`
+- `experiencesService.getAvailability()` — tries `ExperienceProvider` first, falls back to guidance inventory
+- `restaurantsService.search()` — augments DB results with optional `placeSuggestions` from `PlacesProvider`
+- `destinationsService.search()` — optional autocomplete suggestions via `PlacesProvider`
+
+**Rules:**
+
+- Controllers and routes are unchanged
+- Prisma repositories remain the source of truth for published catalog content
+- External responses are normalized before reaching services/controllers
+- Provider API keys stay server-side only
+
+---
+
+### Step 15.2 — Provider Configuration
+
+**Status:** Complete
+
+Provider credentials and selection are centralized in `apps/api/src/config/providers.ts`. `env.ts` loads core server secrets only; provider keys never appear in `apps/web` or `NEXT_PUBLIC_*` variables.
+
+**Configuration flow:**
+
+```
+process.env → loadProvidersConfig() → validateProvidersConfig() → providersConfig → ProviderFactory
+```
+
+**Startup validation:** If `PLACES_PROVIDER=foursquare` but `FOURSQUARE_API_KEY` is missing, the API fails fast at startup with a clear error instead of failing mid-search.
+
+**Shared HTTP client:** `providers/lib/provider-http.client.ts` wraps native `fetch()` with:
+
+- Mandatory timeouts (`PROVIDER_HTTP_TIMEOUT_MS`, default 8s)
+- Selective retries for network errors, `429`, and `5xx` only
+- Sanitized `PROVIDER_UNAVAILABLE` responses (no provider HTTP details exposed to clients)
+- No logging of API keys, auth headers, or secrets
+
+**Never commit:** `.env`, `.env.local` — only `apps/api/.env.example` with placeholders.
+
+---
+
+### Step 15.3 — Location & Geolocation
+
+**Status:** Complete (foundation)
+
+**Location service:** `apps/api/src/services/location/`
+
+- Validates latitude (`-90` → `90`), longitude (`-180` → `180`)
+- Normalizes nearby radius (`1 km` → `50 km`, default `10 km`)
+- Reverse geocoding via `PlacesProvider.reverseGeocode()` when configured
+- Does not persist user GPS coordinates
+
+**Global search endpoint:** `/api/v1/search`
+
+| Method | Use case |
+|--------|----------|
+| `GET /search?q=` | Text search across destinations, stays, experiences, restaurants, stories |
+| `POST /search` or `QUERY /search` | Nearby search with `{ location: { lat, lng, radius }, query?, types? }` |
+
+**Architecture:**
+
+```
+Frontend (browser geolocation)
+        ↓
+/api/v1/search
+        ↓
+SearchService
+        ↓
+LocationService (validate + reverse geocode)
+        ↓
+ProviderFactory → PlacesProvider → external API
+        ↓
+Normalized results (+ Prisma catalog fallback)
+```
+
+Supports destination text search, near-me coordinate search, radius filtering, and location labels for display. Map integration and persistent user location storage are out of scope for this step.
+
+---
+
 ## Step 4 — Authentication
 
 **Status:** Complete

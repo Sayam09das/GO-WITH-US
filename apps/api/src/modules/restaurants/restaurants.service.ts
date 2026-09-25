@@ -1,5 +1,7 @@
 import { AppError } from "../../lib/errors.js";
 import { reviewCatalog } from "../../lib/review-catalog.js";
+import { providerFactory } from "../../providers/index.js";
+import { mapNormalizedPlaceToAutocomplete } from "../../providers/places/places.mapper.js";
 import { restaurantsRepository } from "./restaurants.repository.js";
 import type { ListRestaurantsQuery, RestaurantSearchInput } from "./restaurants.schemas.js";
 import {
@@ -39,16 +41,59 @@ export const restaurantsService = {
         )
       : new Set<string>();
 
+    const placesProvider = providerFactory.getPlacesProvider();
+    const placeSuggestions =
+      placesProvider.isConfigured() && input.query
+        ? (await placesProvider.search({ query: input.query, limit: 6 })).map(
+            mapNormalizedPlaceToAutocomplete,
+          )
+        : [];
+
     return {
       restaurants: result.restaurants.map((restaurant) =>
         toRestaurantListItem(restaurant, savedIds.has(restaurant.id)),
       ),
-      meta: buildPaginationMeta({
-        page: result.page,
-        limit: result.limit,
-        total: result.total,
-      }),
+      meta: {
+        ...buildPaginationMeta({
+          page: result.page,
+          limit: result.limit,
+          total: result.total,
+        }),
+        ...(placeSuggestions.length > 0
+          ? {
+              placeSuggestions,
+              provider: placesProvider.name,
+            }
+          : {}),
+      },
     };
+  },
+
+  async searchPlaces(input: {
+    query: string;
+    limit?: number;
+    latitude?: number;
+    longitude?: number;
+  }) {
+    const placesProvider = providerFactory.getPlacesProvider();
+
+    if (!placesProvider.isConfigured()) {
+      return [];
+    }
+
+    if (input.latitude != null && input.longitude != null) {
+      return placesProvider.searchNearby({
+        latitude: input.latitude,
+        longitude: input.longitude,
+        query: input.query,
+        limit: input.limit ?? 20,
+      });
+    }
+
+    return placesProvider.search({
+      query: input.query,
+      limit: input.limit ?? 20,
+    });
   },
 
   async listFeatured(userId?: string) {

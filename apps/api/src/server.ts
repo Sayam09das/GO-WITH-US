@@ -1,5 +1,6 @@
 import { createApp } from "./app.js";
 import { env } from "./config/env.js";
+import "./config/providers.js";
 import { logger } from "./infrastructure/logging/logger.js";
 import { closeQueues } from "./infrastructure/queue/queues.js";
 import { connectRedis, disconnectRedis } from "./infrastructure/redis/redis.js";

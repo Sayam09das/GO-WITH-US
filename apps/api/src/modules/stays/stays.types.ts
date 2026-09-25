@@ -5,6 +5,7 @@ import type {
   PropertyType,
   Stay,
 } from "../../generated/client.js";
+import type { ProviderSource } from "../../providers/provider.types.js";
 
 export type StayDestinationSummary = {
   id: string;
@@ -120,7 +121,8 @@ export type StayAvailabilityResult = {
     }
   >;
   meta: {
-    inventoryModel: "guidance";
+    inventoryModel: "guidance" | "provider";
+    provider?: ProviderSource;
   };
 };
 
