@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { DestinationsCatalogSection, DestinationsHero } from "@/components/destinations";
+import { DestinationsHero } from "@/components/destinations";
+import { DestinationsCatalogLoader } from "@/components/destinations/catalog/destinations-catalog-loader";
 import { CatalogPageSkeleton } from "@/components/states";
-import { getAllDestinations } from "@/lib/api/destinations";
 import { buildCatalogTitle, buildPageMetadata, trimDescription } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -13,14 +13,12 @@ export const metadata: Metadata = buildPageMetadata({
   path: "/destinations",
 });
 
-export default async function DestinationsPage() {
-  const destinations = await getAllDestinations();
-
+export default function DestinationsPage() {
   return (
     <main>
       <DestinationsHero />
       <Suspense fallback={<CatalogPageSkeleton />}>
-        <DestinationsCatalogSection initialDestinations={destinations} />
+        <DestinationsCatalogLoader />
       </Suspense>
     </main>
   );

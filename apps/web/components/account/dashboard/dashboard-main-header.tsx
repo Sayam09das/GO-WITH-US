@@ -2,14 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useDashboardUser } from "@/components/account/dashboard/dashboard-user-context";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { buildDashboardGreeting, DASHBOARD_HEADER_COPY, DASHBOARD_USER } from "@/lib/account";
+import { buildDashboardGreeting, DASHBOARD_HEADER_COPY } from "@/lib/account";
 import { cn } from "@/lib/utils";
 
 function DashboardMainHeader() {
   const pathname = usePathname();
-  const greeting = buildDashboardGreeting(DASHBOARD_USER.firstName);
+  const user = useDashboardUser();
+  const greeting = buildDashboardGreeting(user.firstName);
   const isOverview = pathname === "/account";
 
   return (
@@ -35,7 +37,7 @@ function DashboardMainHeader() {
       <div className="hidden items-center gap-4 lg:flex lg:flex-col lg:items-end lg:gap-5">
         <Avatar className="size-14 border border-border/70 bg-primary/5 shadow-xs lg:size-16">
           <AvatarFallback className="bg-primary/10 text-lg font-semibold text-primary lg:text-xl">
-            {DASHBOARD_USER.initials}
+            {user.initials}
           </AvatarFallback>
         </Avatar>
         <Button asChild variant="outline" size="sm" className="rounded-full px-5">

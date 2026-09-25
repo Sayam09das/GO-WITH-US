@@ -1,10 +1,10 @@
 import rateLimit from "express-rate-limit";
 import { RedisStore } from "rate-limit-redis";
-import { redis } from "../infrastructure/redis/redis.js";
+import { isRedisReady, redis } from "../infrastructure/redis/redis.js";
 
 function createRedisStore(prefix: string): RedisStore | undefined {
   const client = redis;
-  if (!client) {
+  if (!isRedisReady() || !client) {
     return undefined;
   }
 

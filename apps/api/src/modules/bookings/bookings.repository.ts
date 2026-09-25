@@ -50,8 +50,8 @@ async function assertStayAvailability(
     checkOut: Date;
   },
 ): Promise<void> {
-  const conflicts = await tx.$queryRaw<Array<{ count: number }>>`
-    SELECT COUNT(*)::int AS count
+  const conflicts = await tx.$queryRaw<Array<{ id: string }>>`
+    SELECT b.id
     FROM booking_items bi
     INNER JOIN bookings b ON b.id = bi.booking_id
     WHERE bi.stay_id = ${input.stayId}::uuid
@@ -60,10 +60,11 @@ async function assertStayAvailability(
       AND bi.check_out IS NOT NULL
       AND bi.check_in < ${input.checkOut}
       AND bi.check_out > ${input.checkIn}
+    LIMIT 1
     FOR UPDATE OF b
   `;
 
-  if ((conflicts[0]?.count ?? 0) > 0) {
+  if (conflicts.length > 0) {
     throw new AppError(409, "BOOKING_NOT_AVAILABLE", "The selected option is no longer available.");
   }
 }
@@ -76,6 +77,16 @@ async function assertExperienceAvailability(
     guestCount: number;
   },
 ): Promise<void> {
+  await tx.$queryRaw`
+    SELECT b.id
+    FROM booking_items bi
+    INNER JOIN bookings b ON b.id = bi.booking_id
+    WHERE bi.experience_id = ${input.experienceId}::uuid
+      AND bi.experience_date = ${input.experienceDate}
+      AND b.status NOT IN ('cancelled', 'expired')
+    FOR UPDATE OF b
+  `;
+
   const capacityRows = await tx.$queryRaw<Array<{ bookedGuests: number | null }>>`
     SELECT COALESCE(SUM((bi.guests->>'adults')::int + (bi.guests->>'children')::int), 0)::int AS "bookedGuests"
     FROM booking_items bi
@@ -83,7 +94,6 @@ async function assertExperienceAvailability(
     WHERE bi.experience_id = ${input.experienceId}::uuid
       AND bi.experience_date = ${input.experienceDate}
       AND b.status NOT IN ('cancelled', 'expired')
-    FOR UPDATE OF b
   `;
 
   const maxGuests = 12;

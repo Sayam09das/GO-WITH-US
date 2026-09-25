@@ -362,13 +362,45 @@ Editorial presentation fields (`objectPosition`, layout variants, category label
 
 ### Next step
 
-Wire remaining account dashboard fixtures (saved places, trips, recent activity) to authenticated API endpoints.
+See Step 14 for remaining frontend integration (restaurants pages, itinerary workspace, E2E QA).
+
+---
+
+## Step 14 — Frontend Integration (Client ↔ Backend)
+
+**Status:** In progress
+
+Follow this order — do not wire everything at once:
+
+1. **API client** — `lib/api/client.ts`, `lib/api/server.ts` (cookie-forwarding for RSC)
+2. **Auth** — `lib/api/auth.ts` (forms + session cookie)
+3. **User / profile** — `lib/api/users.ts`, `/account/profile`
+4. **Destinations** — `lib/api/destinations.ts` + catalog pages
+5. **Stays** — `lib/api/stays.ts` + `/stays` pages
+6. **Experiences** — `lib/api/experiences.ts` + `/experiences` pages
+7. **Restaurants** — `lib/api/restaurants.ts` (API client ready; pages pending)
+8. **Stories** — `lib/api/journal.ts`, `lib/api/inspiration.ts`
+9. **Dashboard** — `lib/api/dashboard.ts`, `/dashboard` aggregate on `/account`
+10. **Trips / itinerary** — `lib/api/trips.ts`, `/trips` list (itinerary workspace pending)
+11. **Bookings** — `lib/api/bookings.ts`, booking request forms + `/account/bookings`
+12. **Reviews** — `lib/api/reviews.ts`, review sections on detail pages
+13. **Global search** — `lib/api/search.ts`, `/search?q=`
+14. **Loading / error / empty states** — `EmptyState`, skeletons on list pages
+15. **End-to-end testing** — manual QA with API + Postgres + Redis running
+
+### Environment
+
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:4000/api/v1
+```
+
+Authenticated server requests forward the session cookie via `serverApiFetch()`.
 
 ---
 
 ## Next step
 
-**Step 14 — Frontend polish and production testing** per `docs/ROADMAP.md`.
+Complete restaurant discovery pages, itinerary workspace UI, and end-to-end QA per Step 14.15.
 
 ---
 

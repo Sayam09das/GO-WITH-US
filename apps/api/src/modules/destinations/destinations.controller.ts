@@ -80,8 +80,12 @@ export const destinationsController = {
   },
 };
 
+function acceptsComplexSearchMethod(method: string): boolean {
+  return method === "POST" || method === "QUERY";
+}
+
 export function handleDestinationSearch(req: Request, res: Response, next: NextFunction) {
-  if (req.method === "QUERY") {
+  if (acceptsComplexSearchMethod(req.method)) {
     void destinationsController.search(req, res);
     return;
   }

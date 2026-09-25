@@ -2,6 +2,7 @@ import type {
   BookingSummary as ApiBookingSummary,
   DestinationListItem as ApiDestinationListItem,
   ExperienceListItem as ApiExperienceListItem,
+  RestaurantListItem as ApiRestaurantListItem,
   StayListItem as ApiStayListItem,
   StoryListItem as ApiStoryListItem,
 } from "@gowithus/types";
@@ -9,6 +10,7 @@ import type { DestinationListItem } from "@/types/destination";
 import type { ExperienceListItem } from "@/types/experience";
 import type { InspirationStory } from "@/types/inspiration";
 import type { JournalStory } from "@/types/journal";
+import type { RestaurantListItem } from "@/types/restaurant";
 import type { StayListItem } from "@/types/stay";
 import {
   getDestinationEditorial,
@@ -40,18 +42,39 @@ export function mapDestinationListItem(item: ApiDestinationListItem): Destinatio
   };
 }
 
-export function mapStayListItem(item: ApiStayListItem): StayListItem {
+function resolveStayDestination(
+  destination: ApiStayListItem["destination"] | { title?: string } | string | null | undefined,
+): string {
+  if (typeof destination === "string") {
+    return destination;
+  }
+
+  if (destination && typeof destination === "object" && "title" in destination) {
+    return destination.title ?? "Unknown";
+  }
+
+  return "Unknown";
+}
+
+export function mapStayListItem(
+  item: ApiStayListItem & {
+    heroImage?: string;
+    locationLabel?: string;
+    overview?: string;
+    description?: string;
+  },
+): StayListItem {
   const editorial = getStayEditorial(item.slug);
 
   return {
     id: item.id,
     slug: item.slug,
     name: item.name,
-    destination: item.destination,
+    destination: resolveStayDestination(item.destination),
     propertyType: (editorial?.propertyType ?? item.propertyType) as StayListItem["propertyType"],
     propertyTypeLabel: editorial?.propertyTypeLabel ?? item.propertyType,
-    description: editorial?.description ?? item.name,
-    heroImage: item.coverImage,
+    description: editorial?.description ?? item.description ?? item.overview ?? item.name,
+    heroImage: item.coverImage ?? item.heroImage ?? "",
     imageAlt: editorial?.imageAlt ?? item.imageAlt,
     objectPosition: editorial?.objectPosition,
     isFeatured: editorial?.isFeatured,
@@ -74,6 +97,21 @@ export function mapExperienceListItem(item: ApiExperienceListItem): ExperienceLi
     imageAlt: editorial?.imageAlt ?? item.name,
     objectPosition: editorial?.objectPosition,
     isFeatured: editorial?.isFeatured,
+  };
+}
+
+export function mapRestaurantListItem(item: ApiRestaurantListItem): RestaurantListItem {
+  return {
+    id: item.id,
+    slug: item.slug,
+    name: item.name,
+    destination: item.destination,
+    cuisine: item.cuisine,
+    heroImage: item.coverImage,
+    imageAlt: item.name,
+    priceLevel: item.priceLevel,
+    rating: item.rating,
+    reviewCount: item.reviewCount,
   };
 }
 

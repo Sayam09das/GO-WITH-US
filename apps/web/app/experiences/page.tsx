@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { ExperienceCard } from "@/components/landing/featured-experiences/experience-card";
-import { getAllExperiences } from "@/lib/api/experiences";
+import { Suspense } from "react";
+import { ExperiencesCatalogGrid } from "@/components/catalog/experiences-catalog-grid";
+import { CatalogPageSkeleton } from "@/components/states";
 import { buildCatalogTitle, buildPageMetadata, trimDescription } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -11,9 +12,7 @@ export const metadata: Metadata = buildPageMetadata({
   path: "/experiences",
 });
 
-export default async function ExperiencesPage() {
-  const experiences = await getAllExperiences();
-
+export default function ExperiencesPage() {
   return (
     <main>
       <section className="bg-background pb-10 pt-[5.5rem] sm:pb-14 sm:pt-28">
@@ -32,11 +31,9 @@ export default async function ExperiencesPage() {
 
       <section className="travel-section bg-soft-gray">
         <div className="container-travel">
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {experiences.map((experience, index) => (
-              <ExperienceCard key={experience.id} experience={experience} index={index} />
-            ))}
-          </div>
+          <Suspense fallback={<CatalogPageSkeleton />}>
+            <ExperiencesCatalogGrid />
+          </Suspense>
         </div>
       </section>
     </main>

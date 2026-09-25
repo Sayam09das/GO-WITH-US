@@ -5,14 +5,17 @@ import { DashboardRecentCard } from "@/components/account/dashboard/dashboard-re
 import { DashboardRecentEmpty } from "@/components/account/dashboard/dashboard-recent-empty";
 import { DashboardRecentHeader } from "@/components/account/dashboard/dashboard-recent-header";
 import { useDashboardRecentAnimation } from "@/components/account/dashboard/use-dashboard-recent-animation";
-import { getRecentlyViewed } from "@/lib/account";
+import type { RecentlyViewedItem } from "@/lib/account";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
 import { cn } from "@/lib/utils";
 
-function DashboardRecentSection() {
+interface DashboardRecentSectionProps {
+  items?: RecentlyViewedItem[];
+}
+
+function DashboardRecentSection({ items = [] }: DashboardRecentSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const reducedMotion = useReducedMotion();
-  const items = getRecentlyViewed();
 
   useDashboardRecentAnimation(sectionRef, reducedMotion);
 

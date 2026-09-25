@@ -63,8 +63,12 @@ export const storiesController = {
   },
 };
 
+function acceptsComplexSearchMethod(method: string): boolean {
+  return method === "POST" || method === "QUERY";
+}
+
 export function handleStorySearch(req: Request, res: Response, next: NextFunction) {
-  if (req.method === "QUERY") {
+  if (acceptsComplexSearchMethod(req.method)) {
     void storiesController.search(req, res);
     return;
   }

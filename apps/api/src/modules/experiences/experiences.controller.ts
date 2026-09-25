@@ -102,8 +102,12 @@ export const experiencesController = {
   },
 };
 
+function acceptsComplexSearchMethod(method: string): boolean {
+  return method === "POST" || method === "QUERY";
+}
+
 export function handleExperienceAvailability(req: Request, res: Response, next: NextFunction) {
-  if (req.method === "QUERY") {
+  if (acceptsComplexSearchMethod(req.method)) {
     void experiencesController.getAvailability(req, res);
     return;
   }
@@ -117,7 +121,7 @@ export function handleExperienceAvailability(req: Request, res: Response, next: 
 }
 
 export function handleExperienceSearch(req: Request, res: Response, next: NextFunction) {
-  if (req.method === "QUERY") {
+  if (acceptsComplexSearchMethod(req.method)) {
     void experiencesController.search(req, res);
     return;
   }
