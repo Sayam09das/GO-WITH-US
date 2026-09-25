@@ -1,27 +1,38 @@
+import type { StoryListItem as ApiStoryListItem } from "@gowithus/types";
 import { JOURNAL_FIXTURE } from "@/data/fixtures/loaders/journal";
 import type { JournalStory } from "@/types/journal";
+import { apiFetch } from "./client";
+import { mapJournalStory } from "./mappers";
 
-/** Featured editorial story for the homepage journal — JSON fixture-backed until REST is wired. */
-export function getFeaturedJournalStory(): JournalStory | undefined {
-  return JOURNAL_FIXTURE.find((item) => item.isFeatured);
+type StoryListResponse = {
+  stories: ApiStoryListItem[];
+};
+
+export async function getFeaturedJournalStory(): Promise<JournalStory | undefined> {
+  const stories = await getJournalStories();
+  return stories.find((item) => item.isFeatured);
 }
 
-export function getSupportingJournalStories(): JournalStory[] {
-  return JOURNAL_FIXTURE.filter((item) => !item.isFeatured);
+export async function getSupportingJournalStories(): Promise<JournalStory[]> {
+  const stories = await getJournalStories();
+  return stories.filter((item) => !item.isFeatured);
 }
 
-/** Full editorial set for carousel surfaces — featured story first. */
-export function getJournalStories(): JournalStory[] {
-  const featured = getFeaturedJournalStory();
-  const supporting = getSupportingJournalStories();
-
-  if (!featured) {
-    return JOURNAL_FIXTURE;
+export async function getJournalStories(): Promise<JournalStory[]> {
+  try {
+    const response = await apiFetch<StoryListResponse>("/stories?limit=20&page=1");
+    const mapped = response.stories.map(mapJournalStory);
+    const featured = mapped.find((item) => item.isFeatured);
+    const supporting = mapped.filter((item) => !item.isFeatured);
+    return featured ? [featured, ...supporting] : mapped;
+  } catch {
+    const featured = JOURNAL_FIXTURE.find((item) => item.isFeatured);
+    const supporting = JOURNAL_FIXTURE.filter((item) => !item.isFeatured);
+    return featured ? [featured, ...supporting] : JOURNAL_FIXTURE;
   }
-
-  return [featured, ...supporting];
 }
 
-export function getJournalStoryBySlug(slug: string): JournalStory | undefined {
-  return JOURNAL_FIXTURE.find((item) => item.slug === slug);
+export async function getJournalStoryBySlug(slug: string): Promise<JournalStory | undefined> {
+  const stories = await getJournalStories();
+  return stories.find((item) => item.slug === slug);
 }

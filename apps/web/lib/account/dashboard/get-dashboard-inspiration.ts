@@ -11,8 +11,11 @@ export interface DashboardInspirationContent {
   supporting: JournalStory[];
 }
 
-export function getDashboardInspiration(): DashboardInspirationContent {
-  const supporting = getSupportingJournalStories().slice(0, DASHBOARD_INSPIRATION_SUPPORTING_COUNT);
+export async function getDashboardInspiration(): Promise<DashboardInspirationContent> {
+  const supporting = (await getSupportingJournalStories()).slice(
+    0,
+    DASHBOARD_INSPIRATION_SUPPORTING_COUNT,
+  );
 
   return {
     featured: DASHBOARD_INSPIRATION_FEATURED,

@@ -318,9 +318,57 @@ pnpm exec prisma db execute --file apps/api/prisma/migrations/20250925213000_pro
 
 ---
 
+## Step 12 — Seed Catalog Data + Frontend Wiring
+
+**Status:** Complete
+
+### Catalog seed
+
+- Idempotent seed script: `apps/api/prisma/seed.ts`
+- Seeds destinations, stays, experiences, and stories from `apps/web/data/fixtures/*.json`
+- Adds Venice and Cappadocia destinations required by editorial stay fixtures
+- Run locally:
+
+```bash
+pnpm db:seed
+# or
+pnpm --filter @gowithus/api db:seed
+```
+
+Apply after migrations on a fresh database. Re-running the seed upserts by slug.
+
+### Frontend API wiring
+
+Discovery modules in `apps/web/lib/api/` now call the REST API via `apiFetch()` with fixture fallbacks when the API is unavailable:
+
+- `destinations.ts` — featured, catalog list, destination detail
+- `stays.ts` — homepage stays blocks
+- `experiences.ts` — featured experiences
+- `journal.ts` / `inspiration.ts` — editorial stories
+- `bookings.ts` — authenticated booking list
+
+Editorial presentation fields (`objectPosition`, layout variants, category labels) remain in `lib/api/catalog-enrichment.ts`, keyed by slug.
+
+### Pages updated
+
+- Homepage server-fetches catalog data and passes props into landing sections
+- `/destinations` loads from API
+- `/destinations/[slug]` — destination detail page
+- `/stays` and `/stays/[slug]` — stays catalog + detail with booking request form
+- `/experiences` and `/experiences/[slug]` — experiences catalog + detail with booking request form
+- `/account/bookings` — authenticated bookings list UI
+- Account overview inspiration block uses seeded journal stories
+- Sitemap includes destination, stay, and experience slugs from the API
+
+### Next step
+
+Wire remaining account dashboard fixtures (saved places, trips, recent activity) to authenticated API endpoints.
+
+---
+
 ## Next step
 
-**Step 12 — Seed catalog data** and wire frontend discovery/booking flows.
+**Step 14 — Frontend polish and production testing** per `docs/ROADMAP.md`.
 
 ---
 

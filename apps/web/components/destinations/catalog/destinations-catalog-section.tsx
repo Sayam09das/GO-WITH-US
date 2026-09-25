@@ -6,7 +6,6 @@ import { useCallback, useLayoutEffect, useMemo, useRef, useTransition } from "re
 import { DestinationCard } from "@/components/landing/popular-destinations/destination-card";
 import { EmptyState } from "@/components/states";
 import { gsap, registerGsapPlugins } from "@/lib/animation/gsap";
-import { getAllDestinations, searchDestinations } from "@/lib/api/destinations";
 import {
   buildDestinationCatalogSearchParams,
   DESTINATIONS_CATALOG_COPY,
@@ -16,11 +15,15 @@ import {
 } from "@/lib/destinations";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
 import { cn } from "@/lib/utils";
-import type { DestinationCatalogFilters } from "@/types/destination";
+import type { DestinationCatalogFilters, DestinationListItem } from "@/types/destination";
 import { DestinationsCatalogHeader } from "./destinations-catalog-header";
 import { DestinationsCatalogToolbar } from "./destinations-catalog-toolbar";
 
-function DestinationsCatalogSection() {
+interface DestinationsCatalogSectionProps {
+  initialDestinations: DestinationListItem[];
+}
+
+function DestinationsCatalogSection({ initialDestinations }: DestinationsCatalogSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
@@ -29,7 +32,7 @@ function DestinationsCatalogSection() {
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  const allDestinations = useMemo(() => getAllDestinations(), []);
+  const allDestinations = useMemo(() => initialDestinations, [initialDestinations]);
   const filterOptions = useMemo(
     () => getDestinationFilterOptions(allDestinations),
     [allDestinations],
@@ -37,7 +40,52 @@ function DestinationsCatalogSection() {
 
   const filters = useMemo(() => parseDestinationCatalogFilters(searchParams), [searchParams]);
 
-  const results = useMemo(() => searchDestinations(filters), [filters]);
+  const results = useMemo(() => {
+    const minRating = filters.rating ? Number.parseFloat(filters.rating) : null;
+
+    const filtered = allDestinations.filter((destination) => {
+      if (filters.q) {
+        const haystack = [
+          destination.title,
+          destination.location,
+          destination.country,
+          destination.region,
+        ]
+          .join(" ")
+          .toLowerCase();
+        if (!haystack.includes(filters.q.toLowerCase())) {
+          return false;
+        }
+      }
+      if (filters.region && destination.region !== filters.region) {
+        return false;
+      }
+      if (filters.style && destination.style !== filters.style) {
+        return false;
+      }
+      if (filters.budgetTier && destination.budgetTier !== filters.budgetTier) {
+        return false;
+      }
+      if (minRating !== null && destination.rating < minRating) {
+        return false;
+      }
+      return true;
+    });
+
+    const sorted = [...filtered];
+    switch (filters.sort) {
+      case "name":
+        sorted.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      case "rating":
+        sorted.sort((a, b) => b.rating - a.rating);
+        break;
+      default:
+        sorted.sort((a, b) => b.popularity - a.popularity);
+    }
+
+    return sorted;
+  }, [allDestinations, filters]);
   const activeFilters = hasActiveDestinationFilters(filters);
 
   const updateFilters = useCallback(

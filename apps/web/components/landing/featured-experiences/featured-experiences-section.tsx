@@ -2,17 +2,20 @@
 
 import { useLayoutEffect, useRef } from "react";
 import { gsap, registerGsapPlugins } from "@/lib/animation/gsap";
-import { getFeaturedExperiences } from "@/lib/api/experiences";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
 import { cn } from "@/lib/utils";
+import type { ExperienceListItem } from "@/types/experience";
 import { ExperienceCard } from "./experience-card";
 import { FeaturedExperiencesHeader } from "./featured-experiences-header";
 
-function FeaturedExperiencesSection() {
+interface FeaturedExperiencesSectionProps {
+  experiences: ExperienceListItem[];
+}
+
+function FeaturedExperiencesSection({ experiences }: FeaturedExperiencesSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
-  const experiences = getFeaturedExperiences();
 
   useLayoutEffect(() => {
     const section = sectionRef.current;

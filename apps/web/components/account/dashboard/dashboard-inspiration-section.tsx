@@ -5,14 +5,18 @@ import { DashboardInspirationFeaturedStory } from "@/components/account/dashboar
 import { DashboardInspirationHeader } from "@/components/account/dashboard/dashboard-inspiration-header";
 import { DashboardInspirationStoryCard } from "@/components/account/dashboard/dashboard-inspiration-story-card";
 import { useDashboardInspirationAnimation } from "@/components/account/dashboard/use-dashboard-inspiration-animation";
-import { getDashboardInspiration } from "@/lib/account";
+import type { DashboardInspirationContent } from "@/lib/account/dashboard/get-dashboard-inspiration";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
 import { cn } from "@/lib/utils";
 
-function DashboardInspirationSection() {
+interface DashboardInspirationSectionProps {
+  content: DashboardInspirationContent;
+}
+
+function DashboardInspirationSection({ content }: DashboardInspirationSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const reducedMotion = useReducedMotion();
-  const { featured, supporting } = getDashboardInspiration();
+  const { featured, supporting } = content;
 
   useDashboardInspirationAnimation(sectionRef, reducedMotion);
 

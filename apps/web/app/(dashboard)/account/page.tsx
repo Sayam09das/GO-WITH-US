@@ -6,6 +6,7 @@ import { DashboardPlanJourneySection } from "@/components/account/dashboard/dash
 import { DashboardRecentSection } from "@/components/account/dashboard/dashboard-recent-section";
 import { DashboardSavedPlacesSection } from "@/components/account/dashboard/dashboard-saved-places-section";
 import { DashboardUpcomingTripSection } from "@/components/account/dashboard/dashboard-upcoming-trip-section";
+import { getDashboardInspiration } from "@/lib/account/dashboard/get-dashboard-inspiration";
 import { buildPageMetadata, buildPageTitle } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -15,14 +16,16 @@ export const metadata: Metadata = buildPageMetadata({
   noIndex: true,
 });
 
-export default function AccountOverviewPage() {
+export default async function AccountOverviewPage() {
+  const inspiration = await getDashboardInspiration();
+
   return (
     <>
       <DashboardHero />
       <DashboardUpcomingTripSection />
       <DashboardExploreSection />
       <DashboardSavedPlacesSection />
-      <DashboardInspirationSection />
+      <DashboardInspirationSection content={inspiration} />
       <DashboardRecentSection />
       <DashboardPlanJourneySection />
     </>

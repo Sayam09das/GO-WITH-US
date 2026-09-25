@@ -2,20 +2,24 @@
 
 import { useLayoutEffect, useRef } from "react";
 import { gsap, registerGsapPlugins } from "@/lib/animation/gsap";
-import { getFeaturedInspirationStory, getInspirationStories } from "@/lib/api/inspiration";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
 import { cn } from "@/lib/utils";
+import type { InspirationStory } from "@/types/inspiration";
 import { InspirationFeaturedStory } from "./inspiration-featured-story";
 import { InspirationStoryCard } from "./inspiration-story-card";
 import { TravelInspirationHeader } from "./travel-inspiration-header";
 
-function TravelInspirationSection() {
+interface TravelInspirationSectionProps {
+  featured?: InspirationStory;
+  stories: InspirationStory[];
+}
+
+function TravelInspirationSection({ featured, stories }: TravelInspirationSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
-  const featured = getFeaturedInspirationStory();
-  const stories = getInspirationStories().filter((story) => !story.isFeatured);
-  const [sideOne, sideTwo, ...bottomStories] = stories;
+  const supportingStories = stories.filter((story) => !story.isFeatured);
+  const [sideOne, sideTwo, ...bottomStories] = supportingStories;
 
   useLayoutEffect(() => {
     const section = sectionRef.current;
