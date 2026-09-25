@@ -1,3 +1,5 @@
+import { CACHE_KEYS, CACHE_TTL } from "../../infrastructure/cache/cache.keys.js";
+import { cacheService } from "../../infrastructure/cache/cache.service.js";
 import { AppError } from "../../lib/errors.js";
 import { storiesRepository } from "./stories.repository.js";
 import type { StorySearchInput } from "./stories.schemas.js";
@@ -28,7 +30,11 @@ export const storiesService = {
   },
 
   async listFeatured() {
-    const stories = await storiesRepository.listFeatured();
+    const stories = await cacheService.getOrSet(
+      CACHE_KEYS.storiesFeatured,
+      CACHE_TTL.featured,
+      () => storiesRepository.listFeatured(),
+    );
     return stories.map(toStoryListItem);
   },
 

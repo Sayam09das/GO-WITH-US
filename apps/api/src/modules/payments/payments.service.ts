@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { env } from "../../config/env.js";
+import { logger } from "../../infrastructure/logging/logger.js";
 import { prisma } from "../../lib/db.js";
 import { AppError } from "../../lib/errors.js";
 import type { PaymentWebhookInput } from "./payments.schemas.js";
@@ -162,6 +163,13 @@ export const paymentsService = {
           status: "confirmed",
         },
       });
+    });
+
+    logger.info("payment.webhook_processed", {
+      paymentId: payment.id,
+      bookingId: payment.bookingId,
+      eventId: event.id,
+      duplicate: false,
     });
 
     return { processed: true, duplicate: false as const };

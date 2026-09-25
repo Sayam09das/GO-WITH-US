@@ -14,8 +14,15 @@ export function sendError(
   statusCode: number,
   code: string,
   message: string,
+  requestId?: string,
 ): void {
-  res.status(statusCode).json({ error: { code, message } });
+  res.status(statusCode).json({
+    error: {
+      code,
+      message,
+      ...(requestId ? { requestId } : {}),
+    },
+  });
 }
 
 export function sendData<T>(res: import("express").Response, statusCode: number, data: T): void {

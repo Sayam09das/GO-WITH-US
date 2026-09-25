@@ -1,35 +1,8 @@
 import { Router } from "express";
-import rateLimit from "express-rate-limit";
+import { authRateLimit, loginRateLimit } from "../../middleware/rate-limit.js";
 import { authController } from "./auth.controller.js";
 
 const authRouter = Router();
-
-const authRateLimit = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 20,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: {
-    error: {
-      code: "RATE_LIMITED",
-      message: "Too many attempts. Please try again later.",
-    },
-  },
-});
-
-const loginRateLimit = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 10,
-  standardHeaders: true,
-  legacyHeaders: false,
-  keyGenerator: (req) => `${req.ip}:${String(req.body?.email ?? "").toLowerCase()}`,
-  message: {
-    error: {
-      code: "RATE_LIMITED",
-      message: "Too many login attempts. Please try again later.",
-    },
-  },
-});
 
 authRouter.post("/register", authRateLimit, authController.register);
 authRouter.post("/sign-up", authRateLimit, authController.register);

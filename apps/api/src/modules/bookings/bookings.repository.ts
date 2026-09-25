@@ -1,5 +1,6 @@
 import type { BookingStatus, BookingType, Prisma } from "../../generated/client.js";
 import { prisma } from "../../lib/db.js";
+import { AppError } from "../../lib/errors.js";
 import type { BookingStatusFilter } from "./bookings.schemas.js";
 
 const bookingInclude = {
@@ -39,6 +40,58 @@ function buildBookingListWhere(
     status: { in: ["pending", "confirmed"] },
     OR: [{ startDate: { gte: today } }, { startDate: null }],
   };
+}
+
+async function assertStayAvailability(
+  tx: Prisma.TransactionClient,
+  input: {
+    stayId: string;
+    checkIn: Date;
+    checkOut: Date;
+  },
+): Promise<void> {
+  const conflicts = await tx.$queryRaw<Array<{ count: number }>>`
+    SELECT COUNT(*)::int AS count
+    FROM booking_items bi
+    INNER JOIN bookings b ON b.id = bi.booking_id
+    WHERE bi.stay_id = ${input.stayId}::uuid
+      AND b.status NOT IN ('cancelled', 'expired')
+      AND bi.check_in IS NOT NULL
+      AND bi.check_out IS NOT NULL
+      AND bi.check_in < ${input.checkOut}
+      AND bi.check_out > ${input.checkIn}
+    FOR UPDATE OF b
+  `;
+
+  if ((conflicts[0]?.count ?? 0) > 0) {
+    throw new AppError(409, "BOOKING_NOT_AVAILABLE", "The selected option is no longer available.");
+  }
+}
+
+async function assertExperienceAvailability(
+  tx: Prisma.TransactionClient,
+  input: {
+    experienceId: string;
+    experienceDate: Date;
+    guestCount: number;
+  },
+): Promise<void> {
+  const capacityRows = await tx.$queryRaw<Array<{ bookedGuests: number | null }>>`
+    SELECT COALESCE(SUM((bi.guests->>'adults')::int + (bi.guests->>'children')::int), 0)::int AS "bookedGuests"
+    FROM booking_items bi
+    INNER JOIN bookings b ON b.id = bi.booking_id
+    WHERE bi.experience_id = ${input.experienceId}::uuid
+      AND bi.experience_date = ${input.experienceDate}
+      AND b.status NOT IN ('cancelled', 'expired')
+    FOR UPDATE OF b
+  `;
+
+  const maxGuests = 12;
+  const bookedGuests = capacityRows[0]?.bookedGuests ?? 0;
+
+  if (bookedGuests + input.guestCount > maxGuests) {
+    throw new AppError(409, "BOOKING_NOT_AVAILABLE", "The selected option is no longer available.");
+  }
 }
 
 export const bookingsRepository = {
@@ -99,6 +152,22 @@ export const bookingsRepository = {
     };
   }) {
     return prisma.$transaction(async (tx) => {
+      if (input.item.stayId && input.item.checkIn && input.item.checkOut) {
+        await assertStayAvailability(tx, {
+          stayId: input.item.stayId,
+          checkIn: input.item.checkIn,
+          checkOut: input.item.checkOut,
+        });
+      }
+
+      if (input.item.experienceId && input.item.experienceDate) {
+        await assertExperienceAvailability(tx, {
+          experienceId: input.item.experienceId,
+          experienceDate: input.item.experienceDate,
+          guestCount: input.item.guests.adults + input.item.guests.children,
+        });
+      }
+
       const booking = await tx.booking.create({
         data: {
           userId: input.userId,

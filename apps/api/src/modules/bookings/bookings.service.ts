@@ -1,3 +1,5 @@
+import { logger } from "../../infrastructure/logging/logger.js";
+import { enqueueBookingPostCreate } from "../../infrastructure/queue/enqueue.js";
 import { logUserActivity } from "../../lib/activity.js";
 import { generateBookingReference } from "../../lib/catalog-utils.js";
 import { AppError } from "../../lib/errors.js";
@@ -47,8 +49,8 @@ export const bookingsService = {
       if (!pricing.available) {
         throw new AppError(
           409,
-          "CONFLICT",
-          "Selected stay is not available for the requested dates.",
+          "BOOKING_NOT_AVAILABLE",
+          "The selected option is no longer available.",
         );
       }
 
@@ -78,6 +80,20 @@ export const bookingsService = {
         type: "BOOKED_STAY",
         title: `Booked stay: ${stay.title}`,
         metadata: { bookingId: booking.id, stayId: stay.id },
+      });
+
+      await enqueueBookingPostCreate({
+        type: "post-create",
+        userId,
+        bookingId: booking.id,
+        bookingReference: booking.bookingReference,
+      });
+
+      logger.info("booking.created", {
+        userId,
+        bookingId: booking.id,
+        bookingReference: booking.bookingReference,
+        type: "stay",
       });
 
       return { booking: toBookingDetail(booking), created: true };
@@ -117,6 +133,20 @@ export const bookingsService = {
       type: "BOOKED_EXPERIENCE",
       title: `Booked experience: ${experience.title}`,
       metadata: { bookingId: booking.id, experienceId: experience.id },
+    });
+
+    await enqueueBookingPostCreate({
+      type: "post-create",
+      userId,
+      bookingId: booking.id,
+      bookingReference: booking.bookingReference,
+    });
+
+    logger.info("booking.created", {
+      userId,
+      bookingId: booking.id,
+      bookingReference: booking.bookingReference,
+      type: "experience",
     });
 
     return { booking: toBookingDetail(booking), created: true };

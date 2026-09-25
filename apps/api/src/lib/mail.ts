@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 import { env } from "../config/env.js";
+import { logger } from "../infrastructure/logging/logger.js";
 
 const transporter =
   env.smtpHost.length > 0
@@ -51,6 +52,23 @@ export async function sendPasswordResetEmail(input: {
   });
 }
 
+export async function sendBookingConfirmationEmail(input: {
+  email: string;
+  fullName: string;
+  bookingReference: string;
+}): Promise<void> {
+  const bookingsUrl = `${env.appUrl}/account/bookings`;
+
+  await deliverEmail({
+    to: input.email,
+    subject: `Booking received — ${input.bookingReference}`,
+    text: `Hi ${input.fullName},\n\nWe received your booking (${input.bookingReference}).\nView details: ${bookingsUrl}`,
+    html: `<p>Hi ${input.fullName},</p><p>We received your booking <strong>${input.bookingReference}</strong>.</p><p><a href="${bookingsUrl}">View booking details</a></p>`,
+    devLabel: "booking confirmation",
+    devUrl: bookingsUrl,
+  });
+}
+
 async function deliverEmail(input: {
   to: string;
   subject: string;
@@ -60,7 +78,11 @@ async function deliverEmail(input: {
   devUrl: string;
 }): Promise<void> {
   if (!transporter) {
-    console.info(`[mail:dev] ${input.devLabel} link for ${input.to}: ${input.devUrl}`);
+    logger.info("mail.dev_fallback", {
+      label: input.devLabel,
+      to: input.to,
+      url: input.devUrl,
+    });
     return;
   }
 
@@ -70,5 +92,10 @@ async function deliverEmail(input: {
     subject: input.subject,
     text: input.text,
     html: input.html,
+  });
+
+  logger.info("mail.sent", {
+    to: input.to,
+    subject: input.subject,
   });
 }

@@ -1,3 +1,5 @@
+import { CACHE_KEYS, CACHE_TTL } from "../../infrastructure/cache/cache.keys.js";
+import { cacheService } from "../../infrastructure/cache/cache.service.js";
 import { AppError } from "../../lib/errors.js";
 import { reviewCatalog } from "../../lib/review-catalog.js";
 import { destinationsRepository } from "./destinations.repository.js";
@@ -7,6 +9,10 @@ import {
   toDestinationDetail,
   toDestinationListItem,
 } from "./destinations.types.js";
+
+function normalizeSuggestionQuery(query: string): string {
+  return query.trim().toLowerCase().slice(0, 64);
+}
 
 export const destinationsService = {
   async list(input: {
@@ -37,7 +43,16 @@ export const destinationsService = {
   },
 
   async search(input: DestinationSearchInput, userId?: string) {
-    const result = await destinationsRepository.search(input);
+    const suggestionQuery = input.query ? normalizeSuggestionQuery(input.query) : "";
+    const cacheKey =
+      suggestionQuery.length > 0 && suggestionQuery.length <= 32
+        ? CACHE_KEYS.searchSuggestions(suggestionQuery)
+        : CACHE_KEYS.destinationSearch(cacheService.hashQuery(input));
+
+    const result = await cacheService.getOrSet(cacheKey, CACHE_TTL.searchResults, () =>
+      destinationsRepository.search(input),
+    );
+
     const savedIds = userId
       ? await destinationsRepository.findSavedDestinationIds(
           userId,
@@ -61,7 +76,12 @@ export const destinationsService = {
   },
 
   async listFeatured(userId?: string) {
-    const destinations = await destinationsRepository.listFeatured();
+    const destinations = await cacheService.getOrSet(
+      CACHE_KEYS.destinationsFeatured,
+      CACHE_TTL.featured,
+      () => destinationsRepository.listFeatured(),
+    );
+
     const savedIds = userId
       ? await destinationsRepository.findSavedDestinationIds(
           userId,
@@ -79,24 +99,35 @@ export const destinationsService = {
   },
 
   async getBySlug(slug: string, userId?: string) {
-    const destination = await destinationsRepository.findBySlug(slug);
+    const cached = await cacheService.getOrSet(
+      CACHE_KEYS.destination(slug),
+      CACHE_TTL.destinationDetail,
+      async () => {
+        const destination = await destinationsRepository.findBySlug(slug);
+        if (!destination) {
+          return null;
+        }
 
-    if (!destination) {
+        const relatedDestinations = await destinationsRepository.findRelated(destination);
+        return { destination, relatedDestinations };
+      },
+    );
+
+    if (!cached) {
       throw new AppError(404, "NOT_FOUND", "Destination not found.");
     }
 
-    const relatedDestinations = await destinationsRepository.findRelated(destination);
     const savedIds = userId
       ? await destinationsRepository.findSavedDestinationIds(userId, [
-          destination.id,
-          ...relatedDestinations.map((item) => item.id),
+          cached.destination.id,
+          ...cached.relatedDestinations.map((item) => item.id),
         ])
       : new Set<string>();
 
     const detail = toDestinationDetail({
-      destination,
-      relatedDestinations,
-      isSaved: savedIds.has(destination.id),
+      destination: cached.destination,
+      relatedDestinations: cached.relatedDestinations,
+      isSaved: savedIds.has(cached.destination.id),
     });
 
     return {
