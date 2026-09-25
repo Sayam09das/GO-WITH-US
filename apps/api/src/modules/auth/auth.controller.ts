@@ -47,7 +47,9 @@ export const authController = {
       const result = await authService.register(body, getRequestMeta(req));
       sendData(res, 201, {
         user: result.user,
-        message: "Check your inbox to verify your email before signing in.",
+        message: result.user.emailVerified
+          ? "Account created. You can sign in now."
+          : "Check your inbox to verify your email before signing in.",
         maskedEmail: result.maskedEmail,
       });
     } catch (error) {

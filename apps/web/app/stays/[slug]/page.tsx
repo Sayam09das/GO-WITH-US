@@ -4,8 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BookingRequestForm } from "@/components/catalog/booking-request-form";
+import { ReviewsSection } from "@/components/catalog/reviews-section";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { listStayReviews } from "@/lib/api/reviews";
 import { getStayBySlug } from "@/lib/api/stays";
 import { buildPageMetadata, buildPageTitle, buildStayTitle, trimDescription } from "@/lib/seo";
 import { cn } from "@/lib/utils";
@@ -40,6 +42,8 @@ export default async function StayDetailPage({ params }: StayDetailPageProps) {
   if (!stay) {
     notFound();
   }
+
+  const reviews = await listStayReviews(stay.id);
 
   return (
     <main>
@@ -80,11 +84,14 @@ export default async function StayDetailPage({ params }: StayDetailPageProps) {
 
       <section className="travel-section bg-soft-gray">
         <div className="container-travel grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
-          <div className="space-y-4">
-            <h2 className="section-heading text-2xl text-heading sm:text-3xl">About this stay</h2>
-            <p className="max-w-2xl text-base leading-relaxed text-muted-foreground">
-              {stay.description}
-            </p>
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <h2 className="section-heading text-2xl text-heading sm:text-3xl">About this stay</h2>
+              <p className="max-w-2xl text-base leading-relaxed text-muted-foreground">
+                {stay.description}
+              </p>
+            </div>
+            <ReviewsSection data={reviews} />
           </div>
 
           <BookingRequestForm type="STAY" itemId={stay.id} itemName={stay.name} />

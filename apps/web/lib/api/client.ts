@@ -1,4 +1,5 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
+const API_FETCH_TIMEOUT_MS = 5_000;
 
 export class ApiRequestError extends Error {
   constructor(
@@ -18,15 +19,26 @@ type ApiFetchOptions = Omit<RequestInit, "body"> & {
 export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): Promise<T> {
   const { body, headers, ...rest } = options;
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...rest,
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      ...headers,
-    },
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
+  let response: Response;
+
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      ...rest,
+      credentials: "include",
+      signal: AbortSignal.timeout(API_FETCH_TIMEOUT_MS),
+      headers: {
+        "Content-Type": "application/json",
+        ...headers,
+      },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+  } catch (error) {
+    if (error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError")) {
+      throw new ApiRequestError(408, "REQUEST_TIMEOUT", "API request timed out.");
+    }
+
+    throw new ApiRequestError(0, "NETWORK_ERROR", "Unable to reach the API.");
+  }
 
   if (response.status === 204) {
     return undefined as T;

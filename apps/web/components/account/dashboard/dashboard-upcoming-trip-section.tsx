@@ -5,14 +5,17 @@ import { DashboardUpcomingTripCard } from "@/components/account/dashboard/dashbo
 import { DashboardUpcomingTripEmpty } from "@/components/account/dashboard/dashboard-upcoming-trip-empty";
 import { DashboardUpcomingTripHeader } from "@/components/account/dashboard/dashboard-upcoming-trip-header";
 import { useDashboardUpcomingTripAnimation } from "@/components/account/dashboard/use-dashboard-upcoming-trip-animation";
-import { getUpcomingTrip } from "@/lib/account";
+import type { UpcomingTrip } from "@/lib/account";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
 import { cn } from "@/lib/utils";
 
-function DashboardUpcomingTripSection() {
+interface DashboardUpcomingTripSectionProps {
+  trip?: UpcomingTrip | null;
+}
+
+function DashboardUpcomingTripSection({ trip = null }: DashboardUpcomingTripSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const reducedMotion = useReducedMotion();
-  const trip = getUpcomingTrip();
 
   useDashboardUpcomingTripAnimation(sectionRef, reducedMotion);
 

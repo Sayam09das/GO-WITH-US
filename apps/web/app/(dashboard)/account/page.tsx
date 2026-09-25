@@ -7,6 +7,12 @@ import { DashboardRecentSection } from "@/components/account/dashboard/dashboard
 import { DashboardSavedPlacesSection } from "@/components/account/dashboard/dashboard-saved-places-section";
 import { DashboardUpcomingTripSection } from "@/components/account/dashboard/dashboard-upcoming-trip-section";
 import { getDashboardInspiration } from "@/lib/account/dashboard/get-dashboard-inspiration";
+import { getDashboardOverview } from "@/lib/api/dashboard.server";
+import {
+  mapActivityToRecentItems,
+  mapDashboardSavedPlaces,
+  mapTripSummaryToUpcomingTrip,
+} from "@/lib/api/dashboard-mappers";
 import { buildPageMetadata, buildPageTitle } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -17,16 +23,26 @@ export const metadata: Metadata = buildPageMetadata({
 });
 
 export default async function AccountOverviewPage() {
-  const inspiration = await getDashboardInspiration();
+  const [overview, inspiration] = await Promise.all([
+    getDashboardOverview(),
+    getDashboardInspiration(),
+  ]);
+
+  const upcomingTrip =
+    overview?.upcomingTrips[0] != null
+      ? mapTripSummaryToUpcomingTrip(overview.upcomingTrips[0])
+      : null;
+  const savedPlaces = overview ? mapDashboardSavedPlaces(overview) : [];
+  const recentItems = overview ? mapActivityToRecentItems(overview.recentActivity) : [];
 
   return (
     <>
       <DashboardHero />
-      <DashboardUpcomingTripSection />
+      <DashboardUpcomingTripSection trip={upcomingTrip} />
       <DashboardExploreSection />
-      <DashboardSavedPlacesSection />
+      <DashboardSavedPlacesSection savedPlaces={savedPlaces} />
       <DashboardInspirationSection content={inspiration} />
-      <DashboardRecentSection />
+      <DashboardRecentSection items={recentItems} />
       <DashboardPlanJourneySection />
     </>
   );

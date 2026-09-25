@@ -2,13 +2,20 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { config } from "dotenv";
+import Redis from "ioredis";
 import { PrismaClient, type StoryCategory } from "../src/generated/client.js";
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const apiRoot = resolve(currentDir, "..");
-const fixturesRoot = resolve(apiRoot, "../../apps/web/data/fixtures");
+const monorepoRoot = resolve(apiRoot, "..");
+const fixturesRoot = resolve(apiRoot, "../web/data/fixtures");
+
+config({ path: resolve(monorepoRoot, ".env") });
+config({ path: resolve(apiRoot, ".env") });
 
 const databaseUrl =
+  process.env.DIRECT_URL ??
   process.env.DATABASE_URL ??
   "postgresql://gowithus:gowithus@localhost:5432/gowithus?schema=public";
 
@@ -403,6 +410,30 @@ async function seedStories(): Promise<void> {
   }
 }
 
+async function invalidateCatalogCache(): Promise<void> {
+  const redisUrl = process.env.REDIS_URL;
+  if (!redisUrl) {
+    return;
+  }
+
+  const redis = new Redis(redisUrl, { maxRetriesPerRequest: 1, lazyConnect: true });
+
+  try {
+    await redis.connect();
+    await redis.del(
+      "destinations:featured",
+      "experiences:featured",
+      "stories:featured",
+      "discovery:homepage",
+    );
+    console.log("Catalog cache invalidated.");
+  } catch {
+    console.warn("Could not invalidate Redis cache (Redis may be offline).");
+  } finally {
+    redis.disconnect();
+  }
+}
+
 async function main(): Promise<void> {
   console.log("Seeding GO WITH US catalog from frontend fixtures…");
 
@@ -410,6 +441,7 @@ async function main(): Promise<void> {
   await seedStays(destinationIds);
   await seedExperiences(destinationIds);
   await seedStories();
+  await invalidateCatalogCache();
 
   console.log("Catalog seed complete.");
 }

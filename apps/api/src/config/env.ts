@@ -4,7 +4,7 @@ import { config } from "dotenv";
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const apiRoot = resolve(currentDir, "../..");
-const monorepoRoot = resolve(apiRoot, "../..");
+const monorepoRoot = resolve(apiRoot, "..");
 
 config({ path: resolve(monorepoRoot, ".env") });
 config({ path: resolve(apiRoot, ".env") });
@@ -42,6 +42,7 @@ export const env = {
   sessionDurationDays: parsePositiveInt(process.env.SESSION_DURATION_DAYS, 7),
   sessionRememberDurationDays: parsePositiveInt(process.env.SESSION_REMEMBER_DURATION_DAYS, 30),
   databaseUrl:
+    process.env.DIRECT_URL ??
     process.env.DATABASE_URL ??
     "postgresql://gowithus:gowithus@localhost:5432/gowithus?schema=public",
   redisUrl: process.env.REDIS_URL ?? "redis://localhost:6379",

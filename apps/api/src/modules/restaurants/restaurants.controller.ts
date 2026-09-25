@@ -85,8 +85,12 @@ export const restaurantsController = {
   },
 };
 
+function acceptsComplexSearchMethod(method: string): boolean {
+  return method === "POST" || method === "QUERY";
+}
+
 export function handleRestaurantSearch(req: Request, res: Response, next: NextFunction) {
-  if (req.method === "QUERY") {
+  if (acceptsComplexSearchMethod(req.method)) {
     void restaurantsController.search(req, res);
     return;
   }

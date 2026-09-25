@@ -81,8 +81,12 @@ export const staysController = {
   },
 };
 
+function acceptsComplexSearchMethod(method: string): boolean {
+  return method === "POST" || method === "QUERY";
+}
+
 export function handleStaySearch(req: Request, res: Response, next: NextFunction) {
-  if (req.method === "QUERY") {
+  if (acceptsComplexSearchMethod(req.method)) {
     void staysController.search(req, res);
     return;
   }
@@ -96,7 +100,7 @@ export function handleStaySearch(req: Request, res: Response, next: NextFunction
 }
 
 export function handleStayAvailability(req: Request, res: Response, next: NextFunction) {
-  if (req.method === "QUERY") {
+  if (acceptsComplexSearchMethod(req.method)) {
     void staysController.getAvailability(req, res);
     return;
   }

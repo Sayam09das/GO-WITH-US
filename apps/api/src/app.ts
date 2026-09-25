@@ -38,7 +38,8 @@ async function healthReadyHandler(req: Request, res: Response): Promise<void> {
     redis = (await pingRedis()) ? "up" : "down";
   }
 
-  const ready = database === "up" && (redis === "up" || redis === "not_configured");
+  const ready =
+    database === "up" && (redis === "up" || redis === "down" || redis === "not_configured");
 
   res.status(ready ? 200 : 503).json({
     status: ready ? "ready" : "not_ready",

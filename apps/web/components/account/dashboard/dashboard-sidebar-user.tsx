@@ -3,6 +3,7 @@
 import { ChevronRight } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
+import { useDashboardUser } from "@/components/account/dashboard/dashboard-user-context";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -11,11 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  DASHBOARD_SIDEBAR_USER_COPY,
-  DASHBOARD_SIDEBAR_USER_LINKS,
-  DASHBOARD_USER,
-} from "@/lib/account";
+import { DASHBOARD_SIDEBAR_USER_COPY, DASHBOARD_SIDEBAR_USER_LINKS } from "@/lib/account";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
 import { cn } from "@/lib/utils";
 
@@ -25,6 +22,7 @@ interface DashboardSidebarUserProps {
 
 function DashboardSidebarUser({ className }: DashboardSidebarUserProps) {
   const reducedMotion = useReducedMotion();
+  const user = useDashboardUser();
 
   return (
     <div data-dash-reveal className={cn("will-change-transform", className)}>
@@ -41,12 +39,12 @@ function DashboardSidebarUser({ className }: DashboardSidebarUserProps) {
           >
             <Avatar className="size-10 bg-primary/10 text-primary">
               <AvatarFallback className="bg-primary/10 text-sm font-semibold text-primary">
-                {DASHBOARD_USER.initials}
+                {user.initials}
               </AvatarFallback>
             </Avatar>
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm font-semibold text-heading">
-                {DASHBOARD_USER.fullName}
+                {user.fullName}
               </span>
               <span className="block truncate text-xs text-muted-foreground">
                 {DASHBOARD_SIDEBAR_USER_COPY.accountType}

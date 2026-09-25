@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { StayCatalogCard } from "@/components/catalog/stay-catalog-card";
-import { getAllStays } from "@/lib/api/stays";
+import { Suspense } from "react";
+import { StaysCatalogGrid } from "@/components/catalog/stays-catalog-grid";
+import { CatalogPageSkeleton } from "@/components/states";
 import { buildCatalogTitle, buildPageMetadata, trimDescription } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -11,9 +12,7 @@ export const metadata: Metadata = buildPageMetadata({
   path: "/stays",
 });
 
-export default async function StaysPage() {
-  const stays = await getAllStays();
-
+export default function StaysPage() {
   return (
     <main>
       <section className="bg-background pb-10 pt-[5.5rem] sm:pb-14 sm:pt-28">
@@ -29,11 +28,9 @@ export default async function StaysPage() {
 
       <section className="travel-section bg-soft-gray">
         <div className="container-travel">
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {stays.map((stay) => (
-              <StayCatalogCard key={stay.id} stay={stay} />
-            ))}
-          </div>
+          <Suspense fallback={<CatalogPageSkeleton />}>
+            <StaysCatalogGrid />
+          </Suspense>
         </div>
       </section>
     </main>

@@ -5,14 +5,17 @@ import { DashboardSavedPlacesCard } from "@/components/account/dashboard/dashboa
 import { DashboardSavedPlacesEmpty } from "@/components/account/dashboard/dashboard-saved-places-empty";
 import { DashboardSavedPlacesHeader } from "@/components/account/dashboard/dashboard-saved-places-header";
 import { useDashboardSavedPlacesAnimation } from "@/components/account/dashboard/use-dashboard-saved-places-animation";
-import { getSavedPlaces } from "@/lib/account";
+import type { SavedPlaceItem } from "@/lib/account";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
 import { cn } from "@/lib/utils";
 
-function DashboardSavedPlacesSection() {
+interface DashboardSavedPlacesSectionProps {
+  savedPlaces?: SavedPlaceItem[];
+}
+
+function DashboardSavedPlacesSection({ savedPlaces = [] }: DashboardSavedPlacesSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const reducedMotion = useReducedMotion();
-  const savedPlaces = getSavedPlaces();
 
   useDashboardSavedPlacesAnimation(sectionRef, reducedMotion);
 

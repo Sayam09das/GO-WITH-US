@@ -50,7 +50,16 @@ export const authService = {
       passwordHash,
     });
 
-    await this.issueEmailVerification(user.id, user.email, user.fullName, meta);
+    const verifiedUser = env.isProduction ? user : await authRepository.markEmailVerified(user.id);
+
+    if (env.isProduction) {
+      await this.issueEmailVerification(
+        verifiedUser.id,
+        verifiedUser.email,
+        verifiedUser.fullName,
+        meta,
+      );
+    }
     await authRepository.createSecurityEvent({
       userId: user.id,
       type: "REGISTER",
@@ -59,8 +68,8 @@ export const authService = {
     });
 
     return {
-      user: toPublicUser(user),
-      maskedEmail: maskEmail(user.email),
+      user: toPublicUser(verifiedUser),
+      maskedEmail: maskEmail(verifiedUser.email),
     };
   },
 

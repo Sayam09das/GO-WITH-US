@@ -44,6 +44,10 @@ export function isRedisConfigured(): boolean {
   return Boolean(env.redisUrl);
 }
 
+export function isRedisReady(): boolean {
+  return Boolean(redis && redis.status === "ready" && globalForRedis.redisAvailable !== false);
+}
+
 export async function connectRedis(): Promise<boolean> {
   if (!redis) {
     return false;
@@ -66,13 +70,18 @@ export async function connectRedis(): Promise<boolean> {
   }
 }
 
-export async function pingRedis(): Promise<boolean> {
+export async function pingRedis(timeoutMs = 2_000): Promise<boolean> {
   if (!redis) {
     return false;
   }
 
   try {
-    const response = await redis.ping();
+    const response = await Promise.race([
+      redis.ping(),
+      new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error("Redis ping timed out.")), timeoutMs);
+      }),
+    ]);
     return response === "PONG";
   } catch {
     return false;
