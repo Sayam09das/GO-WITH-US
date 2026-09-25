@@ -4,17 +4,20 @@ import Link from "next/link";
 import { useLayoutEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { gsap, registerGsapPlugins } from "@/lib/animation/gsap";
-import { getPopularDestinations } from "@/lib/api/destinations";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
 import { POPULAR_DESTINATIONS_COPY } from "@/lib/landing/popular-destinations";
 import { cn } from "@/lib/utils";
+import type { DestinationListItem } from "@/types/destination";
 import { DestinationCard } from "./destination-card";
 
-function PopularDestinationsSection() {
+interface PopularDestinationsSectionProps {
+  destinations: DestinationListItem[];
+}
+
+function PopularDestinationsSection({ destinations }: PopularDestinationsSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
-  const destinations = getPopularDestinations(6);
 
   useLayoutEffect(() => {
     const section = sectionRef.current;

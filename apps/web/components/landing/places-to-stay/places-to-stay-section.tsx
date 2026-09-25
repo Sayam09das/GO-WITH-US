@@ -3,19 +3,22 @@
 import { useLayoutEffect, useRef } from "react";
 import { gsap, registerGsapPlugins } from "@/lib/animation/gsap";
 import { bindLayerParallax } from "@/lib/animation/scroll-parallax";
-import { getFeaturedStay, getSupportingStays } from "@/lib/api/stays";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
 import { cn } from "@/lib/utils";
+import type { StayListItem } from "@/types/stay";
 import { FeaturedStay } from "./featured-stay";
 import { PlacesToStayHeader } from "./places-to-stay-header";
 import { SupportingStayCard } from "./supporting-stay-card";
 
-function PlacesToStaySection() {
+interface PlacesToStaySectionProps {
+  featured?: StayListItem;
+  supportingStays: StayListItem[];
+}
+
+function PlacesToStaySection({ featured, supportingStays }: PlacesToStaySectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const supportingRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
-  const featured = getFeaturedStay();
-  const supportingStays = getSupportingStays();
 
   useLayoutEffect(() => {
     const section = sectionRef.current;

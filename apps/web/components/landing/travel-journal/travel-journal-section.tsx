@@ -2,18 +2,25 @@
 
 import { useLayoutEffect, useRef } from "react";
 import { gsap, registerGsapPlugins } from "@/lib/animation/gsap";
-import { getJournalStories } from "@/lib/api/journal";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
 import { cn } from "@/lib/utils";
+import type { JournalStory } from "@/types/journal";
 import { JournalStoryCarousel } from "./journal-story-carousel";
 import { TravelJournalHeader } from "./travel-journal-header";
 
-function TravelJournalSection() {
+interface TravelJournalSectionProps {
+  stories: JournalStory[];
+}
+
+function TravelJournalSection({ stories }: TravelJournalSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const reducedMotion = useReducedMotion();
-  const stories = getJournalStories();
 
   useLayoutEffect(() => {
+    if (stories.length === 0) {
+      return;
+    }
+
     const section = sectionRef.current;
     if (reducedMotion || !section) {
       return;
@@ -69,7 +76,7 @@ function TravelJournalSection() {
     }, sectionRef);
 
     return () => ctx.revert();
-  }, [reducedMotion]);
+  }, [reducedMotion, stories.length]);
 
   if (stories.length === 0) {
     return null;

@@ -1,15 +1,30 @@
-/**
- * Public slug lists for sitemap generation.
- * Replace with fixture/API data when discovery pages ship.
- */
+import { getAllDestinations } from "@/lib/api/destinations";
+import { getAllExperiences } from "@/lib/api/experiences";
+import { getAllStays } from "@/lib/api/stays";
+
 export async function getDestinationSlugs(): Promise<string[]> {
-  return [];
+  try {
+    const destinations = await getAllDestinations();
+    return destinations.map((destination) => destination.slug);
+  } catch {
+    return [];
+  }
 }
 
 export async function getStaySlugs(): Promise<string[]> {
-  return [];
+  try {
+    const stays = await getAllStays();
+    return stays.map((stay) => stay.slug);
+  } catch {
+    return [];
+  }
 }
 
 export async function getExperienceSlugs(): Promise<string[]> {
-  return [];
+  try {
+    const experiences = await getAllExperiences();
+    return experiences.map((experience) => experience.slug);
+  } catch {
+    return [];
+  }
 }

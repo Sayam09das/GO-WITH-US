@@ -1,15 +1,30 @@
+import type { StoryListItem as ApiStoryListItem } from "@gowithus/types";
 import { INSPIRATION_FIXTURE } from "@/data/fixtures/loaders/inspiration";
 import type { InspirationStory } from "@/types/inspiration";
+import { apiFetch } from "./client";
+import { mapInspirationStory } from "./mappers";
 
-/** Homepage inspiration stories — JSON fixture-backed until REST is wired. */
-export function getInspirationStories(): InspirationStory[] {
-  return INSPIRATION_FIXTURE;
+type StoryListResponse = {
+  stories: ApiStoryListItem[];
+};
+
+export async function getFeaturedInspirationStory(): Promise<InspirationStory | undefined> {
+  const stories = await getInspirationStories();
+  return stories.find((item) => item.isFeatured);
 }
 
-export function getFeaturedInspirationStory(): InspirationStory | undefined {
-  return INSPIRATION_FIXTURE.find((story) => story.isFeatured) ?? INSPIRATION_FIXTURE[0];
+export async function getInspirationStories(): Promise<InspirationStory[]> {
+  try {
+    const response = await apiFetch<StoryListResponse>("/stories/featured");
+    return response.stories.map(mapInspirationStory);
+  } catch {
+    return INSPIRATION_FIXTURE;
+  }
 }
 
-export function getInspirationStoryBySlug(slug: string): InspirationStory | undefined {
-  return INSPIRATION_FIXTURE.find((story) => story.slug === slug);
+export async function getInspirationStoryBySlug(
+  slug: string,
+): Promise<InspirationStory | undefined> {
+  const stories = await getInspirationStories();
+  return stories.find((item) => item.slug === slug);
 }
