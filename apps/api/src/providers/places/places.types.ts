@@ -37,3 +37,20 @@ export type PlacesAutocompleteSuggestion = {
   source: ProviderSource;
   sourceId: string;
 };
+
+export type ReverseGeocodeInput = {
+  latitude: number;
+  longitude: number;
+};
+
+export type NormalizedLocation = {
+  latitude: number;
+  longitude: number;
+  city: string | null;
+  region: string | null;
+  country: string | null;
+  countryCode: string | null;
+  label: string | null;
+  providerPlaceId: string | null;
+  source: ProviderSource;
+};

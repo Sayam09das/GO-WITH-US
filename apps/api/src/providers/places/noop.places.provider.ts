@@ -1,10 +1,12 @@
 import type { PlacesProvider } from "./places.provider.js";
 import type {
+  NormalizedLocation,
   NormalizedPlace,
   PlacesAutocompleteInput,
   PlacesAutocompleteSuggestion,
   PlacesNearbyInput,
   PlacesSearchInput,
+  ReverseGeocodeInput,
 } from "./places.types.js";
 
 export class NoopPlacesProvider implements PlacesProvider {
@@ -28,5 +30,9 @@ export class NoopPlacesProvider implements PlacesProvider {
 
   async autocomplete(_input: PlacesAutocompleteInput): Promise<PlacesAutocompleteSuggestion[]> {
     return [];
+  }
+
+  async reverseGeocode(_input: ReverseGeocodeInput): Promise<NormalizedLocation | null> {
+    return null;
   }
 }

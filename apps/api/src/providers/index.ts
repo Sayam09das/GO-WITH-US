@@ -1,4 +1,4 @@
-import { env } from "../config/env.js";
+import { providersConfig } from "../config/providers.js";
 import type { AccommodationProvider } from "./accommodation/accommodation.provider.js";
 import { BookingAccommodationProvider } from "./accommodation/booking/booking.provider.js";
 import { NoopAccommodationProvider } from "./accommodation/noop.accommodation.provider.js";
@@ -9,10 +9,6 @@ import { FoursquarePlacesProvider } from "./places/foursquare/foursquare.provide
 import { NoopPlacesProvider } from "./places/noop.places.provider.js";
 import type { PlacesProvider } from "./places/places.provider.js";
 import type { ProviderSource } from "./provider.types.js";
-
-function normalizeProviderName(value: string): string {
-  return value.trim().toLowerCase();
-}
 
 class ProviderFactory {
   private placesProvider: PlacesProvider | null = null;
@@ -62,7 +58,7 @@ class ProviderFactory {
   }
 
   private createPlacesProvider(): PlacesProvider {
-    switch (normalizeProviderName(env.providerPlaces)) {
+    switch (providersConfig.places.provider) {
       case "foursquare":
         return new FoursquarePlacesProvider();
       default:
@@ -71,7 +67,7 @@ class ProviderFactory {
   }
 
   private createAccommodationProvider(): AccommodationProvider {
-    switch (normalizeProviderName(env.providerAccommodation)) {
+    switch (providersConfig.accommodation.provider) {
       case "booking":
         return new BookingAccommodationProvider();
       default:
@@ -80,7 +76,7 @@ class ProviderFactory {
   }
 
   private createExperienceProvider(): ExperienceProvider {
-    switch (normalizeProviderName(env.providerExperiences)) {
+    switch (providersConfig.experiences.provider) {
       case "amadeus":
         return new AmadeusExperienceProvider();
       default:

@@ -461,14 +461,16 @@ apps/api/src/providers/
 **Environment variables** (see `apps/api/.env.example`):
 
 ```bash
-PROVIDER_PLACES=none            # or foursquare
-PROVIDER_ACCOMMODATION=none     # or booking
-PROVIDER_EXPERIENCES=none       # or amadeus
+PLACES_PROVIDER=              # or foursquare
+ACCOMMODATION_PROVIDER=       # or booking
+EXPERIENCE_PROVIDER=          # or amadeus
 FOURSQUARE_API_KEY=
 BOOKING_API_KEY=
-AMADEUS_API_KEY=
-AMADEUS_API_SECRET=
+AMADEUS_CLIENT_ID=
+AMADEUS_CLIENT_SECRET=
 ```
+
+Legacy names (`PROVIDER_PLACES`, `AMADEUS_API_KEY`, etc.) are still accepted for backward compatibility.
 
 When provider env vars are unset or set to `none`, noop providers return empty results and domain services fall back to the existing Prisma seed catalog / guidance inventory.
 
@@ -485,6 +487,69 @@ When provider env vars are unset or set to `none`, noop providers return empty r
 - Prisma repositories remain the source of truth for published catalog content
 - External responses are normalized before reaching services/controllers
 - Provider API keys stay server-side only
+
+---
+
+### Step 15.2 — Provider Configuration
+
+**Status:** Complete
+
+Provider credentials and selection are centralized in `apps/api/src/config/providers.ts`. `env.ts` loads core server secrets only; provider keys never appear in `apps/web` or `NEXT_PUBLIC_*` variables.
+
+**Configuration flow:**
+
+```
+process.env → loadProvidersConfig() → validateProvidersConfig() → providersConfig → ProviderFactory
+```
+
+**Startup validation:** If `PLACES_PROVIDER=foursquare` but `FOURSQUARE_API_KEY` is missing, the API fails fast at startup with a clear error instead of failing mid-search.
+
+**Shared HTTP client:** `providers/lib/provider-http.client.ts` wraps native `fetch()` with:
+
+- Mandatory timeouts (`PROVIDER_HTTP_TIMEOUT_MS`, default 8s)
+- Selective retries for network errors, `429`, and `5xx` only
+- Sanitized `PROVIDER_UNAVAILABLE` responses (no provider HTTP details exposed to clients)
+- No logging of API keys, auth headers, or secrets
+
+**Never commit:** `.env`, `.env.local` — only `apps/api/.env.example` with placeholders.
+
+---
+
+### Step 15.3 — Location & Geolocation
+
+**Status:** Complete (foundation)
+
+**Location service:** `apps/api/src/services/location/`
+
+- Validates latitude (`-90` → `90`), longitude (`-180` → `180`)
+- Normalizes nearby radius (`1 km` → `50 km`, default `10 km`)
+- Reverse geocoding via `PlacesProvider.reverseGeocode()` when configured
+- Does not persist user GPS coordinates
+
+**Global search endpoint:** `/api/v1/search`
+
+| Method | Use case |
+|--------|----------|
+| `GET /search?q=` | Text search across destinations, stays, experiences, restaurants, stories |
+| `POST /search` or `QUERY /search` | Nearby search with `{ location: { lat, lng, radius }, query?, types? }` |
+
+**Architecture:**
+
+```
+Frontend (browser geolocation)
+        ↓
+/api/v1/search
+        ↓
+SearchService
+        ↓
+LocationService (validate + reverse geocode)
+        ↓
+ProviderFactory → PlacesProvider → external API
+        ↓
+Normalized results (+ Prisma catalog fallback)
+```
+
+Supports destination text search, near-me coordinate search, radius filtering, and location labels for display. Map integration and persistent user location storage are out of scope for this step.
 
 ---
 

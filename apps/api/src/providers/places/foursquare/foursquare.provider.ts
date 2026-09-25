@@ -1,11 +1,13 @@
 import { mapFoursquarePlace, mapNormalizedPlaceToAutocomplete } from "../places.mapper.js";
 import type { PlacesProvider } from "../places.provider.js";
 import type {
+  NormalizedLocation,
   NormalizedPlace,
   PlacesAutocompleteInput,
   PlacesAutocompleteSuggestion,
   PlacesNearbyInput,
   PlacesSearchInput,
+  ReverseGeocodeInput,
 } from "../places.types.js";
 import { FoursquareClient } from "./foursquare.client.js";
 
@@ -65,5 +67,33 @@ export class FoursquarePlacesProvider implements PlacesProvider {
     });
 
     return places.map(mapNormalizedPlaceToAutocomplete);
+  }
+
+  async reverseGeocode(input: ReverseGeocodeInput): Promise<NormalizedLocation | null> {
+    if (!this.isConfigured()) {
+      return null;
+    }
+
+    const place = await this.client.reverseGeocode(input);
+    if (!place) {
+      return null;
+    }
+
+    const mapped = mapFoursquarePlace(place);
+    const location = place.location;
+
+    return {
+      latitude: mapped.latitude,
+      longitude: mapped.longitude,
+      city: location?.locality ?? null,
+      region: location?.region ?? null,
+      country: location?.country ?? null,
+      countryCode: null,
+      label:
+        [location?.locality, location?.region, location?.country].filter(Boolean).join(", ") ||
+        mapped.name,
+      providerPlaceId: mapped.sourceId,
+      source: this.name,
+    };
   }
 }

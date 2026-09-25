@@ -1,7 +1,5 @@
-import { env } from "../../../config/env.js";
-import { logger } from "../../../infrastructure/logging/logger.js";
-
-const DEFAULT_TIMEOUT_MS = 10_000;
+import { providersConfig } from "../../../config/providers.js";
+import { providerHttpRequest } from "../../lib/provider-http.client.js";
 
 type BookingSearchResponse = {
   result?: Array<{
@@ -16,8 +14,10 @@ type BookingSearchResponse = {
 };
 
 export class BookingClient {
+  private readonly config = providersConfig.accommodation.booking;
+
   isConfigured(): boolean {
-    return env.bookingApiKey.length > 0;
+    return this.config.apiKey.length > 0;
   }
 
   async searchHotels(params: {
@@ -32,7 +32,7 @@ export class BookingClient {
       return { result: [] };
     }
 
-    const url = new URL(`${env.bookingApiUrl.replace(/\/$/, "")}/hotels/search`);
+    const url = new URL(`${this.config.baseUrl.replace(/\/$/, "")}/hotels/search`);
     url.searchParams.set("dest_id", params.destination);
     url.searchParams.set("checkin", params.checkIn);
     url.searchParams.set("checkout", params.checkOut);
@@ -40,26 +40,15 @@ export class BookingClient {
     url.searchParams.set("children", String(params.children));
     url.searchParams.set("limit", String(params.limit));
 
-    try {
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${env.bookingApiKey}`,
-        },
-        signal: AbortSignal.timeout(DEFAULT_TIMEOUT_MS),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Booking.com request failed with status ${response.status}.`);
-      }
-
-      return (await response.json()) as BookingSearchResponse;
-    } catch (error) {
-      logger.warn("provider.booking.request_failed", {
-        message: error instanceof Error ? error.message : "Unknown Booking.com error",
-      });
-      return { result: [] };
-    }
+    return providerHttpRequest<BookingSearchResponse>({
+      url,
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${this.config.apiKey}`,
+      },
+      timeoutMs: this.config.timeoutMs,
+      provider: "booking",
+      operation: "searchHotels",
+    });
   }
 }

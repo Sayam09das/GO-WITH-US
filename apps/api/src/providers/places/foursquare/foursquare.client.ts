@@ -1,11 +1,13 @@
-import { env } from "../../../config/env.js";
-import { logger } from "../../../infrastructure/logging/logger.js";
-
-const DEFAULT_TIMEOUT_MS = 8_000;
+import { providersConfig } from "../../../config/providers.js";
+import { providerHttpRequest } from "../../lib/provider-http.client.js";
 
 type FoursquarePlaceLocation = {
   formatted_address?: string;
   address?: string;
+  locality?: string;
+  region?: string;
+  country?: string;
+  postcode?: string;
   lat?: number;
   lng?: number;
 };
@@ -30,16 +32,10 @@ type FoursquareSearchResponse = {
 type FoursquarePlaceResponse = FoursquarePlaceRecord;
 
 export class FoursquareClient {
-  private readonly apiKey: string;
-  private readonly baseUrl: string;
-
-  constructor() {
-    this.apiKey = env.foursquareApiKey;
-    this.baseUrl = env.foursquareApiUrl.replace(/\/$/, "");
-  }
+  private readonly config = providersConfig.places.foursquare;
 
   isConfigured(): boolean {
-    return this.apiKey.length > 0;
+    return this.config.apiKey.length > 0;
   }
 
   async searchPlaces(params: {
@@ -49,7 +45,7 @@ export class FoursquareClient {
     longitude?: number;
     radius?: number;
   }): Promise<FoursquareSearchResponse> {
-    const url = new URL(`${this.baseUrl}/places/search`);
+    const url = new URL(`${this.config.baseUrl.replace(/\/$/, "")}/places/search`);
     url.searchParams.set("query", params.query);
     url.searchParams.set("limit", String(params.limit));
 
@@ -61,41 +57,56 @@ export class FoursquareClient {
       url.searchParams.set("radius", String(params.radius));
     }
 
-    return this.request<FoursquareSearchResponse>(url);
+    return providerHttpRequest<FoursquareSearchResponse>({
+      url,
+      headers: {
+        Accept: "application/json",
+        Authorization: this.config.apiKey,
+      },
+      timeoutMs: this.config.timeoutMs,
+      provider: "foursquare",
+      operation: "searchPlaces",
+    });
   }
 
   async getPlace(sourceId: string): Promise<FoursquarePlaceResponse | null> {
+    if (!this.isConfigured()) {
+      return null;
+    }
+
     try {
-      return await this.request<FoursquarePlaceResponse>(
-        new URL(`${this.baseUrl}/places/${encodeURIComponent(sourceId)}`),
-      );
-    } catch (error) {
-      logger.warn("provider.foursquare.details_failed", {
-        sourceId,
-        message: error instanceof Error ? error.message : "Unknown Foursquare error",
+      return await providerHttpRequest<FoursquarePlaceResponse>({
+        url: new URL(
+          `${this.config.baseUrl.replace(/\/$/, "")}/places/${encodeURIComponent(sourceId)}`,
+        ),
+        headers: {
+          Accept: "application/json",
+          Authorization: this.config.apiKey,
+        },
+        timeoutMs: this.config.timeoutMs,
+        provider: "foursquare",
+        operation: "getPlace",
+        retryable: false,
       });
+    } catch {
       return null;
     }
   }
 
-  private async request<T>(url: URL): Promise<T> {
-    if (!this.isConfigured()) {
-      return {} as T;
-    }
-
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        Authorization: this.apiKey,
-      },
-      signal: AbortSignal.timeout(DEFAULT_TIMEOUT_MS),
+  async reverseGeocode(params: {
+    latitude: number;
+    longitude: number;
+  }): Promise<FoursquarePlaceRecord | null> {
+    const response = await this.searchPlaces({
+      query: "place",
+      limit: 1,
+      latitude: params.latitude,
+      longitude: params.longitude,
+      radius: 250,
     });
 
-    if (!response.ok) {
-      throw new Error(`Foursquare request failed with status ${response.status}.`);
-    }
-
-    return (await response.json()) as T;
+    return response.results?.[0] ?? null;
   }
 }
+
+export type { FoursquarePlaceRecord };
