@@ -2,6 +2,8 @@ import { CACHE_KEYS, CACHE_TTL } from "../../infrastructure/cache/cache.keys.js"
 import { cacheService } from "../../infrastructure/cache/cache.service.js";
 import { AppError } from "../../lib/errors.js";
 import { reviewCatalog } from "../../lib/review-catalog.js";
+import { mapExperienceAvailabilityToResult } from "../../providers/experiences/experiences.mapper.js";
+import { providerFactory } from "../../providers/index.js";
 import { experiencesRepository } from "./experiences.repository.js";
 import type { ExperienceSearchInput, ListExperiencesQuery } from "./experiences.schemas.js";
 import {
@@ -156,6 +158,21 @@ export const experiencesService = {
       throw new AppError(404, "NOT_FOUND", "Experience not found.");
     }
 
+    const experienceProvider = providerFactory.getExperienceProvider();
+    if (experienceProvider.isConfigured()) {
+      const providerAvailability = await experienceProvider.searchAvailability({
+        experienceId: experience.id,
+        sourceId: experience.slug,
+        date: input.date,
+        startTime: input.startTime,
+        guests: input.guests,
+      });
+
+      if (providerAvailability) {
+        return mapExperienceAvailabilityToResult(providerAvailability);
+      }
+    }
+
     const totalGuests = input.guests.adults + input.guests.children;
     const maxGuests = 12;
 
@@ -176,7 +193,7 @@ export const experiencesService = {
         },
       ],
       meta: {
-        inventoryModel: "guidance",
+        inventoryModel: "guidance" as const,
       },
     };
   },

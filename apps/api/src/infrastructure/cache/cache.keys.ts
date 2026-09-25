@@ -6,6 +6,11 @@ export const CACHE_KEYS = {
   discoveryHomepage: "discovery:homepage",
   searchSuggestions: (query: string) => `search:suggestions:${query}`,
   destinationSearch: (hash: string) => `search:destinations:${hash}`,
+  providerPlacesSearch: (hash: string) => `provider:places:search:${hash}`,
+  providerStayAvailability: (stayId: string, hash: string) =>
+    `provider:stays:availability:${stayId}:${hash}`,
+  providerExperienceAvailability: (experienceId: string, hash: string) =>
+    `provider:experiences:availability:${experienceId}:${hash}`,
 } as const;
 
 export const CACHE_TTL = {
@@ -14,6 +19,7 @@ export const CACHE_TTL = {
   discoveryHomepage: 300,
   searchSuggestions: 120,
   searchResults: 60,
+  providerResults: 120,
 } as const;
 
 export const CACHE_INVALIDATION_GROUPS = {

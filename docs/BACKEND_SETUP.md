@@ -404,6 +404,90 @@ Complete restaurant discovery pages, itinerary workspace UI, and end-to-end QA p
 
 ---
 
+## Step 15 — External Travel Providers
+
+### Step 15.1 — Provider Architecture
+
+**Status:** Complete (scaffolding)
+
+External travel APIs are isolated behind a dedicated provider layer. Domain services never call third-party HTTP APIs directly.
+
+**Flow:**
+
+```
+Controller → Domain Service → Provider Interface → Provider Implementation → External API
+```
+
+**Folder layout:**
+
+```
+apps/api/src/providers/
+├── index.ts                         # ProviderFactory (env-driven selection)
+├── provider.types.ts
+├── places/
+│   ├── places.provider.ts           # PlacesProvider interface
+│   ├── places.types.ts              # NormalizedPlace
+│   ├── places.mapper.ts
+│   ├── noop.places.provider.ts
+│   └── foursquare/
+│       ├── foursquare.client.ts     # HTTP only
+│       └── foursquare.provider.ts
+├── accommodation/
+│   ├── accommodation.provider.ts
+│   ├── accommodation.types.ts
+│   ├── accommodation.mapper.ts
+│   ├── noop.accommodation.provider.ts
+│   └── booking/
+│       ├── booking.client.ts
+│       └── booking.provider.ts
+└── experiences/
+    ├── experiences.provider.ts
+    ├── experiences.types.ts
+    ├── experiences.mapper.ts
+    ├── noop.experiences.provider.ts
+    └── amadeus/
+        ├── amadeus.client.ts
+        └── amadeus.provider.ts
+```
+
+**Provider categories:**
+
+| Category | Interface | Default | Used by |
+|----------|-----------|---------|---------|
+| Places | `PlacesProvider` | `noop` | `restaurantsService`, `destinationsService` |
+| Accommodation | `AccommodationProvider` | `noop` | `staysService.getAvailability()` |
+| Experiences | `ExperienceProvider` | `noop` | `experiencesService.getAvailability()` |
+
+**Environment variables** (see `apps/api/.env.example`):
+
+```bash
+PROVIDER_PLACES=none            # or foursquare
+PROVIDER_ACCOMMODATION=none     # or booking
+PROVIDER_EXPERIENCES=none       # or amadeus
+FOURSQUARE_API_KEY=
+BOOKING_API_KEY=
+AMADEUS_API_KEY=
+AMADEUS_API_SECRET=
+```
+
+When provider env vars are unset or set to `none`, noop providers return empty results and domain services fall back to the existing Prisma seed catalog / guidance inventory.
+
+**Integration points (without breaking existing routes):**
+
+- `staysService.getAvailability()` — tries `AccommodationProvider` first, falls back to `buildStayAvailability()`
+- `experiencesService.getAvailability()` — tries `ExperienceProvider` first, falls back to guidance inventory
+- `restaurantsService.search()` — augments DB results with optional `placeSuggestions` from `PlacesProvider`
+- `destinationsService.search()` — optional autocomplete suggestions via `PlacesProvider`
+
+**Rules:**
+
+- Controllers and routes are unchanged
+- Prisma repositories remain the source of truth for published catalog content
+- External responses are normalized before reaching services/controllers
+- Provider API keys stay server-side only
+
+---
+
 ## Step 4 — Authentication
 
 **Status:** Complete

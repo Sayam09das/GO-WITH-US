@@ -1,5 +1,7 @@
 import type { z } from "zod";
 import { AppError } from "../../lib/errors.js";
+import { mapAccommodationAvailabilityToStayResult } from "../../providers/accommodation/accommodation.mapper.js";
+import { providerFactory } from "../../providers/index.js";
 import { staysRepository } from "./stays.repository.js";
 import type { ListStaysQuery, StaySearchInput, stayAvailabilitySchema } from "./stays.schemas.js";
 import {
@@ -95,6 +97,21 @@ export const staysService = {
 
     if (!stay) {
       throw new AppError(404, "NOT_FOUND", "Stay not found.");
+    }
+
+    const accommodationProvider = providerFactory.getAccommodationProvider();
+    if (accommodationProvider.isConfigured()) {
+      const providerAvailability = await accommodationProvider.searchAvailability({
+        stayId: stay.id,
+        sourceId: stay.slug,
+        checkIn: input.checkIn,
+        checkOut: input.checkOut,
+        guests: input.guests,
+      });
+
+      if (providerAvailability) {
+        return mapAccommodationAvailabilityToStayResult(providerAvailability);
+      }
     }
 
     return buildStayAvailability({
