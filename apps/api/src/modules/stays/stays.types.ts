@@ -33,6 +33,15 @@ export type StayListItem = {
   reviewCount: number;
   amenities: string[];
   isSaved: boolean;
+  source?: "catalog" | "provider";
+  provider?: string;
+  providerPropertyId?: string;
+  location?: {
+    city: string | null;
+    country: string | null;
+    latitude: number | null;
+    longitude: number | null;
+  };
 };
 
 export type StayRoomOption = {
@@ -112,17 +121,29 @@ export type StayAvailabilityResult = {
     adults: number;
     children: number;
   };
+  roomCount: number;
   nights: number;
   isAvailable: boolean;
   rooms: Array<
     StayRoomOption & {
       totalPrice: number | null;
       available: boolean;
+      price?: {
+        baseAmount: number | null;
+        taxAmount: number | null;
+        feeAmount: number | null;
+        totalAmount: number | null;
+        currency: string;
+      };
+      cancellationPolicy?: string | null;
     }
   >;
   meta: {
     inventoryModel: "guidance" | "provider";
     provider?: ProviderSource;
+    fetchedAt?: string;
+    expiresAt?: string;
+    stale?: boolean;
   };
 };
 
@@ -328,6 +349,7 @@ export function buildStayAvailability(input: {
   checkIn: string;
   checkOut: string;
   guests: { adults: number; children: number };
+  rooms?: number;
 }): StayAvailabilityResult {
   const checkInDate = new Date(`${input.checkIn}T00:00:00.000Z`);
   const checkOutDate = new Date(`${input.checkOut}T00:00:00.000Z`);
@@ -342,6 +364,7 @@ export function buildStayAvailability(input: {
     checkIn: input.checkIn,
     checkOut: input.checkOut,
     guests: input.guests,
+    roomCount: input.rooms ?? 1,
     nights,
     isAvailable: rooms.some((room) => room.maxGuests >= totalGuests),
     rooms: rooms.map((room) => ({

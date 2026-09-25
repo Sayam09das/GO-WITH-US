@@ -1,18 +1,33 @@
 import type { z } from "zod";
+import { CACHE_KEYS, CACHE_TTL } from "../../infrastructure/cache/cache.keys.js";
+import { cacheService } from "../../infrastructure/cache/cache.service.js";
 import { AppError } from "../../lib/errors.js";
-import { mapAccommodationAvailabilityToStayResult } from "../../providers/accommodation/accommodation.mapper.js";
+import { ProviderUnavailableError } from "../../lib/provider-errors.js";
+import {
+  mapAccommodationAvailabilityToStayResult,
+  mapProviderListingToStayListItem,
+  mergeStaySearchResults,
+} from "../../providers/accommodation/accommodation.mapper.js";
 import { providerFactory } from "../../providers/index.js";
+import { resolveAccommodationDestinationId } from "../../services/accommodation/resolve-destination.js";
 import { staysRepository } from "./stays.repository.js";
 import type { ListStaysQuery, StaySearchInput, stayAvailabilitySchema } from "./stays.schemas.js";
 import {
   buildPaginationMeta,
   buildStayAvailability,
+  type StayAvailabilityResult,
+  type StayListItem,
   type StayReviewSummary,
   toStayDetail,
   toStayListItem,
 } from "./stays.types.js";
 
 type StayAvailabilityInput = z.infer<typeof stayAvailabilitySchema>;
+
+function paginateItems<T>(items: T[], page: number, limit: number): T[] {
+  const start = (page - 1) * limit;
+  return items.slice(start, start + limit);
+}
 
 function toReviewSummary(review: {
   id: string;
@@ -30,6 +45,111 @@ function toReviewSummary(review: {
       id: review.user.id,
       name: review.user.fullName,
       avatar: review.user.avatarUrl,
+    },
+  };
+}
+
+async function searchProviderStays(input: StaySearchInput): Promise<StayListItem[]> {
+  const accommodationProvider = providerFactory.getAccommodationProvider();
+  if (
+    !accommodationProvider.isConfigured() ||
+    !input.destination ||
+    !input.checkIn ||
+    !input.checkOut ||
+    !input.guests
+  ) {
+    return [];
+  }
+
+  const destinationId = await resolveAccommodationDestinationId(input.destination);
+  if (!destinationId) {
+    return [];
+  }
+
+  const checkIn = input.checkIn;
+  const checkOut = input.checkOut;
+  const guests = input.guests;
+
+  const cacheKey = CACHE_KEYS.providerStaySearch(
+    cacheService.hashQuery({
+      destination: destinationId,
+      checkIn,
+      checkOut,
+      guests,
+      rooms: input.rooms,
+      query: input.query,
+    }),
+  );
+
+  const cached = await cacheService.getOrSetWithLock(cacheKey, CACHE_TTL.providerStaySearch, () =>
+    accommodationProvider.search({
+      destination: destinationId,
+      checkIn,
+      checkOut,
+      guests,
+      rooms: input.rooms,
+      limit: input.limit,
+    }),
+  );
+
+  return cached.value
+    .filter((listing) => {
+      if (!input.query?.trim()) {
+        return true;
+      }
+
+      const needle = input.query.trim().toLowerCase();
+      return listing.name.toLowerCase().includes(needle);
+    })
+    .map(mapProviderListingToStayListItem);
+}
+
+async function fetchProviderAvailability(input: {
+  stayId: string;
+  providerPropertyId: string;
+  checkIn: string;
+  checkOut: string;
+  guests: { adults: number; children: number };
+  rooms: number;
+}): Promise<StayAvailabilityResult> {
+  const accommodationProvider = providerFactory.getAccommodationProvider();
+  const cacheKey = CACHE_KEYS.providerStayAvailability(
+    input.stayId,
+    cacheService.hashQuery({
+      providerPropertyId: input.providerPropertyId,
+      checkIn: input.checkIn,
+      checkOut: input.checkOut,
+      guests: input.guests,
+      rooms: input.rooms,
+    }),
+  );
+
+  const cached = await cacheService.getOrSetWithLock(
+    cacheKey,
+    CACHE_TTL.providerAvailability,
+    async () => {
+      const availability = await accommodationProvider.checkAvailability({
+        stayId: input.stayId,
+        providerPropertyId: input.providerPropertyId,
+        checkIn: input.checkIn,
+        checkOut: input.checkOut,
+        guests: input.guests,
+        rooms: input.rooms,
+      });
+
+      if (!availability) {
+        throw new ProviderUnavailableError("Live availability is temporarily unavailable.");
+      }
+
+      return mapAccommodationAvailabilityToStayResult(availability);
+    },
+  );
+
+  return {
+    ...cached.value,
+    meta: {
+      ...cached.value.meta,
+      stale: cached.stale,
     },
   };
 }
@@ -55,24 +175,46 @@ export const staysService = {
   },
 
   async search(input: StaySearchInput, userId?: string) {
-    const result = await staysRepository.search(input);
+    const catalogResult = await staysRepository.search(input);
     const savedIds = userId
       ? await staysRepository.findSavedStayIds(
           userId,
-          result.stays.map((stay) => stay.id),
+          catalogResult.stays.map((stay) => stay.id),
         )
       : new Set<string>();
 
+    const catalogItems = catalogResult.stays.map((stay) =>
+      toStayListItem(stay, savedIds.has(stay.id)),
+    );
+
+    const accommodationProvider = providerFactory.getAccommodationProvider();
+    const providerItems = await searchProviderStays(input);
+    const merged = mergeStaySearchResults(catalogItems, providerItems);
+    const paginated = paginateItems(merged, input.page, input.limit);
+
     return {
-      stays: result.stays.map((stay) => toStayListItem(stay, savedIds.has(stay.id))),
+      stays: paginated,
       meta: {
         ...buildPaginationMeta({
-          page: result.page,
-          limit: result.limit,
-          total: result.total,
+          page: input.page,
+          limit: input.limit,
+          total: merged.length,
         }),
-        ...(input.checkIn || input.checkOut ? { dateFilterApplied: false } : {}),
-        ...(input.guests ? { guestFilterApplied: false } : {}),
+        ...(providerItems.length > 0
+          ? {
+              provider: accommodationProvider.name,
+              providerCount: providerItems.length,
+            }
+          : {}),
+        ...(input.checkIn && input.checkOut && input.guests
+          ? {
+              dateFilterApplied: providerItems.length > 0,
+              guestFilterApplied: providerItems.length > 0,
+            }
+          : {
+              ...(input.checkIn || input.checkOut ? { dateFilterApplied: false } : {}),
+              ...(input.guests ? { guestFilterApplied: false } : {}),
+            }),
       },
     };
   },
@@ -100,17 +242,24 @@ export const staysService = {
     }
 
     const accommodationProvider = providerFactory.getAccommodationProvider();
-    if (accommodationProvider.isConfigured()) {
-      const providerAvailability = await accommodationProvider.searchAvailability({
-        stayId: stay.id,
-        sourceId: stay.slug,
-        checkIn: input.checkIn,
-        checkOut: input.checkOut,
-        guests: input.guests,
-      });
+    const providerPropertyId = stay.providerPropertyId;
 
-      if (providerAvailability) {
-        return mapAccommodationAvailabilityToStayResult(providerAvailability);
+    if (accommodationProvider.isConfigured() && providerPropertyId) {
+      try {
+        return await fetchProviderAvailability({
+          stayId: stay.id,
+          providerPropertyId,
+          checkIn: input.checkIn,
+          checkOut: input.checkOut,
+          guests: input.guests,
+          rooms: input.rooms,
+        });
+      } catch (error) {
+        if (error instanceof ProviderUnavailableError) {
+          throw error;
+        }
+
+        throw new ProviderUnavailableError("Live availability is temporarily unavailable.");
       }
     }
 
@@ -119,6 +268,7 @@ export const staysService = {
       checkIn: input.checkIn,
       checkOut: input.checkOut,
       guests: input.guests,
+      rooms: input.rooms,
     });
   },
 

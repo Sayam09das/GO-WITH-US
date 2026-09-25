@@ -551,6 +551,216 @@ Normalized results (+ Prisma catalog fallback)
 
 Supports destination text search, near-me coordinate search, radius filtering, and location labels for display. Map integration and persistent user location storage are out of scope for this step.
 
+### Step 15.4 — Places Provider
+
+**Status:** Complete
+
+**Provider layer:** `apps/api/src/providers/places/`
+
+| File | Role |
+|------|------|
+| `places.provider.ts` | Internal contract: `search`, `searchNearby`, `getDetails`, `autocomplete`, `reverseGeocode` |
+| `places.types.ts` | `NormalizedPlace` — GO WITH US place format |
+| `places.mapper.ts` | Foursquare → normalized place + autocomplete helpers |
+| `foursquare/foursquare.client.ts` | HTTP only (URL, headers, timeout, retries) |
+| `foursquare/foursquare.provider.ts` | Foursquare adapter implementing `PlacesProvider` |
+
+Controllers and services call `ProviderFactory.getPlacesProvider()` — never Foursquare directly.
+
+**Normalized place shape** (frontend-facing via search):
+
+```json
+{
+  "provider": "foursquare",
+  "providerPlaceId": "abc123",
+  "name": "Example Restaurant",
+  "category": "restaurant",
+  "address": "Example Street",
+  "city": "Kolkata",
+  "country": "India",
+  "latitude": 22.57,
+  "longitude": 88.36,
+  "rating": null,
+  "image": null
+}
+```
+
+Provider selection: `PLACES_PROVIDER=foursquare` (or `none` for catalog-only). API keys live in `apps/api/.env` only — never `NEXT_PUBLIC_*`.
+
+### Step 15.5 — Destination Synchronization
+
+**Status:** Complete (service + schema; worker stub)
+
+**Schema additions** on `destinations`:
+
+- `provider`, `providerPlaceId` (unique together)
+- `city`, `latitude`, `longitude`
+- `providerSyncedAt`, `syncStatus` (`ACTIVE` | `STALE` | `FAILED`)
+
+Migration: `apps/api/prisma/migrations/20250926030000_provider_sync_fields/`
+
+**Sync service:** `apps/api/src/services/sync/destination-sync.service.ts`
+
+- `upsertFromPlace()` — creates or refreshes provider-owned fields only
+- `syncDestination(providerPlaceId)` — fetch live details then upsert
+- `enqueueSync()` — queues `sync-destination` job on the cleanup queue
+
+Editorial fields (`overview`, `heroImage`, `isFeatured`, SEO content) are never overwritten on update.
+
+User search returns live provider results without blocking on DB sync. Persist when a result becomes a GO WITH US destination.
+
+### Step 15.6 — Real Restaurant Search
+
+**Status:** Complete
+
+Existing endpoint unchanged: `QUERY /api/v1/restaurants/search`
+
+```
+Restaurant Controller → Restaurant Service → PlacesProvider → Foursquare
+                                              ↓
+                                    restaurants.mapper.ts
+                                              ↓
+                                    GO WITH US restaurant list items
+```
+
+**New request fields:**
+
+```json
+{
+  "query": "Italian",
+  "destination": "Bali",
+  "location": { "lat": 22.57, "lng": 88.36, "radius": 5000 },
+  "priceLevel": [2],
+  "sort": "rating"
+}
+```
+
+- Resolves destination text → coordinates via `LocationService.resolvePlaceCoordinates()`
+- Nearby search uses `PlacesProvider.searchNearby()`
+- Provider results merge with Prisma catalog; ephemeral results are not bulk-inserted
+- Saved/review/trip flows continue to use GO WITH US restaurant IDs
+
+### Step 15.7 — Real Experience Search
+
+**Status:** Complete
+
+Existing endpoint unchanged: `QUERY /api/v1/experiences/search`
+
+```
+Experience Controller → Experience Service → ExperienceProvider → Amadeus
+                                              ↓
+                                    experiences.mapper.ts
+                                              ↓
+                                    GO WITH US experience list items
+```
+
+**New request fields:**
+
+```json
+{
+  "query": "boat tour",
+  "destination": "Labuan Bajo",
+  "location": { "lat": -8.49, "lng": 119.88, "radius": 10000 },
+  "date": "2026-10-12",
+  "sort": "rating"
+}
+```
+
+Experiences use a separate provider domain (`providers/experiences/`) from places. Provider results are returned live; PostgreSQL records are created only when users save, review, book, or add to trips.
+
+### Step 15.8 — Real Accommodation Search
+
+**Status:** Complete
+
+Existing endpoints unchanged: `GET /api/v1/stays`, `QUERY /api/v1/stays/search`, `GET /api/v1/stays/:slug`, `QUERY /api/v1/stays/:stayId/availability`.
+
+```
+Stay Controller → Stay Service → AccommodationProvider → Booking.com (when configured)
+                                      ↓
+                            accommodation.mapper.ts
+                                      ↓
+                               GO WITH US Stay
+```
+
+**Search request** (dates + guests required for live provider results):
+
+```json
+{
+  "destination": "Bali",
+  "checkIn": "2026-10-12",
+  "checkOut": "2026-10-16",
+  "guests": { "adults": 2, "children": 0 },
+  "rooms": 1
+}
+```
+
+- Resolves destination → provider `dest_id` via linked GO WITH US destination `providerPlaceId` or numeric ID
+- Merges provider listings with Prisma catalog
+- `Stay` model stores `provider`, `providerPropertyId`, coordinates — live prices are not persisted
+
+Provider selection: `ACCOMMODATION_PROVIDER=booking` + `BOOKING_API_KEY` in `apps/api/.env`.
+
+### Step 15.9 — Live Availability & Pricing
+
+**Status:** Complete
+
+`QUERY /api/v1/stays/:stayId/availability` uses `providerPropertyId` when configured:
+
+- Returns normalized room options with price breakdown (`baseAmount`, `taxAmount`, `feeAmount`, `totalAmount`, `currency`)
+- Includes `fetchedAt` / `expiresAt` in response meta
+- Redis-cached with short TTL (`provider:stays:availability:*`)
+- When provider is configured for a linked stay, failures return `PROVIDER_UNAVAILABLE` — guidance inventory is not shown as live inventory
+
+**Booking revalidation** at `POST /api/v1/bookings`:
+
+- Re-checks live availability + current price before creating a stay booking
+- Optional `quotedTotal` triggers `PRICE_CHANGED` (409) if price moved
+- Returns `AVAILABILITY_CHANGED` (409) if room no longer available
+- Never trusts client-submitted prices
+
+### Step 15.10 — Provider → GO WITH US Normalization
+
+**Status:** Complete
+
+Normalized types live in each provider domain:
+
+| Domain | Types | Mapper |
+|--------|-------|--------|
+| Places | `NormalizedPlace` | `places.mapper.ts` |
+| Experiences | `NormalizedExperienceListing` | `experiences.mapper.ts` |
+| Accommodation | `NormalizedAccommodationListing`, `NormalizedRoomOption`, `NormalizedPriceBreakdown` | `accommodation.mapper.ts` |
+
+Services and controllers consume normalized models only — never raw provider JSON.
+
+### Step 15.11 — Redis Caching
+
+**Status:** Complete (foundation)
+
+Cache layer: `apps/api/src/infrastructure/cache/`
+
+| Key pattern | TTL | Use |
+|-------------|-----|-----|
+| `provider:stays:search:*` | 120s | Accommodation discovery |
+| `provider:stays:availability:*` | 60s | Live room/rate checks |
+| `provider:places:search:*` | 120s | Place discovery |
+
+- Caches **normalized** results with envelope (`fetchedAt`, `expiresAt`)
+- `getOrSetWithLock()` prevents cache stampede via Redis lock
+- Stale cache may be returned with `meta.stale: true` while refreshing in background
+- Availability cache keys include dates, guests, and rooms
+
+### Step 15.12 — Provider Failure & Fallback
+
+**Status:** Complete (foundation)
+
+Infrastructure: `apps/api/src/infrastructure/providers/`
+
+- **Error classification:** `TIMEOUT`, `RATE_LIMITED`, `UNAUTHORIZED`, `FORBIDDEN`, `BAD_REQUEST`, `UNAVAILABLE`, `NETWORK_ERROR`
+- **Circuit breaker:** opens after repeated failures, half-open retry after 30s
+- **HTTP client:** selective retries with backoff; maps errors to `PROVIDER_UNAVAILABLE` or `PROVIDER_RATE_LIMITED`
+- **Availability:** never falls back to guidance when a provider-linked stay requires live inventory
+- **Discovery:** stale cache fallback with `meta.stale: true` where acceptable
+
 ---
 
 ## Step 4 — Authentication

@@ -2,13 +2,96 @@ import { AppError } from "../../lib/errors.js";
 import { reviewCatalog } from "../../lib/review-catalog.js";
 import { providerFactory } from "../../providers/index.js";
 import { mapNormalizedPlaceToAutocomplete } from "../../providers/places/places.mapper.js";
+import type { NormalizedPlace } from "../../providers/places/places.types.js";
+import {
+  filterRestaurantPlaces,
+  mapNormalizedPlaceToRestaurantListItem,
+  mergeRestaurantSearchResults,
+} from "../../providers/restaurants/restaurants.mapper.js";
+import { locationService } from "../../services/location/location.service.js";
 import { restaurantsRepository } from "./restaurants.repository.js";
 import type { ListRestaurantsQuery, RestaurantSearchInput } from "./restaurants.schemas.js";
 import {
   buildPaginationMeta,
+  type RestaurantListItem,
   toRestaurantDetail,
   toRestaurantListItem,
 } from "./restaurants.types.js";
+
+function paginateItems<T>(items: T[], page: number, limit: number): T[] {
+  const start = (page - 1) * limit;
+  return items.slice(start, start + limit);
+}
+
+function applyProviderRestaurantFilters(
+  items: RestaurantListItem[],
+  input: RestaurantSearchInput,
+): RestaurantListItem[] {
+  return items.filter((item) => {
+    if (input.rating != null && item.rating < input.rating) {
+      return false;
+    }
+
+    if (input.priceLevel?.length && !input.priceLevel.includes(item.priceLevel)) {
+      return false;
+    }
+
+    if (input.cuisines?.length) {
+      const cuisine = item.cuisine.toLowerCase();
+      const matches = input.cuisines.some((value) => cuisine.includes(value.toLowerCase()));
+      if (!matches) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+}
+
+async function searchProviderRestaurants(
+  input: RestaurantSearchInput,
+): Promise<RestaurantListItem[]> {
+  const placesProvider = providerFactory.getPlacesProvider();
+  if (!placesProvider.isConfigured()) {
+    return [];
+  }
+
+  let places: NormalizedPlace[] = [];
+
+  if (input.location) {
+    const nearby = locationService.normalizeNearbyLocation(input.location);
+    places = await placesProvider.searchNearby({
+      latitude: nearby.latitude,
+      longitude: nearby.longitude,
+      radiusMeters: nearby.radiusMeters,
+      query: input.query ?? "restaurant",
+      limit: input.limit,
+    });
+  } else {
+    const locationQuery = input.destination ?? input.query;
+    if (locationQuery) {
+      const coordinates = await locationService.resolvePlaceCoordinates({ query: locationQuery });
+      if (coordinates) {
+        places = await placesProvider.searchNearby({
+          latitude: coordinates.latitude,
+          longitude: coordinates.longitude,
+          radiusMeters: 10_000,
+          query: input.query ?? "restaurant",
+          limit: input.limit,
+        });
+      } else if (input.query) {
+        places = await placesProvider.search({
+          query: input.query,
+          limit: input.limit,
+        });
+      }
+    }
+  }
+
+  return filterRestaurantPlaces(places)
+    .map(mapNormalizedPlaceToRestaurantListItem)
+    .filter((item) => applyProviderRestaurantFilters([item], input).length > 0);
+}
 
 export const restaurantsService = {
   async list(input: ListRestaurantsQuery, userId?: string) {
@@ -33,15 +116,27 @@ export const restaurantsService = {
   },
 
   async search(input: RestaurantSearchInput, userId?: string) {
-    const result = await restaurantsRepository.search(input);
+    const catalogResult = await restaurantsRepository.search(input);
     const savedIds = userId
       ? await restaurantsRepository.findSavedRestaurantIds(
           userId,
-          result.restaurants.map((restaurant) => restaurant.id),
+          catalogResult.restaurants.map((restaurant) => restaurant.id),
         )
       : new Set<string>();
 
+    const catalogItems = catalogResult.restaurants.map((restaurant) =>
+      toRestaurantListItem(restaurant, savedIds.has(restaurant.id)),
+    );
+
     const placesProvider = providerFactory.getPlacesProvider();
+    const useProviderSearch =
+      placesProvider.isConfigured() &&
+      (Boolean(input.location) || Boolean(input.destination) || Boolean(input.query));
+
+    const providerItems = useProviderSearch ? await searchProviderRestaurants(input) : [];
+    const merged = mergeRestaurantSearchResults(catalogItems, providerItems);
+    const paginated = paginateItems(merged, input.page, input.limit);
+
     const placeSuggestions =
       placesProvider.isConfigured() && input.query
         ? (await placesProvider.search({ query: input.query, limit: 6 })).map(
@@ -50,19 +145,22 @@ export const restaurantsService = {
         : [];
 
     return {
-      restaurants: result.restaurants.map((restaurant) =>
-        toRestaurantListItem(restaurant, savedIds.has(restaurant.id)),
-      ),
+      restaurants: paginated,
       meta: {
         ...buildPaginationMeta({
-          page: result.page,
-          limit: result.limit,
-          total: result.total,
+          page: input.page,
+          limit: input.limit,
+          total: merged.length,
         }),
+        ...(providerItems.length > 0
+          ? {
+              provider: placesProvider.name,
+              providerCount: providerItems.length,
+            }
+          : {}),
         ...(placeSuggestions.length > 0
           ? {
               placeSuggestions,
-              provider: placesProvider.name,
             }
           : {}),
       },

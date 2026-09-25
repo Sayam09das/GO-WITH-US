@@ -1,6 +1,12 @@
 import { providersConfig } from "../../config/providers.js";
 import { logger } from "../../infrastructure/logging/logger.js";
-import { ProviderUnavailableError } from "../../lib/provider-errors.js";
+import { providerCircuitBreaker } from "../../infrastructure/providers/circuit-breaker.js";
+import {
+  classifyHttpStatus,
+  classifyNetworkError,
+} from "../../infrastructure/providers/provider-error.classifier.js";
+import { AppError } from "../../lib/errors.js";
+import { throwClassifiedProviderError } from "../../lib/provider-errors.js";
 
 type ProviderHttpRequest = {
   url: URL;
@@ -24,6 +30,18 @@ function delay(ms: number): Promise<void> {
 }
 
 export async function providerHttpRequest<T>(input: ProviderHttpRequest): Promise<T> {
+  if (!providerCircuitBreaker.canRequest(input.provider, input.operation)) {
+    logger.warn("provider.circuit.open", {
+      provider: input.provider,
+      operation: input.operation,
+    });
+    throwClassifiedProviderError({
+      code: "UNAVAILABLE",
+      message: "Live travel data is temporarily unavailable.",
+      retryable: false,
+    });
+  }
+
   const timeoutMs = input.timeoutMs ?? providersConfig.http.defaultTimeoutMs;
   const maxAttempts = input.retryable === false ? 1 : providersConfig.http.maxRetries + 1;
   let lastError: Error | null = null;
@@ -43,41 +61,48 @@ export async function providerHttpRequest<T>(input: ProviderHttpRequest): Promis
           continue;
         }
 
+        const classified = classifyHttpStatus(response.status);
         logger.warn("provider.http.failed", {
           provider: input.provider,
           operation: input.operation,
           status: response.status,
+          errorType: classified.code,
           attempt,
         });
-
-        throw new ProviderUnavailableError();
+        providerCircuitBreaker.recordFailure(input.provider, input.operation);
+        throwClassifiedProviderError(classified);
       }
 
+      providerCircuitBreaker.recordSuccess(input.provider, input.operation);
       return (await response.json()) as T;
     } catch (error) {
-      lastError = error instanceof Error ? error : new Error("Unknown provider request error.");
-
-      if (error instanceof ProviderUnavailableError) {
+      if (error instanceof AppError) {
         throw error;
       }
 
-      const isTimeout = lastError.name === "TimeoutError" || lastError.name === "AbortError";
-      const canRetry = attempt < maxAttempts && (isTimeout || lastError.message.includes("fetch"));
+      lastError = error instanceof Error ? error : new Error("Unknown provider request error.");
+      const classified = classifyNetworkError(lastError);
+      const canRetry = attempt < maxAttempts && classified.retryable;
 
       logger.warn("provider.http.error", {
         provider: input.provider,
         operation: input.operation,
         attempt,
+        errorType: classified.code,
         message: lastError.message,
       });
 
       if (!canRetry) {
-        break;
+        providerCircuitBreaker.recordFailure(input.provider, input.operation);
+        throwClassifiedProviderError(classified);
       }
 
       await delay(250 * attempt);
     }
   }
 
-  throw lastError instanceof ProviderUnavailableError ? lastError : new ProviderUnavailableError();
+  providerCircuitBreaker.recordFailure(input.provider, input.operation);
+  throwClassifiedProviderError(
+    classifyNetworkError(lastError ?? new Error("Provider request failed.")),
+  );
 }

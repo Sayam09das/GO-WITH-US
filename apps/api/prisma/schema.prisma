@@ -69,6 +69,12 @@ enum StoryStatus {
   archived
 }
 
+enum ProviderSyncStatus {
+  ACTIVE
+  STALE
+  FAILED
+}
+
 enum BookingType {
   stay
   experience
@@ -212,6 +218,13 @@ model Destination {
   reviewCount     Int        @default(0) @map("review_count")
   isFeatured      Boolean    @default(false) @map("is_featured")
   isPublished     Boolean    @default(true) @map("is_published")
+  city            String?
+  latitude        Decimal?   @db.Decimal(10, 7)
+  longitude       Decimal?   @db.Decimal(10, 7)
+  provider        String?
+  providerPlaceId String?    @map("provider_place_id")
+  providerSyncedAt DateTime? @map("provider_synced_at") @db.Timestamptz(6)
+  syncStatus      ProviderSyncStatus? @default(ACTIVE) @map("sync_status")
   createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt       DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -220,6 +233,8 @@ model Destination {
   restaurants  Restaurant[]
   trips        Trip[]
 
+  @@unique([provider, providerPlaceId])
+  @@index([providerPlaceId])
   @@index([isPublished, isFeatured])
   @@map("destinations")
 }
@@ -241,11 +256,18 @@ model Stay {
   reviewCount          Int          @default(0) @map("review_count")
   isFeatured           Boolean      @default(false) @map("is_featured")
   isPublished          Boolean      @default(true) @map("is_published")
+  latitude             Decimal?     @db.Decimal(10, 7)
+  longitude            Decimal?     @db.Decimal(10, 7)
+  provider             String?
+  providerPropertyId   String?      @map("provider_property_id")
+  providerSyncedAt     DateTime?    @map("provider_synced_at") @db.Timestamptz(6)
   createdAt            DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt            DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   destination Destination @relation(fields: [destinationId], references: [id])
 
+  @@unique([provider, providerPropertyId])
+  @@index([providerPropertyId])
   @@index([destinationId, isPublished])
   @@map("stays")
 }
@@ -272,11 +294,18 @@ model Experience {
   reviewCount        Int                @default(0) @map("review_count")
   isFeatured         Boolean            @default(false) @map("is_featured")
   isPublished        Boolean            @default(true) @map("is_published")
+  latitude           Decimal?           @db.Decimal(10, 7)
+  longitude          Decimal?           @db.Decimal(10, 7)
+  provider           String?
+  providerPlaceId    String?            @map("provider_place_id")
+  providerSyncedAt   DateTime?          @map("provider_synced_at") @db.Timestamptz(6)
   createdAt          DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt          DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   destination Destination @relation(fields: [destinationId], references: [id])
 
+  @@unique([provider, providerPlaceId])
+  @@index([providerPlaceId])
   @@index([destinationId, isPublished])
   @@map("experiences")
 }
@@ -301,11 +330,16 @@ model Restaurant {
   reviewCount     Int      @default(0) @map("review_count")
   isFeatured      Boolean  @default(false) @map("is_featured")
   isPublished     Boolean  @default(true) @map("is_published")
+  provider        String?
+  providerPlaceId String?  @map("provider_place_id")
+  providerSyncedAt DateTime? @map("provider_synced_at") @db.Timestamptz(6)
   createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   destination Destination @relation(fields: [destinationId], references: [id])
 
+  @@unique([provider, providerPlaceId])
+  @@index([providerPlaceId])
   @@index([destinationId, isPublished])
   @@map("restaurants")
 }

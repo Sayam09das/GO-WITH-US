@@ -9,6 +9,7 @@ export const CACHE_KEYS = {
   providerPlacesSearch: (hash: string) => `provider:places:search:${hash}`,
   providerStayAvailability: (stayId: string, hash: string) =>
     `provider:stays:availability:${stayId}:${hash}`,
+  providerStaySearch: (hash: string) => `provider:stays:search:${hash}`,
   providerExperienceAvailability: (experienceId: string, hash: string) =>
     `provider:experiences:availability:${experienceId}:${hash}`,
 } as const;
@@ -20,6 +21,8 @@ export const CACHE_TTL = {
   searchSuggestions: 120,
   searchResults: 60,
   providerResults: 120,
+  providerAvailability: 60,
+  providerStaySearch: 120,
 } as const;
 
 export const CACHE_INVALIDATION_GROUPS = {

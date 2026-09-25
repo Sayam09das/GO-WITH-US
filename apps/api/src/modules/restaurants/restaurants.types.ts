@@ -21,6 +21,16 @@ export type RestaurantListItem = {
   rating: number;
   reviewCount: number;
   isSaved: boolean;
+  source?: "catalog" | "provider";
+  provider?: string;
+  providerPlaceId?: string;
+  address?: string | null;
+  location?: {
+    city: string | null;
+    country: string | null;
+    latitude: number;
+    longitude: number;
+  };
 };
 
 export type RestaurantDetail = {

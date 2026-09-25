@@ -60,4 +60,40 @@ export const locationService = {
       null
     );
   },
+
+  async resolvePlaceCoordinates(input: {
+    query: string;
+    near?: { lat: number; lng: number };
+  }): Promise<{ latitude: number; longitude: number } | null> {
+    const query = input.query.trim();
+    if (!query) {
+      return null;
+    }
+
+    const placesProvider = providerFactory.getPlacesProvider();
+    if (!placesProvider.isConfigured()) {
+      return null;
+    }
+
+    const results = await placesProvider.search({
+      query,
+      limit: 1,
+      near: input.near
+        ? {
+            latitude: input.near.lat,
+            longitude: input.near.lng,
+          }
+        : undefined,
+    });
+
+    const place = results[0];
+    if (!place || !Number.isFinite(place.latitude) || !Number.isFinite(place.longitude)) {
+      return null;
+    }
+
+    return {
+      latitude: place.latitude,
+      longitude: place.longitude,
+    };
+  },
 };
