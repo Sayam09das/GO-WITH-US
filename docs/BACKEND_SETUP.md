@@ -97,9 +97,22 @@ pnpm exec prisma studio
 
 ---
 
+## Step 5 — User & Dashboard Backend
+
+**Status:** Complete
+
+- `GET/PATCH /api/v1/users/me` — profile (`name`, `email`, `avatar`, `bio`, `phone`, `country`, `timezone`)
+- `PATCH /api/v1/users/me/avatar` — avatar URL update (upload pipeline later)
+- `GET /api/v1/dashboard` — aggregated dashboard payload
+- `GET /api/v1/trips?status=upcoming` — upcoming trips list
+- Saved destinations + stays under `/api/v1/users/me/saved-*`
+- `GET /api/v1/users/me/activity` — recent user activity feed
+
+---
+
 ## Next step
 
-**Step 5 — User & Dashboard APIs**: replace dashboard fixtures with authenticated PostgreSQL-backed endpoints.
+**Step 6 — Wire dashboard UI to live API** and replace account/dashboard fixtures.
 
 ---
 

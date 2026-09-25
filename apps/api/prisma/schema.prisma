@@ -85,6 +85,16 @@ enum SecurityEventType {
   SESSION_REVOKED
 }
 
+enum UserActivityType {
+  SAVED_DESTINATION
+  UNSAVED_DESTINATION
+  SAVED_STAY
+  UNSAVED_STAY
+  CREATED_TRIP
+  COMPLETED_PROFILE
+  BOOKED_STAY
+}
+
 model User {
   id               String      @id @default(uuid()) @db.Uuid
   email            String      @unique @db.Citext
@@ -94,6 +104,9 @@ model User {
   role             UserRole    @default(USER)
   avatarUrl        String?     @map("avatar_url")
   bio              String?
+  phone            String?
+  country          String?
+  timezone         String?
   homeCity         String?     @map("home_city")
   travelStyles     String[]    @map("travel_styles")
   budgetPreference BudgetTier? @map("budget_preference")
@@ -108,6 +121,7 @@ model User {
   emailVerificationTokens EmailVerificationToken[]
   sessions                Session[]
   securityEvents          SecurityEvent[]
+  activities              UserActivity[]
 
   @@map("users")
 }
@@ -349,4 +363,18 @@ model SecurityEvent {
   @@index([userId, createdAt(sort: Desc)])
   @@index([type, createdAt(sort: Desc)])
   @@map("security_events")
+}
+
+model UserActivity {
+  id        String           @id @default(uuid()) @db.Uuid
+  userId    String           @map("user_id") @db.Uuid
+  type      UserActivityType
+  title     String
+  metadata  Json?
+  createdAt DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@map("user_activities")
 }
