@@ -1,6 +1,9 @@
 import { env } from "../../config/env.js";
+import {
+  enqueuePasswordResetEmail,
+  enqueueVerificationEmail,
+} from "../../infrastructure/queue/enqueue.js";
 import { AppError } from "../../lib/errors.js";
-import { sendPasswordResetEmail, sendVerificationEmail } from "../../lib/mail.js";
 import {
   AuthValidationError,
   assertPasswordPolicy,
@@ -67,7 +70,7 @@ export const authService = {
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
     await authRepository.createEmailVerificationToken(userId, hash, expiresAt);
-    await sendVerificationEmail({ email, fullName, token: raw });
+    await enqueueVerificationEmail({ type: "verification", email, fullName, token: raw });
     await authRepository.createSecurityEvent({
       userId,
       type: "EMAIL_VERIFICATION_SENT",
@@ -212,7 +215,12 @@ export const authService = {
       const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
       await authRepository.createPasswordResetToken(user.id, hash, expiresAt);
-      await sendPasswordResetEmail({ email: user.email, fullName: user.fullName, token: raw });
+      await enqueuePasswordResetEmail({
+        type: "password-reset",
+        email: user.email,
+        fullName: user.fullName,
+        token: raw,
+      });
       await authRepository.createSecurityEvent({
         userId: user.id,
         type: "PASSWORD_RESET_REQUESTED",

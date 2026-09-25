@@ -240,6 +240,84 @@ Itinerary items accept `restaurantId` via `POST /api/v1/trips/:tripId/days/:dayI
 
 ---
 
+## Step 13 — Production Infrastructure
+
+**Status:** Complete
+
+Production-ready infrastructure for caching, background jobs, observability, and deployment.
+
+### Redis + cache layer
+
+- Redis client: `apps/api/src/infrastructure/redis/redis.ts`
+- Cache service + keys: `apps/api/src/infrastructure/cache/`
+- Cached surfaces:
+  - Featured destinations, experiences, stories
+  - Destination detail by slug
+  - Discovery homepage feed (`GET /api/v1/discovery/homepage`)
+  - Destination search + short-query suggestion keys
+
+### Background jobs (BullMQ)
+
+- Shared job contracts: `packages/jobs`
+- API enqueue helpers: `apps/api/src/infrastructure/queue/`
+- Separate worker process: `apps/worker` (not exposed as HTTP)
+- Queues: `email`, `booking`, `notification`, `cleanup`
+- Jobs include verification/reset emails, booking post-create processing, notifications, expired booking cleanup
+
+Run locally:
+
+```bash
+pnpm --filter @gowithus/worker dev
+```
+
+### Rate limiting
+
+Redis-backed when available, in-memory fallback otherwise.
+
+- Strict: auth + booking creation
+- Moderate: search routes
+- Higher: catalog GET routes
+
+### Logging + request tracing
+
+- Structured JSON logs: `apps/api/src/infrastructure/logging/logger.ts`
+- Request IDs via `x-request-id` middleware
+- Error responses include `requestId`
+- Sensitive values are redacted from logs
+
+### Health checks
+
+- `GET /health/live` — process liveness
+- `GET /health/ready` — PostgreSQL + Redis readiness
+- Legacy alias: `GET /ready`
+
+### Booking + payment hardening
+
+- Transactional overlap checks for stay/experience bookings
+- Idempotent booking creation via `Idempotency-Key`
+- Payment webhook signature verification + processed event IDs
+
+### Database performance
+
+Migration: `apps/api/prisma/migrations/20250925213000_production_indexes/`
+
+Adds indexes for review user lookups and booking overlap queries.
+
+Apply on Supabase:
+
+```bash
+pnpm exec prisma db execute --file apps/api/prisma/migrations/20250925213000_production_indexes/migration.sql
+```
+
+### Docker + CI/CD
+
+- Root `docker-compose.yml` services: `postgres`, `redis`, `api`, `worker`
+- Dockerfiles: `apps/api/Dockerfile`, `apps/worker/Dockerfile`
+- CI builds + typechecks all packages and builds Docker images
+- Deploy workflow builds production images (registry hook placeholder)
+
+---
+
 ## Next step
 
 **Step 12 — Seed catalog data** and wire frontend discovery/booking flows.
@@ -254,7 +332,7 @@ Itinerary items accept `restaurantId` via `POST /api/v1/trips/:tripId/days/:dayI
 - PostgreSQL-backed sessions (`sessions` table) with hashed tokens in HTTP-only cookie `gowithus_session`
 - Email verification links (24h, single-use, hashed)
 - Password reset links (1h, single-use, hashed, revokes sessions)
-- Rate limiting on auth mutations (in-memory; Redis-ready later)
+- Rate limiting on auth mutations (Redis-backed with in-memory fallback)
 - Helmet, origin guard, Zod validation, security event audit log
 - Frontend auth forms wired to `/api/v1/auth/*`
 

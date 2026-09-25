@@ -1,3 +1,5 @@
+import { CACHE_KEYS, CACHE_TTL } from "../../infrastructure/cache/cache.keys.js";
+import { cacheService } from "../../infrastructure/cache/cache.service.js";
 import { AppError } from "../../lib/errors.js";
 import { reviewCatalog } from "../../lib/review-catalog.js";
 import { experiencesRepository } from "./experiences.repository.js";
@@ -52,7 +54,11 @@ export const experiencesService = {
   },
 
   async listFeatured(userId?: string) {
-    const experiences = await experiencesRepository.listFeatured();
+    const experiences = await cacheService.getOrSet(
+      CACHE_KEYS.experiencesFeatured,
+      CACHE_TTL.featured,
+      () => experiencesRepository.listFeatured(),
+    );
     const savedIds = userId
       ? await experiencesRepository.findSavedExperienceIds(
           userId,
