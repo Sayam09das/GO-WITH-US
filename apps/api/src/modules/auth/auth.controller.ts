@@ -1,8 +1,9 @@
-import type { NextFunction, Request, Response } from "express";
+import type { Request, Response } from "express";
 import { ZodError } from "zod";
 import { env } from "../../config/env.js";
 import { clearSessionCookie, setSessionCookie } from "../../lib/cookies.js";
 import { AppError, sendData, sendError } from "../../lib/errors.js";
+import { requireAdmin, requireAuth } from "../../middleware/auth.js";
 import {
   changePasswordSchema,
   forgotPasswordSchema,
@@ -20,6 +21,8 @@ import {
   validateResetToken,
   validateVerificationToken,
 } from "./auth.service.js";
+
+export { requireAdmin, requireAuth };
 
 function handleError(error: unknown, res: Response): void {
   if (error instanceof AppError) {
@@ -216,29 +219,3 @@ export const authController = {
     }
   },
 };
-
-export function requireAuth(req: Request, res: Response, next: NextFunction) {
-  const token = readSessionToken(req);
-
-  if (!token) {
-    sendError(res, 401, "UNAUTHENTICATED", "Authentication required.");
-    return;
-  }
-
-  authService
-    .getMe(token)
-    .then((user) => {
-      req.authUser = user;
-      next();
-    })
-    .catch((error) => handleError(error, res));
-}
-
-export function requireAdmin(req: Request, res: Response, next: NextFunction) {
-  if (req.authUser?.role !== "ADMIN") {
-    sendError(res, 403, "FORBIDDEN", "Admin access required.");
-    return;
-  }
-
-  next();
-}

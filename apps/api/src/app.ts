@@ -7,6 +7,9 @@ import { prisma } from "./lib/db.js";
 import { errorHandler } from "./middleware/error-handler.js";
 import { validateOrigin } from "./middleware/origin-guard.js";
 import { authRouter } from "./modules/auth/auth.routes.js";
+import { dashboardRouter } from "./modules/dashboard/dashboard.routes.js";
+import { tripsRouter } from "./modules/trips/trips.routes.js";
+import { usersRouter } from "./modules/users/users.routes.js";
 
 export function createApp(): Express {
   const app = express();
@@ -67,6 +70,9 @@ export function createApp(): Express {
   });
 
   apiRouter.use("/auth", authRouter);
+  apiRouter.use("/users", usersRouter);
+  apiRouter.use("/dashboard", dashboardRouter);
+  apiRouter.use("/trips", tripsRouter);
 
   app.use("/api/v1", apiRouter);
   app.use(errorHandler);
