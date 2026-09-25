@@ -102,6 +102,38 @@ export type PaginatedMeta = {
   totalPages: number;
 };
 
+export type StayListItem = {
+  id: string;
+  name: string;
+  slug: string;
+  destination: string;
+  destinationSlug: string;
+  propertyType: string;
+  coverImage: string;
+  imageAlt: string;
+  price: {
+    nightlyFrom: number | null;
+    label: string;
+    tier: BudgetTier;
+  };
+  rating: number;
+  reviewCount: number;
+  amenities: string[];
+  isSaved: boolean;
+};
+
+export type StayReviewItem = {
+  id: string;
+  rating: number;
+  body: string | null;
+  createdAt: string;
+  user: {
+    id: string;
+    name: string;
+    avatar: string | null;
+  };
+};
+
 export type ApiErrorEnvelope = {
   error: {
     code: string;

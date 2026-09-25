@@ -124,9 +124,24 @@ Saved destinations remain on `/api/v1/users/me/saved-destinations/*`.
 
 ---
 
+## Step 7 — Stays API
+
+**Status:** Complete
+
+- `GET /api/v1/stays` — paginated listing with optional filters
+- `QUERY /api/v1/stays/search` — complex JSON search (idempotent)
+- `GET /api/v1/stays/:slug` — detail with rooms, pricing, policies, nearby experiences, optional `isSaved`
+- `QUERY /api/v1/stays/:stayId/availability` — guidance-based room availability by dates/guests
+- `GET /api/v1/stays/:stayId/reviews` — paginated reviews with aggregate rating
+- `POST /api/v1/stays/:stayId/reviews` — auth required; user must have stay on a trip itinerary or a `BOOKED_STAY` activity
+
+Saved stays remain on `/api/v1/users/me/saved-stays/*`.
+
+---
+
 ## Next step
 
-**Step 7 — Wire discovery UI** to destinations API and seed catalog data.
+**Step 8 — Wire stays UI** to the stays API and seed catalog data.
 
 ---
 

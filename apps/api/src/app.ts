@@ -9,6 +9,7 @@ import { validateOrigin } from "./middleware/origin-guard.js";
 import { authRouter } from "./modules/auth/auth.routes.js";
 import { dashboardRouter } from "./modules/dashboard/dashboard.routes.js";
 import { destinationsRouter } from "./modules/destinations/destinations.routes.js";
+import { staysRouter } from "./modules/stays/stays.routes.js";
 import { tripsRouter } from "./modules/trips/trips.routes.js";
 import { usersRouter } from "./modules/users/users.routes.js";
 
@@ -74,6 +75,7 @@ export function createApp(): Express {
 
   apiRouter.use("/auth", authRouter);
   apiRouter.use("/destinations", destinationsRouter);
+  apiRouter.use("/stays", staysRouter);
   apiRouter.use("/users", usersRouter);
   apiRouter.use("/dashboard", dashboardRouter);
   apiRouter.use("/trips", tripsRouter);
