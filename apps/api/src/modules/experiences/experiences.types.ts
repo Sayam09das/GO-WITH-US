@@ -34,6 +34,15 @@ export type ExperienceListItem = {
   reviewCount: number;
   isFeatured: boolean;
   isSaved: boolean;
+  source?: "catalog" | "provider";
+  provider?: string;
+  providerExperienceId?: string;
+  location?: {
+    city: string | null;
+    country: string | null;
+    latitude: number;
+    longitude: number;
+  };
 };
 
 export type ExperienceDetail = {

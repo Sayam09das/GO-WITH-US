@@ -18,7 +18,7 @@ export function errorHandler(
       message: error.message,
       userId: req.authUser?.id,
     });
-    sendError(res, error.statusCode, error.code, error.message, requestId);
+    sendError(res, error.statusCode, error.code, error.message, requestId, error.details);
     return;
   }
 

@@ -37,6 +37,7 @@ export const staySearchSchema = z.object({
   checkIn: z.string().date().optional(),
   checkOut: z.string().date().optional(),
   guests: guestsSchema.optional(),
+  rooms: z.number().int().min(1).max(10).default(1),
   priceRange: z
     .object({
       min: z.number().min(0).optional(),
@@ -63,6 +64,7 @@ export const stayAvailabilitySchema = z
     checkIn: z.string().date(),
     checkOut: z.string().date(),
     guests: guestsSchema,
+    rooms: z.number().int().min(1).max(10).default(1),
   })
   .refine((input) => input.checkOut > input.checkIn, {
     message: "Check-out must be after check-in.",

@@ -10,6 +10,9 @@ type BookingSearchResponse = {
     min_total_price?: number;
     price?: number;
     max_persons?: number;
+    review_score?: number;
+    main_photo_url?: string;
+    hotel_facilities?: string[];
   }>;
 };
 
@@ -26,6 +29,7 @@ export class BookingClient {
     checkOut: string;
     adults: number;
     children: number;
+    rooms: number;
     limit: number;
   }): Promise<BookingSearchResponse> {
     if (!this.isConfigured()) {
@@ -38,6 +42,7 @@ export class BookingClient {
     url.searchParams.set("checkout", params.checkOut);
     url.searchParams.set("adults", String(params.adults));
     url.searchParams.set("children", String(params.children));
+    url.searchParams.set("room_number", String(params.rooms));
     url.searchParams.set("limit", String(params.limit));
 
     return providerHttpRequest<BookingSearchResponse>({

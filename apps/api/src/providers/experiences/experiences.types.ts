@@ -34,18 +34,39 @@ export type NormalizedExperienceAvailability = {
 };
 
 export type ExperienceSearchInput = {
-  destination: string;
+  destination?: string;
   date?: string;
   query?: string;
   limit?: number;
+  location?: {
+    latitude: number;
+    longitude: number;
+    radiusMeters?: number;
+  };
 };
 
 export type NormalizedExperienceListing = {
   id: string;
+  provider: ProviderSource;
+  providerExperienceId: string;
   title: string;
-  source: ProviderSource;
-  sourceId: string;
+  description: string | null;
   destination: string | null;
+  location: {
+    city: string | null;
+    country: string | null;
+    latitude: number;
+    longitude: number;
+  };
   durationLabel: string | null;
-  priceFrom: number | null;
+  rating: number | null;
+  price: {
+    amount: number | null;
+    currency: string;
+  };
+  image: string | null;
+  /** @deprecated Use `provider`. */
+  source: ProviderSource;
+  /** @deprecated Use `providerExperienceId`. */
+  sourceId: string;
 };

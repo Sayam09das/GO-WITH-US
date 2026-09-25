@@ -18,6 +18,8 @@ export const createBookingSchema = z
     checkOut: dateString.optional(),
     experienceDate: dateString.optional(),
     startTime: timeString.optional(),
+    rooms: z.number().int().min(1).max(10).default(1).optional(),
+    quotedTotal: z.number().min(0).optional(),
     guests: guestsSchema,
   })
   .superRefine((input, ctx) => {

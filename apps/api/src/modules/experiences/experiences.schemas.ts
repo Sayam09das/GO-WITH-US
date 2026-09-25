@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { nearbyLocationSchema } from "../../services/location/location.schema.js";
 
 const listSortSchema = z.enum(["popular", "rating", "duration", "price", "newest"]);
 const searchSortSchema = z.enum(["popular", "rating", "price", "newest"]);
@@ -27,6 +28,8 @@ export const listExperiencesQuerySchema = z.object({
 export const experienceSearchSchema = z.object({
   query: z.string().trim().max(120).optional(),
   destination: z.string().trim().max(160).optional(),
+  location: nearbyLocationSchema.optional(),
+  date: z.string().date().optional(),
   categories: z.array(experienceCategorySchema).max(20).optional(),
   priceRange: z
     .object({

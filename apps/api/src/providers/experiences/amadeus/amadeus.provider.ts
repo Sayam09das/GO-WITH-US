@@ -1,3 +1,4 @@
+import { buildNormalizedPlaceId } from "../../places/places.mapper.js";
 import type { ExperienceProvider } from "../experiences.provider.js";
 import type {
   ExperienceAvailabilityInput,
@@ -50,27 +51,75 @@ export class AmadeusExperienceProvider implements ExperienceProvider {
       return [];
     }
 
-    const [latitudeRaw, longitudeRaw] = input.destination.split(",");
-    const latitude = Number(latitudeRaw);
-    const longitude = Number(longitudeRaw);
+    let latitude: number | undefined;
+    let longitude: number | undefined;
+    let radiusKm = 20;
 
-    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    if (input.location) {
+      latitude = input.location.latitude;
+      longitude = input.location.longitude;
+      radiusKm = Math.max(1, Math.round((input.location.radiusMeters ?? 20_000) / 1_000));
+    } else if (input.destination) {
+      const [latitudeRaw, longitudeRaw] = input.destination.split(",");
+      latitude = Number(latitudeRaw);
+      longitude = Number(longitudeRaw);
+    }
+
+    if (
+      latitude == null ||
+      longitude == null ||
+      !Number.isFinite(latitude) ||
+      !Number.isFinite(longitude)
+    ) {
       return [];
     }
 
     const response = await this.client.searchActivities({
       latitude,
       longitude,
+      radiusKm,
     });
 
-    return (response.data ?? []).map((activity) => ({
-      id: activity.id,
-      title: activity.name,
-      source: this.name,
-      sourceId: activity.id,
-      destination: input.destination,
-      durationLabel: null,
-      priceFrom: activity.price?.amount ? Number(activity.price.amount) : null,
-    }));
+    return (response.data ?? [])
+      .filter((activity) => {
+        if (!input.query?.trim()) {
+          return true;
+        }
+
+        const needle = input.query.trim().toLowerCase();
+        return (
+          activity.name.toLowerCase().includes(needle) ||
+          activity.shortDescription?.toLowerCase().includes(needle)
+        );
+      })
+      .slice(0, input.limit ?? 20)
+      .map((activity) => {
+        const providerExperienceId = activity.id;
+        const provider = this.name;
+
+        return {
+          id: buildNormalizedPlaceId(provider, providerExperienceId),
+          provider,
+          providerExperienceId,
+          title: activity.name,
+          description: activity.shortDescription ?? null,
+          destination: input.destination ?? null,
+          location: {
+            city: null,
+            country: null,
+            latitude: activity.geoCode?.latitude ?? latitude ?? 0,
+            longitude: activity.geoCode?.longitude ?? longitude ?? 0,
+          },
+          durationLabel: null,
+          rating: null,
+          price: {
+            amount: activity.price?.amount ? Number(activity.price.amount) : null,
+            currency: "USD",
+          },
+          image: null,
+          source: provider,
+          sourceId: providerExperienceId,
+        };
+      });
   }
 }

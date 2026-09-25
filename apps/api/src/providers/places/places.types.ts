@@ -1,13 +1,25 @@
 import type { ProviderGeoPoint, ProviderSource } from "../provider.types.js";
 
+/** GO WITH US normalized place — provider-agnostic contract for the application layer. */
 export type NormalizedPlace = {
+  /** Composite id: `{provider}:{providerPlaceId}` */
   id: string;
+  provider: ProviderSource;
+  providerPlaceId: string;
   name: string;
+  category: string | null;
+  address: string | null;
+  city: string | null;
+  region: string | null;
+  country: string | null;
+  countryCode: string | null;
   latitude: number;
   longitude: number;
-  address: string | null;
-  category: string | null;
+  rating: number | null;
+  image: string | null;
+  /** @deprecated Use `provider`. */
   source: ProviderSource;
+  /** @deprecated Use `providerPlaceId`. */
   sourceId: string;
 };
 
@@ -15,6 +27,7 @@ export type PlacesSearchInput = {
   query: string;
   limit?: number;
   near?: ProviderGeoPoint;
+  categories?: string[];
 };
 
 export type PlacesNearbyInput = {
@@ -23,6 +36,7 @@ export type PlacesNearbyInput = {
   radiusMeters?: number;
   query?: string;
   limit?: number;
+  categories?: string[];
 };
 
 export type PlacesAutocompleteInput = {
@@ -34,7 +48,11 @@ export type PlacesAutocompleteInput = {
 export type PlacesAutocompleteSuggestion = {
   id: string;
   label: string;
+  provider: ProviderSource;
+  providerPlaceId: string;
+  /** @deprecated Use `provider`. */
   source: ProviderSource;
+  /** @deprecated Use `providerPlaceId`. */
   sourceId: string;
 };
 

@@ -1,5 +1,6 @@
 import { ProviderUnavailableError } from "../../lib/provider-errors.js";
 import { providerFactory } from "../../providers/index.js";
+import { mapNormalizedPlaceToPublicPlace } from "../../providers/places/places.mapper.js";
 import type { NormalizedPlace } from "../../providers/places/places.types.js";
 import { locationService } from "../../services/location/location.service.js";
 import { destinationsService } from "../destinations/destinations.service.js";
@@ -56,7 +57,7 @@ export const searchService = {
     const includeRestaurant = type === "all" || type === "restaurant";
     const includeStory = type === "all" || type === "story";
 
-    const [destinations, stays, experiences, restaurants, stories] = await Promise.all([
+    const [destinations, stays, experiences, restaurants, stories, places] = await Promise.all([
       includeDestination
         ? destinationsService
             .search({ query: trimmed, page: 1, limit, sort: "popular" }, userId)
@@ -65,7 +66,7 @@ export const searchService = {
         : Promise.resolve([]),
       includeStay
         ? staysService
-            .search({ query: trimmed, page: 1, limit, sort: "recommended" }, userId)
+            .search({ query: trimmed, page: 1, limit, sort: "recommended", rooms: 1 }, userId)
             .then((result) => result.stays)
             .catch(() => [])
         : Promise.resolve([]),
@@ -87,6 +88,21 @@ export const searchService = {
             .then((result) => result.stories)
             .catch(() => [])
         : Promise.resolve([]),
+      (async () => {
+        const placesProvider = providerFactory.getPlacesProvider();
+        if (!placesProvider.isConfigured()) {
+          return [] as NormalizedPlace[];
+        }
+
+        try {
+          return await placesProvider.search({ query: trimmed, limit });
+        } catch (error) {
+          if (error instanceof ProviderUnavailableError) {
+            return [];
+          }
+          throw error;
+        }
+      })(),
     ]);
 
     return {
@@ -95,15 +111,19 @@ export const searchService = {
       experiences,
       restaurants,
       stories,
-      places: [] as NormalizedPlace[],
+      places: places.map(mapNormalizedPlaceToPublicPlace),
       meta: {
         query: trimmed,
+        provider: providerFactory.getPlacesProvider().isConfigured()
+          ? providerFactory.getPlacesProvider().name
+          : undefined,
         totals: buildTotals({
           destinations: destinations.length,
           stays: stays.length,
           experiences: experiences.length,
           restaurants: restaurants.length,
           stories: stories.length,
+          places: places.length,
         }),
       },
     };
@@ -167,7 +187,7 @@ export const searchService = {
       experiences: types.includes("EXPERIENCE") ? catalogResults.experiences : [],
       restaurants: types.includes("RESTAURANT") ? catalogResults.restaurants : [],
       stories: types.includes("STORY") ? catalogResults.stories : [],
-      places,
+      places: places.map(mapNormalizedPlaceToPublicPlace),
       meta: {
         query: textQuery,
         location: {

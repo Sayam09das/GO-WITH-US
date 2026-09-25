@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { nearbyLocationSchema } from "../../services/location/location.schema.js";
 
 const sortSchema = z.enum(["recommended", "rating", "price"]);
 
@@ -16,6 +17,7 @@ export const listRestaurantsQuerySchema = z.object({
 export const restaurantSearchSchema = z.object({
   query: z.string().trim().max(120).optional(),
   destination: z.string().trim().max(160).optional(),
+  location: nearbyLocationSchema.optional(),
   cuisines: z.array(z.string().trim().min(1).max(80)).max(20).optional(),
   priceLevel: z.array(z.number().int().min(1).max(4)).max(4).optional(),
   rating: z.number().min(1).max(5).optional(),

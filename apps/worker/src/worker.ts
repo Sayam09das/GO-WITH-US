@@ -4,6 +4,7 @@ import { env, getQueueConnection } from "./config/env.js";
 import { logger } from "./infrastructure/logging/logger.js";
 import { disconnectDatabase } from "./lib/db.js";
 import { processBookingJob } from "./processors/booking.processor.js";
+import { processCleanupJob } from "./processors/cleanup.processor.js";
 import { processEmailJob } from "./processors/email.processor.js";
 import { processNotificationJob } from "./processors/notification.processor.js";
 
@@ -20,7 +21,7 @@ const workers = [
   new Worker(QUEUE_NAMES.email, processEmailJob, { connection }),
   new Worker(QUEUE_NAMES.booking, processBookingJob, { connection }),
   new Worker(QUEUE_NAMES.notification, processNotificationJob, { connection }),
-  new Worker(QUEUE_NAMES.cleanup, processBookingJob, { connection }),
+  new Worker(QUEUE_NAMES.cleanup, processCleanupJob, { connection }),
 ];
 
 for (const worker of workers) {

@@ -92,7 +92,7 @@ export class FoursquarePlacesProvider implements PlacesProvider {
       label:
         [location?.locality, location?.region, location?.country].filter(Boolean).join(", ") ||
         mapped.name,
-      providerPlaceId: mapped.sourceId,
+      providerPlaceId: mapped.providerPlaceId,
       source: this.name,
     };
   }

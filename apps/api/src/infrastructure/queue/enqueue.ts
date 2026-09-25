@@ -1,6 +1,7 @@
 import type {
   BookingConfirmationEmailJob,
   BookingPostCreateJob,
+  DestinationSyncJob,
   EmailJobPayload,
   NotificationJobPayload,
   PasswordResetEmailJob,
@@ -8,7 +9,7 @@ import type {
 } from "@gowithus/jobs";
 import { sendPasswordResetEmail, sendVerificationEmail } from "../../lib/mail.js";
 import { logger } from "../logging/logger.js";
-import { bookingQueue, emailQueue, enqueueJob, notificationQueue } from "./queues.js";
+import { bookingQueue, cleanupQueue, emailQueue, enqueueJob, notificationQueue } from "./queues.js";
 
 export async function enqueueVerificationEmail(input: VerificationEmailJob): Promise<void> {
   const queued = await enqueueJob(emailQueue, input.type, input);
@@ -39,6 +40,10 @@ export async function enqueueNotification(input: NotificationJobPayload): Promis
   if (!queued) {
     logger.debug("notification.skipped", { userId: input.userId, reason: "redis_unavailable" });
   }
+}
+
+export async function enqueueDestinationSyncJob(input: DestinationSyncJob): Promise<boolean> {
+  return enqueueJob(cleanupQueue, input.type, input);
 }
 
 export type { EmailJobPayload };
