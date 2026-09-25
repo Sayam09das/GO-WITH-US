@@ -126,6 +126,7 @@ export type StayListItem = {
 export type StayReviewItem = {
   id: string;
   rating: number;
+  title: string | null;
   body: string | null;
   createdAt: string;
   user: {
@@ -133,6 +134,98 @@ export type StayReviewItem = {
     name: string;
     avatar: string | null;
   };
+};
+
+export type SavedExperienceSummary = {
+  id: string;
+  experienceId: string;
+  slug: string;
+  title: string;
+  category: string;
+  heroImage: string;
+  destination: {
+    id: string;
+    title: string;
+    country: string;
+  };
+  savedAt: string;
+};
+
+export type SavedRestaurantSummary = {
+  id: string;
+  restaurantId: string;
+  slug: string;
+  title: string;
+  cuisine: string;
+  heroImage: string;
+  destination: {
+    id: string;
+    title: string;
+    country: string;
+  };
+  savedAt: string;
+};
+
+export type ExperienceListItem = {
+  id: string;
+  name: string;
+  slug: string;
+  destination: string;
+  category: string;
+  coverImage: string;
+  durationLabel: string | null;
+  price: {
+    from: number | null;
+    label: string;
+    tier: BudgetTier;
+  };
+  rating: number;
+  reviewCount: number;
+  isSaved: boolean;
+};
+
+export type RestaurantListItem = {
+  id: string;
+  name: string;
+  slug: string;
+  destination: string;
+  cuisine: string;
+  coverImage: string;
+  priceLevel: number;
+  rating: number;
+  reviewCount: number;
+  isSaved: boolean;
+};
+
+export type BookingSummary = {
+  id: string;
+  reference: string;
+  type: "stay" | "experience";
+  status: "pending" | "confirmed" | "cancelled" | "completed" | "expired";
+  paymentStatus: "unpaid" | "pending" | "paid" | "failed" | "refunded";
+  startDate: string | null;
+  endDate: string | null;
+  totalAmount: number;
+  currency: string;
+};
+
+export type StoryListItem = {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  category: string;
+  coverImage: string;
+  authorName: string;
+  readTimeMinutes: number;
+  isFeatured: boolean;
+  publishedAt: string | null;
+};
+
+export type RatingAggregate = {
+  averageRating: number;
+  reviewCount: number;
+  ratingDistribution: Record<"1" | "2" | "3" | "4" | "5", number>;
 };
 
 export type ApiErrorEnvelope = {

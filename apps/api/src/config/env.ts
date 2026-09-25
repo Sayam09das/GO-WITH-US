@@ -50,5 +50,6 @@ export const env = {
   smtpUser: process.env.SMTP_USER ?? "",
   smtpPass: process.env.SMTP_PASS ?? "",
   mailFrom: process.env.MAIL_FROM ?? "GoWithUs <noreply@localhost>",
+  paymentWebhookSecret: process.env.PAYMENT_WEBHOOK_SECRET ?? "",
   isProduction: (process.env.NODE_ENV ?? "development") === "production",
 } as const;

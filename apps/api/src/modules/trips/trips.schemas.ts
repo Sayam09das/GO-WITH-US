@@ -88,6 +88,7 @@ export const createItineraryItemSchema = z
     destinationId: z.string().uuid().optional(),
     stayId: z.string().uuid().optional(),
     experienceId: z.string().uuid().optional(),
+    restaurantId: z.string().uuid().optional(),
     title: z.string().trim().min(1).max(200).optional(),
     startTime: timeString.optional(),
     endTime: timeString.optional(),
@@ -119,10 +120,18 @@ export const createItineraryItemSchema = z
       });
     }
 
-    if ((input.type === "custom" || input.type === "restaurant") && !input.title) {
+    if (input.type === "restaurant" && !input.restaurantId) {
       context.addIssue({
         code: "custom",
-        message: "title is required for custom and restaurant items.",
+        message: "restaurantId is required for restaurant items.",
+        path: ["restaurantId"],
+      });
+    }
+
+    if (input.type === "custom" && !input.title) {
+      context.addIssue({
+        code: "custom",
+        message: "title is required for custom items.",
         path: ["title"],
       });
     }

@@ -3,6 +3,8 @@ import { sendData } from "../../lib/errors.js";
 import { getAuthUserId, handleControllerError } from "../../middleware/auth.js";
 import {
   destinationIdParamSchema,
+  experienceIdParamSchema,
+  restaurantIdParamSchema,
   stayIdParamSchema,
   updateAvatarSchema,
   updateProfileSchema,
@@ -94,6 +96,70 @@ export const usersController = {
     try {
       const params = stayIdParamSchema.parse(req.params);
       await usersService.unsaveStay(getAuthUserId(req), params.stayId);
+      res.status(204).send();
+    } catch (error) {
+      handleControllerError(error, res);
+    }
+  },
+
+  async listSavedExperiences(req: Request, res: Response) {
+    try {
+      const savedExperiences = await usersService.listSavedExperiences(getAuthUserId(req));
+      sendData(res, 200, { savedExperiences });
+    } catch (error) {
+      handleControllerError(error, res);
+    }
+  },
+
+  async saveExperience(req: Request, res: Response) {
+    try {
+      const params = experienceIdParamSchema.parse(req.params);
+      const savedExperience = await usersService.saveExperience(
+        getAuthUserId(req),
+        params.experienceId,
+      );
+      sendData(res, 201, { savedExperience });
+    } catch (error) {
+      handleControllerError(error, res);
+    }
+  },
+
+  async unsaveExperience(req: Request, res: Response) {
+    try {
+      const params = experienceIdParamSchema.parse(req.params);
+      await usersService.unsaveExperience(getAuthUserId(req), params.experienceId);
+      res.status(204).send();
+    } catch (error) {
+      handleControllerError(error, res);
+    }
+  },
+
+  async listSavedRestaurants(req: Request, res: Response) {
+    try {
+      const savedRestaurants = await usersService.listSavedRestaurants(getAuthUserId(req));
+      sendData(res, 200, { savedRestaurants });
+    } catch (error) {
+      handleControllerError(error, res);
+    }
+  },
+
+  async saveRestaurant(req: Request, res: Response) {
+    try {
+      const params = restaurantIdParamSchema.parse(req.params);
+      const savedRestaurant = await usersService.saveRestaurant(
+        getAuthUserId(req),
+        params.restaurantId,
+      );
+      sendData(res, 201, { savedRestaurant });
+    } catch (error) {
+      handleControllerError(error, res);
+    }
+  },
+
+  async unsaveRestaurant(req: Request, res: Response) {
+    try {
+      const params = restaurantIdParamSchema.parse(req.params);
+      await usersService.unsaveRestaurant(getAuthUserId(req), params.restaurantId);
       res.status(204).send();
     } catch (error) {
       handleControllerError(error, res);

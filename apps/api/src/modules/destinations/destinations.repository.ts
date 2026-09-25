@@ -170,6 +170,15 @@ export const destinationsRepository = {
     });
   },
 
+  async findByIdOrSlug(idOrSlug: string) {
+    const isUuid =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(idOrSlug);
+
+    return prisma.destination.findFirst({
+      where: isUuid ? { id: idOrSlug, isPublished: true } : { slug: idOrSlug, isPublished: true },
+    });
+  },
+
   async findRelated(destination: Destination, limit = 4) {
     return prisma.destination.findMany({
       where: {

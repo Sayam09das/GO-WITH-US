@@ -2,8 +2,10 @@ import type { NextFunction, Request, Response } from "express";
 import { sendData, sendError } from "../../lib/errors.js";
 import { getOptionalAuthUserId, handleControllerError } from "../../middleware/auth.js";
 import {
+  destinationIdParamSchema,
   destinationSearchSchema,
   destinationSlugParamSchema,
+  listDestinationReviewsQuerySchema,
   listDestinationsQuerySchema,
 } from "./destinations.schemas.js";
 import { destinationsService } from "./destinations.service.js";
@@ -61,6 +63,17 @@ export const destinationsController = {
         getOptionalAuthUserId(req),
       );
       sendData(res, 200, { destination });
+    } catch (error) {
+      handleControllerError(error, res);
+    }
+  },
+
+  async listReviews(req: Request, res: Response) {
+    try {
+      const params = destinationIdParamSchema.parse(req.params);
+      const query = listDestinationReviewsQuerySchema.parse(req.query);
+      const result = await destinationsService.listReviews(params.destinationId, query);
+      sendData(res, 200, result);
     } catch (error) {
       handleControllerError(error, res);
     }

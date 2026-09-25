@@ -18,6 +18,14 @@ usersRouter.get("/me/saved-stays", usersController.listSavedStays);
 usersRouter.post("/me/saved-stays/:stayId", usersController.saveStay);
 usersRouter.delete("/me/saved-stays/:stayId", usersController.unsaveStay);
 
+usersRouter.get("/me/saved-experiences", usersController.listSavedExperiences);
+usersRouter.post("/me/saved-experiences/:experienceId", usersController.saveExperience);
+usersRouter.delete("/me/saved-experiences/:experienceId", usersController.unsaveExperience);
+
+usersRouter.get("/me/saved-restaurants", usersController.listSavedRestaurants);
+usersRouter.post("/me/saved-restaurants/:restaurantId", usersController.saveRestaurant);
+usersRouter.delete("/me/saved-restaurants/:restaurantId", usersController.unsaveRestaurant);
+
 usersRouter.get("/me/activity", usersController.listActivity);
 
 export { usersRouter };

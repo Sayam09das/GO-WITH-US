@@ -373,6 +373,10 @@ export const tripsRepository = {
     return prisma.experience.findFirst({ where: { id, isPublished: true } });
   },
 
+  async findPublishedRestaurant(id: string) {
+    return prisma.restaurant.findFirst({ where: { id, isPublished: true } });
+  },
+
   async getNextSortOrder(tripId: string, dayIndex: number) {
     const lastItem = await prisma.itineraryItem.findFirst({
       where: { tripId, dayIndex },

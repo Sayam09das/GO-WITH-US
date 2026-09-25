@@ -38,6 +38,61 @@ enum ItemType {
   destination
   stay
   experience
+  restaurant
+}
+
+enum ReviewStatus {
+  pending
+  published
+  hidden
+}
+
+enum ReviewReportReason {
+  spam                      @map("spam")
+  inappropriate_content     @map("inappropriate_content")
+  harassment
+  false_information         @map("false_information")
+  other
+}
+
+enum StoryCategory {
+  editorial
+  guides
+  journeys
+  tips
+  inspiration
+}
+
+enum StoryStatus {
+  draft
+  published
+  archived
+}
+
+enum BookingType {
+  stay
+  experience
+}
+
+enum BookingStatus {
+  pending
+  confirmed
+  cancelled
+  completed
+  expired
+}
+
+enum PaymentStatus {
+  unpaid
+  pending
+  paid
+  failed
+  refunded
+}
+
+enum PaymentProvider {
+  stripe
+  manual
 }
 
 enum ItineraryItemType {
@@ -92,9 +147,14 @@ enum UserActivityType {
   UNSAVED_DESTINATION
   SAVED_STAY
   UNSAVED_STAY
+  SAVED_EXPERIENCE
+  UNSAVED_EXPERIENCE
+  SAVED_RESTAURANT
+  UNSAVED_RESTAURANT
   CREATED_TRIP
   COMPLETED_PROFILE
   BOOKED_STAY
+  BOOKED_EXPERIENCE
 }
 
 model User {
@@ -117,7 +177,9 @@ model User {
 
   savedItems              SavedItem[]
   trips                   Trip[]
+  bookings                Booking[]
   reviews                 Review[]
+  reviewReports           ReviewReport[]
   notifications           Notification[]
   passwordResetTokens     PasswordResetToken[]
   emailVerificationTokens EmailVerificationToken[]
@@ -153,9 +215,10 @@ model Destination {
   createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt       DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  stays       Stay[]
-  experiences Experience[]
-  trips       Trip[]
+  stays        Stay[]
+  experiences  Experience[]
+  restaurants  Restaurant[]
+  trips        Trip[]
 
   @@index([isPublished, isFeatured])
   @@map("destinations")
@@ -188,30 +251,63 @@ model Stay {
 }
 
 model Experience {
-  id              String             @id @default(uuid()) @db.Uuid
-  destinationId   String             @map("destination_id") @db.Uuid
-  slug            String             @unique
-  title           String
-  category        ExperienceCategory
-  durationLabel   String?            @map("duration_label")
-  durationMinutes Int?               @map("duration_minutes")
-  meetingPoint    String?            @map("meeting_point")
-  heroImage       String             @map("hero_image")
-  gallery         String[]
-  overview        String
-  highlights      String[]
-  priceTier       BudgetTier         @map("price_tier")
-  ratingAvg       Decimal?           @map("rating_avg") @db.Decimal(3, 2)
-  reviewCount     Int                @default(0) @map("review_count")
-  isFeatured      Boolean            @default(false) @map("is_featured")
-  isPublished     Boolean            @default(true) @map("is_published")
-  createdAt       DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt       DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id                 String             @id @default(uuid()) @db.Uuid
+  destinationId      String             @map("destination_id") @db.Uuid
+  slug               String             @unique
+  title              String
+  category           ExperienceCategory
+  durationLabel      String?            @map("duration_label")
+  durationMinutes    Int?               @map("duration_minutes")
+  meetingPoint       String?            @map("meeting_point")
+  heroImage          String             @map("hero_image")
+  gallery            String[]
+  overview           String
+  highlights         String[]
+  included           String[]           @default([])
+  requirements       String[]           @default([])
+  cancellationPolicy String?            @map("cancellation_policy")
+  priceTier          BudgetTier         @map("price_tier")
+  estimatedPriceFrom Int?               @map("estimated_price_from")
+  ratingAvg          Decimal?           @map("rating_avg") @db.Decimal(3, 2)
+  reviewCount        Int                @default(0) @map("review_count")
+  isFeatured         Boolean            @default(false) @map("is_featured")
+  isPublished        Boolean            @default(true) @map("is_published")
+  createdAt          DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   destination Destination @relation(fields: [destinationId], references: [id])
 
   @@index([destinationId, isPublished])
   @@map("experiences")
+}
+
+model Restaurant {
+  id              String   @id @default(uuid()) @db.Uuid
+  destinationId   String   @map("destination_id") @db.Uuid
+  slug            String   @unique
+  title           String
+  cuisine         String
+  heroImage       String   @map("hero_image")
+  gallery         String[]
+  overview        String
+  priceLevel      Int      @map("price_level") @db.SmallInt
+  address         String?
+  latitude        Decimal? @db.Decimal(10, 7)
+  longitude       Decimal? @db.Decimal(10, 7)
+  openingHours    Json?    @map("opening_hours")
+  menuHighlights  String[] @map("menu_highlights")
+  amenities       String[] @default([])
+  ratingAvg       Decimal? @map("rating_avg") @db.Decimal(3, 2)
+  reviewCount     Int      @default(0) @map("review_count")
+  isFeatured      Boolean  @default(false) @map("is_featured")
+  isPublished     Boolean  @default(true) @map("is_published")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  destination Destination @relation(fields: [destinationId], references: [id])
+
+  @@index([destinationId, isPublished])
+  @@map("restaurants")
 }
 
 model SavedItem {
@@ -290,20 +386,129 @@ model ItineraryItem {
 }
 
 model Review {
-  id        String   @id @default(uuid()) @db.Uuid
-  userId    String   @map("user_id") @db.Uuid
-  itemType  ItemType @map("item_type")
-  itemId    String   @map("item_id") @db.Uuid
-  rating    Int      @db.SmallInt
+  id        String       @id @default(uuid()) @db.Uuid
+  userId    String       @map("user_id") @db.Uuid
+  itemType  ItemType     @map("item_type")
+  itemId    String       @map("item_id") @db.Uuid
+  rating    Int          @db.SmallInt
+  title     String?
   body      String?
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  status    ReviewStatus @default(published)
+  createdAt DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reports ReviewReport[]
 
   @@unique([userId, itemType, itemId])
   @@index([itemType, itemId, createdAt(sort: Desc)])
+  @@index([itemType, itemId, status, createdAt(sort: Desc)])
   @@map("reviews")
+}
+
+model ReviewReport {
+  id        String             @id @default(uuid()) @db.Uuid
+  reviewId  String             @map("review_id") @db.Uuid
+  userId    String             @map("user_id") @db.Uuid
+  reason    ReviewReportReason
+  details   String?
+  createdAt DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewId, userId])
+  @@index([reviewId, createdAt(sort: Desc)])
+  @@map("review_reports")
+}
+
+model Story {
+  id              String        @id @default(uuid()) @db.Uuid
+  slug            String        @unique
+  title           String
+  excerpt         String
+  content         String
+  category        StoryCategory
+  coverImage      String        @map("cover_image")
+  authorName      String        @map("author_name")
+  readTimeMinutes Int           @map("read_time_minutes")
+  isFeatured      Boolean       @default(false) @map("is_featured")
+  status          StoryStatus   @default(draft)
+  publishedAt     DateTime?     @map("published_at") @db.Timestamptz(6)
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([status, isFeatured, publishedAt(sort: Desc)])
+  @@index([category, status, publishedAt(sort: Desc)])
+  @@map("stories")
+}
+
+model Booking {
+  id               String        @id @default(uuid()) @db.Uuid
+  userId           String        @map("user_id") @db.Uuid
+  bookingReference String        @unique @map("booking_reference")
+  type             BookingType
+  status           BookingStatus @default(pending)
+  paymentStatus    PaymentStatus @default(unpaid) @map("payment_status")
+  startDate        DateTime?     @map("start_date") @db.Date
+  endDate          DateTime?     @map("end_date") @db.Date
+  guestCount       Int           @default(1) @map("guest_count")
+  totalAmount      Int           @map("total_amount")
+  currency         String        @default("USD")
+  idempotencyKey   String?       @unique @map("idempotency_key")
+  cancellationNote String?       @map("cancellation_note")
+  createdAt        DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items    BookingItem[]
+  payments Payment[]
+
+  @@index([userId, status, startDate])
+  @@map("bookings")
+}
+
+model BookingItem {
+  id            String       @id @default(uuid()) @db.Uuid
+  bookingId     String       @map("booking_id") @db.Uuid
+  stayId        String?      @map("stay_id") @db.Uuid
+  experienceId  String?      @map("experience_id") @db.Uuid
+  roomId        String?      @map("room_id")
+  roomLabel     String?      @map("room_label")
+  checkIn       DateTime?    @map("check_in") @db.Date
+  checkOut      DateTime?    @map("check_out") @db.Date
+  experienceDate DateTime?   @map("experience_date") @db.Date
+  startTime     DateTime?    @map("start_time") @db.Time(6)
+  guests        Json
+  unitPrice     Int          @map("unit_price")
+  totalPrice    Int          @map("total_price")
+  createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId])
+  @@map("booking_items")
+}
+
+model Payment {
+  id                String          @id @default(uuid()) @db.Uuid
+  bookingId         String          @map("booking_id") @db.Uuid
+  provider          PaymentProvider
+  providerPaymentId String?         @map("provider_payment_id")
+  amount            Int
+  currency          String          @default("USD")
+  status            PaymentStatus   @default(pending)
+  idempotencyKey    String?         @unique @map("idempotency_key")
+  metadata          Json?
+  paidAt            DateTime?       @map("paid_at") @db.Timestamptz(6)
+  createdAt         DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId, status])
+  @@map("payments")
 }
 
 model Notification {

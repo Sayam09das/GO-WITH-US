@@ -4,6 +4,8 @@ import { usersRepository } from "./users.repository.js";
 import type { UpdateProfileInput } from "./users.schemas.js";
 import type {
   SavedDestinationSummary,
+  SavedExperienceSummary,
+  SavedRestaurantSummary,
   SavedStaySummary,
   UserActivityItem,
   UserProfile,
@@ -218,6 +220,182 @@ export const usersService = {
         type: "UNSAVED_STAY",
         title: `Removed ${stay.title}`,
         metadata: { stayId: stay.id, slug: stay.slug },
+      });
+    }
+  },
+
+  async listSavedExperiences(userId: string): Promise<SavedExperienceSummary[]> {
+    const savedItems = await usersRepository.listSavedExperiences(userId);
+    const experienceIds = savedItems.map((item) => item.itemId);
+    const experiences = await usersRepository.findExperiencesByIds(experienceIds);
+    const experienceMap = new Map(experiences.map((experience) => [experience.id, experience]));
+
+    return savedItems.flatMap((item) => {
+      const experience = experienceMap.get(item.itemId);
+      if (!experience) {
+        return [];
+      }
+
+      return [
+        {
+          id: item.id,
+          experienceId: experience.id,
+          slug: experience.slug,
+          title: experience.title,
+          category: experience.category.replace(/_/g, "-"),
+          heroImage: experience.heroImage,
+          destination: {
+            id: experience.destination.id,
+            title: experience.destination.title,
+            country: experience.destination.country,
+          },
+          savedAt: item.createdAt.toISOString(),
+        },
+      ];
+    });
+  },
+
+  async saveExperience(userId: string, experienceId: string): Promise<SavedExperienceSummary> {
+    const experience = await usersRepository.findPublishedExperience(experienceId);
+
+    if (!experience) {
+      throw new AppError(404, "NOT_FOUND", "Experience not found.");
+    }
+
+    const existing = await usersRepository.findSavedExperience(userId, experienceId);
+    if (existing) {
+      throw new AppError(409, "CONFLICT", "Experience is already saved.");
+    }
+
+    const savedItem = await usersRepository.createSavedItem(userId, "experience", experienceId);
+
+    await logUserActivity({
+      userId,
+      type: "SAVED_EXPERIENCE",
+      title: `Saved ${experience.title}`,
+      metadata: { experienceId: experience.id, slug: experience.slug },
+    });
+
+    return {
+      id: savedItem.id,
+      experienceId: experience.id,
+      slug: experience.slug,
+      title: experience.title,
+      category: experience.category.replace(/_/g, "-"),
+      heroImage: experience.heroImage,
+      destination: {
+        id: experience.destination.id,
+        title: experience.destination.title,
+        country: experience.destination.country,
+      },
+      savedAt: savedItem.createdAt.toISOString(),
+    };
+  },
+
+  async unsaveExperience(userId: string, experienceId: string): Promise<void> {
+    const savedItem = await usersRepository.findSavedExperience(userId, experienceId);
+
+    if (!savedItem) {
+      throw new AppError(404, "NOT_FOUND", "Saved experience not found.");
+    }
+
+    const experience = await usersRepository.findPublishedExperience(experienceId);
+    await usersRepository.deleteSavedItem(savedItem.id);
+
+    if (experience) {
+      await logUserActivity({
+        userId,
+        type: "UNSAVED_EXPERIENCE",
+        title: `Removed ${experience.title}`,
+        metadata: { experienceId: experience.id, slug: experience.slug },
+      });
+    }
+  },
+
+  async listSavedRestaurants(userId: string): Promise<SavedRestaurantSummary[]> {
+    const savedItems = await usersRepository.listSavedRestaurants(userId);
+    const restaurantIds = savedItems.map((item) => item.itemId);
+    const restaurants = await usersRepository.findRestaurantsByIds(restaurantIds);
+    const restaurantMap = new Map(restaurants.map((restaurant) => [restaurant.id, restaurant]));
+
+    return savedItems.flatMap((item) => {
+      const restaurant = restaurantMap.get(item.itemId);
+      if (!restaurant) {
+        return [];
+      }
+
+      return [
+        {
+          id: item.id,
+          restaurantId: restaurant.id,
+          slug: restaurant.slug,
+          title: restaurant.title,
+          cuisine: restaurant.cuisine,
+          heroImage: restaurant.heroImage,
+          destination: {
+            id: restaurant.destination.id,
+            title: restaurant.destination.title,
+            country: restaurant.destination.country,
+          },
+          savedAt: item.createdAt.toISOString(),
+        },
+      ];
+    });
+  },
+
+  async saveRestaurant(userId: string, restaurantId: string): Promise<SavedRestaurantSummary> {
+    const restaurant = await usersRepository.findPublishedRestaurant(restaurantId);
+
+    if (!restaurant) {
+      throw new AppError(404, "NOT_FOUND", "Restaurant not found.");
+    }
+
+    const existing = await usersRepository.findSavedRestaurant(userId, restaurantId);
+    if (existing) {
+      throw new AppError(409, "CONFLICT", "Restaurant is already saved.");
+    }
+
+    const savedItem = await usersRepository.createSavedItem(userId, "restaurant", restaurantId);
+
+    await logUserActivity({
+      userId,
+      type: "SAVED_RESTAURANT",
+      title: `Saved ${restaurant.title}`,
+      metadata: { restaurantId: restaurant.id, slug: restaurant.slug },
+    });
+
+    return {
+      id: savedItem.id,
+      restaurantId: restaurant.id,
+      slug: restaurant.slug,
+      title: restaurant.title,
+      cuisine: restaurant.cuisine,
+      heroImage: restaurant.heroImage,
+      destination: {
+        id: restaurant.destination.id,
+        title: restaurant.destination.title,
+        country: restaurant.destination.country,
+      },
+      savedAt: savedItem.createdAt.toISOString(),
+    };
+  },
+
+  async unsaveRestaurant(userId: string, restaurantId: string): Promise<void> {
+    const savedItem = await usersRepository.findSavedRestaurant(userId, restaurantId);
+
+    if (!savedItem) {
+      throw new AppError(404, "NOT_FOUND", "Saved restaurant not found.");
+    }
+
+    const restaurant = await usersRepository.findPublishedRestaurant(restaurantId);
+    await usersRepository.deleteSavedItem(savedItem.id);
+
+    if (restaurant) {
+      await logUserActivity({
+        userId,
+        type: "UNSAVED_RESTAURANT",
+        title: `Removed ${restaurant.title}`,
+        metadata: { restaurantId: restaurant.id, slug: restaurant.slug },
       });
     }
   },
