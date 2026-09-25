@@ -77,6 +77,63 @@ export type DashboardOverview = {
   recentActivity: UserActivityItem[];
 };
 
+export type DestinationListItem = {
+  id: string;
+  slug: string;
+  title: string;
+  location: string;
+  country: string;
+  region: string;
+  style: string | null;
+  category: string | null;
+  budgetTier: BudgetTier;
+  popularity: number;
+  rating: number;
+  priceLabel: string;
+  heroImage: string;
+  imageAlt: string;
+  isSaved: boolean;
+};
+
+export type PaginatedMeta = {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+};
+
+export type StayListItem = {
+  id: string;
+  name: string;
+  slug: string;
+  destination: string;
+  destinationSlug: string;
+  propertyType: string;
+  coverImage: string;
+  imageAlt: string;
+  price: {
+    nightlyFrom: number | null;
+    label: string;
+    tier: BudgetTier;
+  };
+  rating: number;
+  reviewCount: number;
+  amenities: string[];
+  isSaved: boolean;
+};
+
+export type StayReviewItem = {
+  id: string;
+  rating: number;
+  body: string | null;
+  createdAt: string;
+  user: {
+    id: string;
+    name: string;
+    avatar: string | null;
+  };
+};
+
 export type ApiErrorEnvelope = {
   error: {
     code: string;
