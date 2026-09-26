@@ -1,3 +1,4 @@
+import type { UserProfileStats } from "@gowithus/types";
 import { logUserActivity } from "../../lib/activity.js";
 import { AppError } from "../../lib/errors.js";
 import { storageEnv, uploadUserFile } from "../../lib/supabase-storage.js";
@@ -30,12 +31,48 @@ export const usersService = {
   },
 
   async updateProfile(userId: string, input: UpdateProfileInput): Promise<UserProfile> {
+    const existing = await usersRepository.findById(userId);
+    if (!existing) {
+      throw new AppError(404, "NOT_FOUND", "User not found.");
+    }
+
+    const currentProfile = toUserProfile(existing);
+
+    const travelInterests = input.travelInterests ?? currentProfile.travelInterests;
+    const travelStyleTags = input.travelStyleTags ?? currentProfile.travelStyleTags;
+
+    let budgetPreference =
+      input.budgetPreference !== undefined ? input.budgetPreference : existing.budgetPreference;
+
+    if (travelStyleTags.includes("budget")) {
+      budgetPreference = "budget";
+    } else if (travelStyleTags.includes("luxury")) {
+      budgetPreference = "luxury";
+    }
+
+    const mergedPreferences = {
+      ...currentProfile.preferences,
+      ...(input.preferences ?? {}),
+    };
+
     const user = await usersRepository.updateProfile(userId, {
       ...(input.name !== undefined ? { fullName: input.name } : {}),
       ...(input.bio !== undefined ? { bio: input.bio } : {}),
       ...(input.phone !== undefined ? { phone: input.phone } : {}),
       ...(input.country !== undefined ? { country: input.country } : {}),
       ...(input.timezone !== undefined ? { timezone: input.timezone } : {}),
+      ...(input.homeCity !== undefined ? { homeCity: input.homeCity } : {}),
+      ...(input.travelInterests !== undefined || input.travelStyleTags !== undefined
+        ? { travelStyles: [...travelInterests, ...travelStyleTags] }
+        : {}),
+      ...(input.budgetPreference !== undefined ||
+      input.travelStyleTags !== undefined ||
+      input.travelInterests !== undefined
+        ? { budgetPreference }
+        : {}),
+      ...(input.preferences !== undefined
+        ? { profilePreferences: mergedPreferences as object }
+        : {}),
     });
 
     const profile = toUserProfile(user);
@@ -49,6 +86,19 @@ export const usersService = {
     }
 
     return profile;
+  },
+
+  async getProfileStats(userId: string): Promise<UserProfileStats> {
+    const [savedPlaces, trips] = await Promise.all([
+      usersRepository.countSavedItems(userId),
+      usersRepository.countTrips(userId),
+    ]);
+
+    return {
+      savedPlaces,
+      trips,
+      storiesSaved: 0,
+    };
   },
 
   async updateAvatar(userId: string, avatar: string): Promise<UserProfile> {

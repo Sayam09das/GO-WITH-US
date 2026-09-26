@@ -8,6 +8,7 @@ import type {
 } from "@gowithus/jobs";
 import { env } from "../../config/env.js";
 import { sendPasswordResetEmail, sendVerificationEmail } from "../../lib/mail.js";
+import { notificationsService } from "../../modules/notifications/notifications.service.js";
 import { logger } from "../logging/logger.js";
 import { bookingQueue, emailQueue, enqueueJob, notificationQueue } from "./queues.js";
 
@@ -63,7 +64,14 @@ export async function enqueueBookingPostCreate(input: BookingPostCreateJob): Pro
 export async function enqueueNotification(input: NotificationJobPayload): Promise<void> {
   const queued = await enqueueJob(notificationQueue, input.type, input);
   if (!queued) {
-    logger.debug("notification.skipped", { userId: input.userId, reason: "redis_unavailable" });
+    try {
+      await notificationsService.createFromJob(input);
+    } catch (error) {
+      logger.error("notification.sync_create_failed", {
+        userId: input.userId,
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
 }
 

@@ -15,6 +15,7 @@ import { dashboardRouter } from "./modules/dashboard/dashboard.routes.js";
 import { destinationsRouter } from "./modules/destinations/destinations.routes.js";
 import { discoveryRouter } from "./modules/discovery/discovery.routes.js";
 import { experiencesRouter } from "./modules/experiences/experiences.routes.js";
+import { notificationsRouter } from "./modules/notifications/notifications.routes.js";
 import { paymentsRouter } from "./modules/payments/payments.routes.js";
 import { placesRouter } from "./modules/places/places.routes.js";
 import { restaurantsRouter } from "./modules/restaurants/restaurants.routes.js";
@@ -136,6 +137,7 @@ export function createApp(): Express {
   apiRouter.use("/users", usersRouter);
   apiRouter.use("/dashboard", dashboardRouter);
   apiRouter.use("/trips", tripsRouter);
+  apiRouter.use("/notifications", notificationsRouter);
 
   app.use("/api/v1", apiRouter);
   app.use(errorHandler);

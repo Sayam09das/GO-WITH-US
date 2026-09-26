@@ -54,7 +54,7 @@ function AccountSettingsSections() {
       <AccountSettingsGroup title="Account">
         <AccountSettingsRow
           label="Profile details"
-          description="Update your name, bio, and where you call home."
+          description="Update your name, travel preferences, and favorite destinations."
           href="/account/profile"
           actionLabel="Edit profile"
         />
@@ -67,14 +67,16 @@ function AccountSettingsSections() {
       </AccountSettingsGroup>
 
       <AccountSettingsGroup title="Notifications">
-        <AccountSettingsRow
-          label="Trip reminders"
-          description="Gentle nudges before departures and itinerary changes."
-        />
-        <AccountSettingsRow
-          label="Saved place updates"
-          description="When a saved stay or experience has new details."
-        />
+        <div id="notifications">
+          <AccountSettingsRow
+            label="Trip reminders"
+            description="Gentle nudges before departures and itinerary changes."
+          />
+          <AccountSettingsRow
+            label="Saved place updates"
+            description="When a saved stay or experience has new details."
+          />
+        </div>
       </AccountSettingsGroup>
 
       <AccountSettingsGroup title="Privacy">

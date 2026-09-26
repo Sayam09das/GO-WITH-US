@@ -22,6 +22,15 @@ export const usersController = {
     }
   },
 
+  async getProfileStats(req: Request, res: Response) {
+    try {
+      const stats = await usersService.getProfileStats(getAuthUserId(req));
+      sendData(res, 200, { stats });
+    } catch (error) {
+      handleControllerError(error, res);
+    }
+  },
+
   async patchMe(req: Request, res: Response) {
     try {
       const body = updateProfileSchema.parse(req.body);

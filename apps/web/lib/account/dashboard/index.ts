@@ -30,7 +30,7 @@ export {
   INSPIRATION_SECTION_COPY,
   INSPIRATION_SECTION_LINKS,
 } from "./inspiration-config";
-export { isDashboardNavActive } from "./nav-utils";
+export { dashboardSidebarNavLinkClasses, isDashboardNavActive } from "./nav-utils";
 export {
   DASHBOARD_PLAN_JOURNEY_VISUAL,
   type DashboardPlanJourneyVisualConfig,

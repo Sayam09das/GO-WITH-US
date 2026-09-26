@@ -5,11 +5,13 @@ import type {
   SavedStaySummary,
   UserActivityItem,
   UserProfile,
+  UserProfileStats,
 } from "@gowithus/types";
 import { notifyNavCountsChanged } from "@/lib/navigation/nav-counts-events";
 import { apiFetch, apiUpload } from "./client";
 
 type UserResponse = { user: UserProfile };
+type ProfileStatsResponse = { stats: UserProfileStats };
 type SavedDestinationsResponse = { savedDestinations: SavedDestinationSummary[] };
 type SavedStaysResponse = { savedStays: SavedStaySummary[] };
 type SavedExperiencesResponse = { savedExperiences: SavedExperienceSummary[] };
@@ -25,14 +27,33 @@ export async function getUserProfile(): Promise<UserProfile | null> {
   }
 }
 
-export async function updateUserProfile(
-  input: Partial<Pick<UserProfile, "name" | "bio" | "phone" | "country" | "timezone">>,
-): Promise<UserProfile> {
+export type UpdateUserProfileInput = Partial<
+  Pick<
+    UserProfile,
+    | "name"
+    | "bio"
+    | "phone"
+    | "country"
+    | "timezone"
+    | "homeCity"
+    | "budgetPreference"
+    | "travelInterests"
+    | "travelStyleTags"
+    | "preferences"
+  >
+>;
+
+export async function updateUserProfile(input: UpdateUserProfileInput): Promise<UserProfile> {
   const response = await apiFetch<UserResponse>("/users/me", {
     method: "PATCH",
     body: input,
   });
   return response.user;
+}
+
+export async function getUserProfileStats(): Promise<UserProfileStats> {
+  const response = await apiFetch<ProfileStatsResponse>("/users/me/stats");
+  return response.stats;
 }
 
 export async function listSavedDestinations(): Promise<SavedDestinationSummary[]> {

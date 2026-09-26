@@ -1,5 +1,24 @@
 export type BudgetTier = "budget" | "moderate" | "luxury";
 
+import type {
+  ProfilePreferences,
+  ProfileTravelInterestId,
+  ProfileTravelStyleTagId,
+} from "./profile";
+
+export type {
+  ProfilePreferences,
+  ProfileTravelInterestId,
+  ProfileTravelStyleTagId,
+  UserProfileStats,
+} from "./profile";
+export {
+  PROFILE_INTEREST_IDS,
+  PROFILE_STYLE_TAG_IDS,
+  PROFILE_TRAVEL_INTERESTS,
+  PROFILE_TRAVEL_STYLE_TAGS,
+} from "./profile";
+
 export type PublicUser = {
   id: string;
   email: string;
@@ -23,6 +42,11 @@ export type UserProfile = {
   country: string | null;
   timezone: string | null;
   emailVerified: boolean;
+  homeCity: string | null;
+  budgetPreference: BudgetTier | null;
+  travelInterests: ProfileTravelInterestId[];
+  travelStyleTags: ProfileTravelStyleTagId[];
+  preferences: ProfilePreferences;
 };
 
 export type TripSummary = {
@@ -282,4 +306,29 @@ export type ApiErrorEnvelope = {
 
 export type ApiDataEnvelope<T> = {
   data: T;
+};
+
+export type NotificationType = "trip_reminder" | "itinerary_alert" | "system";
+
+export type NotificationFilterCategory = "trips" | "bookings" | "itineraries" | "updates";
+
+export type NotificationAction = {
+  label: string;
+  href: string;
+};
+
+export type NotificationSummary = {
+  id: string;
+  type: NotificationType;
+  filterCategory: NotificationFilterCategory;
+  title: string;
+  description: string;
+  isRead: boolean;
+  createdAt: string;
+  action: NotificationAction | null;
+};
+
+export type NotificationListResponse = {
+  items: NotificationSummary[];
+  unreadCount: number;
 };

@@ -23,6 +23,9 @@ importers:
       '@gowithus/jobs':
         specifier: workspace:*
         version: link:../../packages/jobs
+      '@gowithus/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@prisma/adapter-pg':
         specifier: ^7.0.0
         version: 7.10.0
