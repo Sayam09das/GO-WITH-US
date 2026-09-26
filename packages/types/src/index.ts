@@ -225,8 +225,10 @@ export type BookingSummary = {
   paymentStatus: "unpaid" | "pending" | "paid" | "failed" | "refunded";
   startDate: string | null;
   endDate: string | null;
+  guestCount: number;
   totalAmount: number;
   currency: string;
+  createdAt: string;
 };
 
 export type StoryListItem = {
