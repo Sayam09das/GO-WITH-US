@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { AccountPageHeader } from "@/components/account/account-page-header";
 import { TripsList } from "@/components/account/trips/trips-list";
+import { Button } from "@/components/ui/button";
 import { buildPageMetadata, buildPageTitle } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -12,11 +15,14 @@ export const metadata: Metadata = buildPageMetadata({
 export default function TripsPage() {
   return (
     <div className="container-travel py-10 sm:py-12 lg:py-14">
-      <div className="mb-8 max-w-2xl">
-        <h1 className="section-heading text-3xl text-heading sm:text-4xl">My trips</h1>
-        <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
-          Draft, upcoming, and completed journeys in one calm workspace.
-        </p>
+      <AccountPageHeader
+        title="My trips"
+        description="Draft, upcoming, and completed journeys in one calm workspace."
+      />
+      <div className="mb-8">
+        <Button asChild>
+          <Link href="/trips/new">Plan a trip</Link>
+        </Button>
       </div>
       <TripsList />
     </div>

@@ -4,6 +4,7 @@ import type {
   Experience,
   ExperienceCategory,
 } from "../../generated/client.js";
+import { decimalToNumber } from "../../lib/decimal.js";
 
 export type ExperienceDestinationSummary = {
   id: string;
@@ -86,10 +87,6 @@ const CATEGORY_LABELS: Record<ExperienceCategory, string> = {
   food_dining: "Food & Drink",
   attractions: "Attractions",
 };
-
-function decimalToNumber(value: { toNumber(): number } | null | undefined): number {
-  return value ? Number(value.toNumber()) : 0;
-}
 
 export function categoryToApi(value: ExperienceCategory): string {
   return value.replace(/_/g, "-");

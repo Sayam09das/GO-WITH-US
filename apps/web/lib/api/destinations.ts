@@ -7,7 +7,49 @@ import { mapDestinationListItem } from "./mappers";
 
 type DestinationListResponse = {
   destinations: ApiDestinationListItem[];
+  meta?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 };
+
+type DestinationFetch = typeof apiFetch;
+
+async function fetchAllDestinations(
+  fetcher: DestinationFetch = apiFetch,
+): Promise<DestinationListItem[]> {
+  const merged = new Map<string, DestinationListItem>();
+
+  try {
+    const featured = await fetcher<DestinationListResponse>("/destinations/featured");
+    for (const item of featured.destinations) {
+      merged.set(item.slug, mapDestinationListItem(item));
+    }
+  } catch {
+    // Featured list is optional; paginated catalog is the source of truth.
+  }
+
+  const limit = 100;
+  let page = 1;
+  let totalPages = 1;
+
+  do {
+    const listed = await fetcher<DestinationListResponse>(
+      `/destinations?limit=${limit}&page=${page}&sort=popular`,
+    );
+
+    for (const item of listed.destinations) {
+      merged.set(item.slug, mapDestinationListItem(item));
+    }
+
+    totalPages = listed.meta?.totalPages ?? 1;
+    page += 1;
+  } while (page <= totalPages);
+
+  return [...merged.values()];
+}
 
 type DestinationDetailResponse = {
   id: string;
@@ -57,18 +99,6 @@ type DestinationDetailResponse = {
   relatedDestinations: ApiDestinationListItem[];
 };
 
-async function fetchAllDestinations(): Promise<DestinationListItem[]> {
-  const featured = await apiFetch<DestinationListResponse>("/destinations/featured");
-  const listed = await apiFetch<DestinationListResponse>("/destinations?limit=100&page=1");
-
-  const merged = new Map<string, DestinationListItem>();
-  for (const item of [...featured.destinations, ...listed.destinations]) {
-    merged.set(item.slug, mapDestinationListItem(item));
-  }
-
-  return [...merged.values()];
-}
-
 async function fetchPopularFromApi(limit: number): Promise<DestinationListItem[]> {
   try {
     const response = await apiFetch<DestinationListResponse>("/destinations/featured");
@@ -82,7 +112,7 @@ async function fetchPopularFromApi(limit: number): Promise<DestinationListItem[]
 
   try {
     const listed = await apiFetch<DestinationListResponse>(
-      `/destinations?limit=${limit}&page=1&sort=popularity`,
+      `/destinations?limit=${limit}&page=1&sort=popular`,
     );
     if (listed.destinations.length > 0) {
       return listed.destinations.map(mapDestinationListItem);
@@ -112,8 +142,19 @@ export async function getPopularDestinations(limit = 6): Promise<DestinationList
   return POPULAR_DESTINATIONS_HOMEPAGE_SHOWCASE.slice(0, limit);
 }
 
-export async function getAllDestinations(): Promise<DestinationListItem[]> {
-  return fetchAllDestinations();
+export async function getAllDestinations(
+  fetcher: DestinationFetch = apiFetch,
+): Promise<DestinationListItem[]> {
+  try {
+    const merged = await fetchAllDestinations(fetcher);
+    if (merged.length > 0) {
+      return merged;
+    }
+  } catch {
+    // Fall through when the catalog API is unreachable.
+  }
+
+  return POPULAR_DESTINATIONS_HOMEPAGE_SHOWCASE;
 }
 
 export async function searchDestinations(

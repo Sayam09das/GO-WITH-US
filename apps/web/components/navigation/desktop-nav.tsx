@@ -9,8 +9,10 @@ import type { NavbarOverlayTone, NavbarVisualState } from "@/lib/navigation";
 import {
   isAccountActive,
   isNavItemActive,
+  navCountForHref,
   PRIMARY_NAV_ITEMS,
   UTILITY_NAV_ITEMS,
+  useNavCounts,
 } from "@/lib/navigation";
 
 interface DesktopNavProps {
@@ -20,6 +22,7 @@ interface DesktopNavProps {
 
 function DesktopNav({ visualState, overlayTone }: DesktopNavProps) {
   const pathname = usePathname();
+  const { counts } = useNavCounts();
 
   return (
     <div className="hidden lg:flex lg:min-h-16 lg:items-center lg:justify-between lg:gap-8">
@@ -56,6 +59,7 @@ function DesktopNav({ visualState, overlayTone }: DesktopNavProps) {
               visualState={visualState}
               overlayTone={overlayTone}
               showLabel={false}
+              badgeCount={navCountForHref(item.href, counts)}
               className="xl:px-3"
             />
           );

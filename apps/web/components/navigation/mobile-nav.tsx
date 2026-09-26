@@ -14,9 +14,11 @@ import type { NavbarOverlayTone, NavbarVisualState } from "@/lib/navigation";
 import {
   isAccountActive,
   isNavItemActive,
+  navCountForHref,
   navIconClass,
   PRIMARY_NAV_ITEMS,
   UTILITY_NAV_ITEMS,
+  useNavCounts,
 } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
@@ -33,6 +35,7 @@ const STAGGER = 0.04;
 
 function MobileNav({ visualState, overlayTone, isOpen, onOpenChange }: MobileNavProps) {
   const pathname = usePathname();
+  const { counts } = useNavCounts();
   const menuId = useId();
   const reducedMotion = useReducedMotion();
   const isOverlay = visualState === "transparent";
@@ -190,6 +193,7 @@ function MobileNav({ visualState, overlayTone, isOpen, onOpenChange }: MobileNav
                           isActive={isNavItemActive(pathname, item.match)}
                           visualState="default"
                           showLabel
+                          badgeCount={navCountForHref(item.href, counts)}
                           className="min-h-12 w-full justify-start px-0 text-base"
                           onNavigate={closeMenu}
                         />

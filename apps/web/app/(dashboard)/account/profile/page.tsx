@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AccountPageHeader } from "@/components/account/account-page-header";
 import { Button } from "@/components/ui/button";
 import { getUserProfile } from "@/lib/api/users.server";
 import { buildPageMetadata, buildPageTitle } from "@/lib/seo";
@@ -17,11 +18,11 @@ export default async function AccountProfilePage() {
   if (!profile) {
     return (
       <div className="container-travel py-10 sm:py-12 lg:py-14">
-        <h1 className="section-heading text-3xl text-heading sm:text-4xl">My profile</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-          Sign in to view and update your profile details.
-        </p>
-        <Button asChild className="mt-6">
+        <AccountPageHeader
+          title="My profile"
+          description="Sign in to view and update your profile details."
+        />
+        <Button asChild className="mt-2">
           <Link href="/sign-in">Sign in</Link>
         </Button>
       </div>
@@ -30,12 +31,7 @@ export default async function AccountProfilePage() {
 
   return (
     <div className="container-travel py-10 sm:py-12 lg:py-14">
-      <div className="mb-8 max-w-2xl">
-        <h1 className="section-heading text-3xl text-heading sm:text-4xl">My profile</h1>
-        <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
-          Your account details from GO WITH US.
-        </p>
-      </div>
+      <AccountPageHeader title="My profile" description="Your account details from GO WITH US." />
 
       <dl className="grid max-w-2xl gap-4 rounded-[1.25rem] border border-border/60 bg-background p-5 shadow-sm">
         <div>

@@ -12,6 +12,10 @@
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
+    "db:seed:destinations": "tsx prisma/seed-destinations-only.ts",
+    "db:repair-catalog": "prisma db execute --file prisma/scripts/repair-catalog-columns.sql",
+    "db:repair-trips": "prisma db execute --file prisma/scripts/repair-trips-schema.sql",
+    "db:repair-schema": "pnpm db:repair-catalog && pnpm db:repair-trips",
     "db:studio": "prisma studio"
   },
   "prisma": {

@@ -2,7 +2,8 @@
 
 import { CalendarDays, CheckCircle2, LoaderCircle } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -28,6 +29,8 @@ function defaultCheckIn(): string {
 }
 
 export function BookingRequestForm({ type, itemId, itemName }: BookingRequestFormProps) {
+  const pathname = usePathname();
+  const formRef = useRef<HTMLFormElement>(null);
   const initialCheckIn = defaultCheckIn();
   const [checkIn, setCheckIn] = useState(initialCheckIn);
   const [checkOut, setCheckOut] = useState(addDays(initialCheckIn, 3));
@@ -37,6 +40,16 @@ export function BookingRequestForm({ type, itemId, itemName }: BookingRequestFor
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reference, setReference] = useState<string | null>(null);
+
+  const signInHref = `/sign-in?next=${encodeURIComponent(`${pathname}#request-booking`)}`;
+
+  useEffect(() => {
+    if (typeof window === "undefined" || window.location.hash !== "#request-booking") {
+      return;
+    }
+
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -59,6 +72,11 @@ export function BookingRequestForm({ type, itemId, itemName }: BookingRequestFor
     } catch (cause) {
       if (cause instanceof ApiRequestError && cause.status === 401) {
         setError("Sign in to request a booking.");
+        return;
+      }
+
+      if (cause instanceof ApiRequestError) {
+        setError(cause.message);
         return;
       }
 
@@ -90,8 +108,10 @@ export function BookingRequestForm({ type, itemId, itemName }: BookingRequestFor
 
   return (
     <form
+      ref={formRef}
+      id="request-booking"
       onSubmit={handleSubmit}
-      className="rounded-[1.25rem] border border-border/60 bg-background p-5 shadow-sm"
+      className="scroll-mt-28 rounded-[1.25rem] border border-border/60 bg-background p-5 shadow-sm"
     >
       <div className="flex items-center gap-2">
         <CalendarDays aria-hidden="true" className="size-4 text-primary" />
@@ -175,7 +195,7 @@ export function BookingRequestForm({ type, itemId, itemName }: BookingRequestFor
         <p className="mt-4 text-sm text-destructive">
           {error}{" "}
           {error.includes("Sign in") ? (
-            <Link href="/sign-in" className="font-medium underline underline-offset-4">
+            <Link href={signInHref} className="font-medium underline underline-offset-4">
               Sign in
             </Link>
           ) : null}

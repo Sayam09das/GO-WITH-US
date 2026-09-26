@@ -2,11 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { DASHBOARD_MOBILE_TAB_ITEMS, isDashboardNavActive } from "@/lib/account";
+import { NavCountBadge } from "@/components/navigation/nav-count-badge";
+import {
+  DASHBOARD_MOBILE_TAB_ITEMS,
+  isDashboardNavActive,
+  navCountForHref,
+  useNavCounts,
+} from "@/lib/account";
 import { cn } from "@/lib/utils";
 
 function DashboardMobileTabBar() {
   const pathname = usePathname();
+  const { counts } = useNavCounts();
 
   return (
     <nav
@@ -17,6 +24,7 @@ function DashboardMobileTabBar() {
         {DASHBOARD_MOBILE_TAB_ITEMS.map((item) => {
           const active = isDashboardNavActive(pathname, item.match);
           const Icon = item.icon;
+          const badgeCount = navCountForHref(item.href, counts);
 
           return (
             <li key={item.href} className="flex-1">
@@ -24,14 +32,20 @@ function DashboardMobileTabBar() {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-lg px-1 py-1.5 text-[0.6875rem] font-medium transition-colors",
+                  "relative flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-lg px-1 py-1.5 text-[0.6875rem] font-medium transition-colors",
                   active ? "text-heading" : "text-muted-foreground hover:text-heading",
                 )}
               >
-                <Icon
-                  aria-hidden="true"
-                  className={cn("size-[1.125rem]", active && "text-primary")}
-                />
+                <span className="relative inline-flex">
+                  <Icon
+                    aria-hidden="true"
+                    className={cn("size-[1.125rem]", active && "text-primary")}
+                  />
+                  <NavCountBadge
+                    count={badgeCount}
+                    className="absolute -right-2 -top-1.5 min-w-[0.875rem] px-0.5 py-px text-[0.5rem]"
+                  />
+                </span>
                 <span>{item.label}</span>
               </Link>
             </li>
