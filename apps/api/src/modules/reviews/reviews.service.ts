@@ -49,6 +49,16 @@ async function assertReviewTargetExists(
       }
       return;
     }
+    case "place": {
+      const place = await prisma.place.findFirst({
+        where: { id: itemId, isPublished: true },
+        select: { id: true },
+      });
+      if (!place) {
+        throw new AppError(404, "NOT_FOUND", "Place not found.");
+      }
+      return;
+    }
   }
 }
 

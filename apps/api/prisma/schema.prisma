@@ -39,6 +39,20 @@ enum ItemType {
   stay
   experience
   restaurant
+  place
+}
+
+enum PlaceCategory {
+  museum
+  beach
+  park
+  market
+  viewpoint
+  temple
+  historic_site      @map("historic-site")
+  neighborhood
+  gallery
+  natural_attraction @map("natural-attraction")
 }
 
 enum ReviewStatus {
@@ -106,6 +120,7 @@ enum ItineraryItemType {
   stay
   experience
   restaurant
+  place
   custom
 }
 
@@ -231,6 +246,7 @@ model Destination {
   stays        Stay[]
   experiences  Experience[]
   restaurants  Restaurant[]
+  places       Place[]
   trips        Trip[]
 
   @@unique([provider, providerPlaceId])
@@ -342,6 +358,32 @@ model Restaurant {
   @@index([providerPlaceId])
   @@index([destinationId, isPublished])
   @@map("restaurants")
+}
+
+model Place {
+  id            String        @id @default(uuid()) @db.Uuid
+  destinationId String        @map("destination_id") @db.Uuid
+  slug          String        @unique
+  title         String
+  category      PlaceCategory
+  locationLabel String?       @map("location_label")
+  heroImage     String        @map("hero_image")
+  gallery       String[]
+  overview      String
+  categoryTags  String[]      @map("category_tags")
+  latitude      Decimal?      @db.Decimal(10, 7)
+  longitude     Decimal?      @db.Decimal(10, 7)
+  ratingAvg     Decimal?      @map("rating_avg") @db.Decimal(3, 2)
+  reviewCount   Int           @default(0) @map("review_count")
+  isFeatured    Boolean       @default(false) @map("is_featured")
+  isPublished   Boolean       @default(true) @map("is_published")
+  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  destination Destination @relation(fields: [destinationId], references: [id])
+
+  @@index([destinationId, isPublished])
+  @@map("places")
 }
 
 model SavedItem {

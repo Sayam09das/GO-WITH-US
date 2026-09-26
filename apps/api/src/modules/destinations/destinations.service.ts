@@ -2,7 +2,6 @@ import { CACHE_KEYS, CACHE_TTL } from "../../infrastructure/cache/cache.keys.js"
 import { cacheService } from "../../infrastructure/cache/cache.service.js";
 import { AppError } from "../../lib/errors.js";
 import { reviewCatalog } from "../../lib/review-catalog.js";
-import { providerFactory } from "../../providers/index.js";
 import { destinationsRepository } from "./destinations.repository.js";
 import type { DestinationSearchInput } from "./destinations.schemas.js";
 import {
@@ -61,12 +60,6 @@ export const destinationsService = {
         )
       : new Set<string>();
 
-    const placesProvider = providerFactory.getPlacesProvider();
-    const placeSuggestions =
-      placesProvider.isConfigured() && suggestionQuery.length > 0
-        ? await placesProvider.autocomplete({ query: suggestionQuery, limit: 6 })
-        : [];
-
     return {
       destinations: result.destinations.map((destination) =>
         toDestinationListItem(destination, savedIds.has(destination.id)),
@@ -78,12 +71,6 @@ export const destinationsService = {
           total: result.total,
         }),
         ...(input.duration ? { durationFilterApplied: false } : {}),
-        ...(placeSuggestions.length > 0
-          ? {
-              placeSuggestions,
-              provider: placesProvider.name,
-            }
-          : {}),
       },
     };
   },

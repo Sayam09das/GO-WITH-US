@@ -50,7 +50,7 @@ function JournalStoryCarousel({ stories }: JournalStoryCarouselProps) {
 
   const carouselItems = stories.map((story) => ({
     id: story.id,
-    src: story.heroImage,
+    src: story.heroImage?.trim() || "/landingImg/travelimg/travel-2.jpg",
     title: story.title,
     alt: story.imageAlt,
   }));

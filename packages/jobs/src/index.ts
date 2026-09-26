@@ -55,12 +55,6 @@ export type ExpiredBookingCleanupJob = {
   type: "cleanup-expired-bookings";
 };
 
-export type DestinationSyncJob = {
-  type: "sync-destination";
-  provider: string;
-  providerPlaceId: string;
-};
-
 export type BookingJobPayload =
   | BookingPostCreateJob
   | ReviewModerationJob
@@ -76,4 +70,4 @@ export type NotificationJobPayload = {
   metadata?: Record<string, string>;
 };
 
-export type CleanupJobPayload = ExpiredBookingCleanupJob | DestinationSyncJob;
+export type CleanupJobPayload = ExpiredBookingCleanupJob;

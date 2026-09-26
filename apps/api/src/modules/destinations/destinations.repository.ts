@@ -3,7 +3,7 @@ import { prisma } from "../../lib/db.js";
 import type { DestinationSearchInput, DestinationSort } from "./destinations.schemas.js";
 
 const DEFAULT_LIMIT = 12;
-const MAX_LIMIT = 50;
+const MAX_LIMIT = 100;
 
 function mapPriceRangeToBudgetTiers(priceRange?: { min?: number; max?: number }): BudgetTier[] {
   if (!priceRange) {

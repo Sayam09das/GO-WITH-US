@@ -4,7 +4,7 @@ const sortSchema = z.enum(["popular", "newest", "rating", "name"]);
 
 export const listDestinationsQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(50).default(20),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
   featured: z
     .enum(["true", "false"])
     .optional()
@@ -31,7 +31,7 @@ export const destinationSearchSchema = z.object({
     .optional(),
   sort: sortSchema.default("popular"),
   page: z.number().int().min(1).default(1),
-  limit: z.number().int().min(1).max(50).default(12),
+  limit: z.number().int().min(1).max(100).default(12),
 });
 
 export const destinationSlugParamSchema = z.object({

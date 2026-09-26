@@ -12,6 +12,8 @@ import { FEATURED_EXPERIENCES_COPY } from "@/lib/landing/featured-experiences";
 import { cn } from "@/lib/utils";
 import type { ExperienceListItem } from "@/types/experience";
 
+const FALLBACK_EXPERIENCE_IMAGE = "/landingImg/travelimg/travel-1.jpg";
+
 interface ExperienceCardProps {
   experience: ExperienceListItem;
   index: number;
@@ -19,6 +21,7 @@ interface ExperienceCardProps {
 
 function ExperienceCard({ experience, index }: ExperienceCardProps) {
   const reducedMotion = useReducedMotion();
+  const imageSrc = experience.heroImage?.trim() || FALLBACK_EXPERIENCE_IMAGE;
 
   return (
     <div data-fe-card data-fe-card-index={index} className="h-full">
@@ -35,7 +38,7 @@ function ExperienceCard({ experience, index }: ExperienceCardProps) {
               transition={{ duration: 0.45, ease: [0, 0, 0.2, 1] }}
             >
               <Image
-                src={experience.heroImage}
+                src={imageSrc}
                 alt={experience.imageAlt}
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"

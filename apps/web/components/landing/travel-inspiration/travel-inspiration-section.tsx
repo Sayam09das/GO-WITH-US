@@ -1,8 +1,10 @@
 "use client";
 
 import { useLayoutEffect, useRef } from "react";
-import { gsap, registerGsapPlugins } from "@/lib/animation/gsap";
+import { EmptyState } from "@/components/states";
+import { gsap, registerGsapPlugins, ScrollTrigger } from "@/lib/animation/gsap";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
+import { TRAVEL_INSPIRATION_COPY } from "@/lib/landing/travel-inspiration";
 import { cn } from "@/lib/utils";
 import type { InspirationStory } from "@/types/inspiration";
 import { InspirationFeaturedStory } from "./inspiration-featured-story";
@@ -18,13 +20,14 @@ function TravelInspirationSection({ featured, stories }: TravelInspirationSectio
   const sectionRef = useRef<HTMLElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
-  const supportingStories = stories.filter((story) => !story.isFeatured);
+  const resolvedFeatured = featured ?? stories[0];
+  const supportingStories = stories.filter((story) => story.id !== resolvedFeatured?.id);
   const [sideOne, sideTwo, ...bottomStories] = supportingStories;
 
   useLayoutEffect(() => {
     const section = sectionRef.current;
     const grid = gridRef.current;
-    if (reducedMotion || !section || !grid) {
+    if (reducedMotion || !section || !grid || !resolvedFeatured) {
       return;
     }
 
@@ -105,13 +108,29 @@ function TravelInspirationSection({ featured, stories }: TravelInspirationSectio
           },
           "-=0.42",
         );
+
+      requestAnimationFrame(() => ScrollTrigger.refresh());
     }, sectionRef);
 
     return () => ctx.revert();
-  }, [reducedMotion]);
+  }, [reducedMotion, resolvedFeatured]);
 
-  if (!featured) {
-    return null;
+  if (!resolvedFeatured) {
+    return (
+      <section
+        aria-labelledby="travel-inspiration-heading"
+        className="travel-section bg-section-warm"
+      >
+        <div className="container-travel flex flex-col gap-10 sm:gap-12">
+          <TravelInspirationHeader />
+          <EmptyState
+            title="Travel inspiration will appear here"
+            description="Start the API and seed editorial stories to populate this magazine section."
+            action={{ label: TRAVEL_INSPIRATION_COPY.cta, href: "/inspiration" }}
+          />
+        </div>
+      </section>
+    );
   }
 
   return (
@@ -131,7 +150,7 @@ function TravelInspirationSection({ featured, stories }: TravelInspirationSectio
           <div ref={gridRef} className="flex flex-col gap-5 lg:gap-6 xl:gap-8">
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-12 lg:items-start lg:gap-6 xl:gap-8">
               <div className="lg:col-span-7 xl:col-span-8">
-                <InspirationFeaturedStory story={featured} />
+                <InspirationFeaturedStory story={resolvedFeatured} />
               </div>
 
               <div className="grid grid-cols-1 items-stretch gap-5 lg:col-span-5 lg:grid-rows-2 lg:gap-6 xl:col-span-4">

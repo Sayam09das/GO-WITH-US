@@ -18,6 +18,8 @@ export function mapReviewTargetType(value: string): ItemType | null {
       return "experience";
     case "RESTAURANT":
       return "restaurant";
+    case "PLACE":
+      return "place";
     default:
       return null;
   }

@@ -110,6 +110,7 @@ export type StayListItem = {
   destination: string;
   destinationSlug: string;
   propertyType: string;
+  description?: string;
   coverImage: string;
   imageAlt: string;
   price: {
@@ -120,6 +121,7 @@ export type StayListItem = {
   rating: number;
   reviewCount: number;
   amenities: string[];
+  isFeatured?: boolean;
   isSaved: boolean;
 };
 
@@ -169,10 +171,14 @@ export type SavedRestaurantSummary = {
 export type ExperienceListItem = {
   id: string;
   name: string;
+  title?: string;
   slug: string;
   destination: string;
   category: string;
+  categoryLabel?: string;
+  description?: string;
   coverImage: string;
+  heroImage?: string;
   durationLabel: string | null;
   price: {
     from: number | null;
@@ -181,6 +187,7 @@ export type ExperienceListItem = {
   };
   rating: number;
   reviewCount: number;
+  isFeatured?: boolean;
   isSaved: boolean;
 };
 
@@ -195,6 +202,19 @@ export type RestaurantListItem = {
   rating: number;
   reviewCount: number;
   isSaved: boolean;
+};
+
+export type PlaceListItem = {
+  id: string;
+  name: string;
+  slug: string;
+  destination: string;
+  destinationSlug: string;
+  category: string;
+  coverImage: string;
+  rating: number;
+  reviewCount: number;
+  tags: string[];
 };
 
 export type BookingSummary = {

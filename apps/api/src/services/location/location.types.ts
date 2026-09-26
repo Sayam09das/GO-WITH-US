@@ -3,5 +3,3 @@ export type NearbyLocationInput = {
   longitude: number;
   radiusMeters: number;
 };
-
-export type { NormalizedLocation } from "../../providers/places/places.types.js";

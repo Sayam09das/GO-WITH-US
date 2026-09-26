@@ -1,6 +1,4 @@
 import { AppError } from "../../lib/errors.js";
-import { providerFactory } from "../../providers/index.js";
-import type { NormalizedLocation } from "../../providers/places/places.types.js";
 import { DEFAULT_RADIUS_METERS, MAX_RADIUS_METERS, MIN_RADIUS_METERS } from "./location.schema.js";
 import type { NearbyLocationInput } from "./location.types.js";
 
@@ -38,62 +36,11 @@ export const locationService = {
     };
   },
 
-  async reverseGeocode(latitude: number, longitude: number): Promise<NormalizedLocation | null> {
-    this.validateCoordinates(latitude, longitude);
-
-    const placesProvider = providerFactory.getPlacesProvider();
-    if (!placesProvider.isConfigured()) {
-      return null;
-    }
-
-    return placesProvider.reverseGeocode({ latitude, longitude });
+  async reverseGeocode(_latitude: number, _longitude: number): Promise<null> {
+    return null;
   },
 
-  formatLocationLabel(location: NormalizedLocation | null): string | null {
-    if (!location) {
-      return null;
-    }
-
-    return (
-      location.label ??
-      [location.city, location.region, location.country].filter(Boolean).join(", ") ??
-      null
-    );
-  },
-
-  async resolvePlaceCoordinates(input: {
-    query: string;
-    near?: { lat: number; lng: number };
-  }): Promise<{ latitude: number; longitude: number } | null> {
-    const query = input.query.trim();
-    if (!query) {
-      return null;
-    }
-
-    const placesProvider = providerFactory.getPlacesProvider();
-    if (!placesProvider.isConfigured()) {
-      return null;
-    }
-
-    const results = await placesProvider.search({
-      query,
-      limit: 1,
-      near: input.near
-        ? {
-            latitude: input.near.lat,
-            longitude: input.near.lng,
-          }
-        : undefined,
-    });
-
-    const place = results[0];
-    if (!place || !Number.isFinite(place.latitude) || !Number.isFinite(place.longitude)) {
-      return null;
-    }
-
-    return {
-      latitude: place.latitude,
-      longitude: place.longitude,
-    };
+  formatLocationLabel(_location: null): string | null {
+    return null;
   },
 };
