@@ -86,16 +86,25 @@ async function deliverEmail(input: {
     return;
   }
 
-  await transporter.sendMail({
-    from: env.mailFrom,
-    to: input.to,
-    subject: input.subject,
-    text: input.text,
-    html: input.html,
-  });
+  try {
+    await transporter.sendMail({
+      from: env.mailFrom,
+      to: input.to,
+      subject: input.subject,
+      text: input.text,
+      html: input.html,
+    });
 
-  logger.info("mail.sent", {
-    to: input.to,
-    subject: input.subject,
-  });
+    logger.info("mail.sent", {
+      to: input.to,
+      subject: input.subject,
+    });
+  } catch (error) {
+    logger.error("mail.failed", {
+      to: input.to,
+      subject: input.subject,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  }
 }

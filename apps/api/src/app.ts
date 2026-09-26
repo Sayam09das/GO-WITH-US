@@ -70,7 +70,20 @@ export function createApp(): Express {
 
   app.use(
     cors({
-      origin: env.appOrigin,
+      origin(origin, callback) {
+        if (!origin) {
+          callback(null, true);
+          return;
+        }
+
+        const allowed = new Set<string>([env.appOrigin, env.appUrl]);
+        if (env.nodeEnv !== "production") {
+          allowed.add("http://localhost:3000");
+          allowed.add("http://127.0.0.1:3000");
+        }
+
+        callback(null, allowed.has(origin));
+      },
       credentials: true,
       methods: ["GET", "POST", "PATCH", "DELETE", "QUERY", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization", "Idempotency-Key", "x-request-id"],

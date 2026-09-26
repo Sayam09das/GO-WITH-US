@@ -6,22 +6,48 @@ import type {
   PasswordResetEmailJob,
   VerificationEmailJob,
 } from "@gowithus/jobs";
+import { env } from "../../config/env.js";
 import { sendPasswordResetEmail, sendVerificationEmail } from "../../lib/mail.js";
 import { logger } from "../logging/logger.js";
 import { bookingQueue, emailQueue, enqueueJob, notificationQueue } from "./queues.js";
 
-export async function enqueueVerificationEmail(input: VerificationEmailJob): Promise<void> {
-  const queued = await enqueueJob(emailQueue, input.type, input);
-  if (!queued) {
-    await sendVerificationEmail(input);
+async function deliverAuthEmail(
+  send: () => Promise<void>,
+  queue: typeof emailQueue,
+  jobName: string,
+  data: VerificationEmailJob | PasswordResetEmailJob,
+): Promise<void> {
+  if (env.isProduction) {
+    const queued = await enqueueJob(queue, jobName, data);
+    if (queued) {
+      return;
+    }
   }
+
+  await send();
 }
 
-export async function enqueuePasswordResetEmail(input: PasswordResetEmailJob): Promise<void> {
-  const queued = await enqueueJob(emailQueue, input.type, input);
-  if (!queued) {
-    await sendPasswordResetEmail(input);
-  }
+function scheduleAuthEmail(
+  send: () => Promise<void>,
+  queue: typeof emailQueue,
+  jobName: string,
+  data: VerificationEmailJob | PasswordResetEmailJob,
+): void {
+  void deliverAuthEmail(send, queue, jobName, data).catch((error) => {
+    logger.error("mail.enqueue_failed", {
+      jobName,
+      to: "email" in data ? data.email : undefined,
+      message: error instanceof Error ? error.message : String(error),
+    });
+  });
+}
+
+export function enqueueVerificationEmail(input: VerificationEmailJob): void {
+  scheduleAuthEmail(() => sendVerificationEmail(input), emailQueue, input.type, input);
+}
+
+export function enqueuePasswordResetEmail(input: PasswordResetEmailJob): void {
+  scheduleAuthEmail(() => sendPasswordResetEmail(input), emailQueue, input.type, input);
 }
 
 export async function enqueueBookingConfirmationEmail(
