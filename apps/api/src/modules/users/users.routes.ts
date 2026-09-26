@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { requireAuth } from "../../middleware/auth.js";
+import { documentsRouter } from "../documents/documents.routes.js";
 import { usersController } from "./users.controller.js";
 
 const usersRouter = Router();
@@ -9,6 +10,9 @@ usersRouter.use(requireAuth);
 usersRouter.get("/me", usersController.getMe);
 usersRouter.patch("/me", usersController.patchMe);
 usersRouter.patch("/me/avatar", usersController.patchAvatar);
+usersRouter.post("/me/avatar/upload", usersController.uploadAvatar);
+
+usersRouter.use("/me/documents", documentsRouter);
 
 usersRouter.get("/me/saved-destinations", usersController.listSavedDestinations);
 usersRouter.post("/me/saved-destinations/:destinationId", usersController.saveDestination);

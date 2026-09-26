@@ -7,7 +7,7 @@ import type {
   UserProfile,
 } from "@gowithus/types";
 import { notifyNavCountsChanged } from "@/lib/navigation/nav-counts-events";
-import { apiFetch } from "./client";
+import { apiFetch, apiUpload } from "./client";
 
 type UserResponse = { user: UserProfile };
 type SavedDestinationsResponse = { savedDestinations: SavedDestinationSummary[] };
@@ -96,4 +96,11 @@ export async function saveExperience(experienceId: string): Promise<void> {
 export async function unsaveExperience(experienceId: string): Promise<void> {
   await apiFetch(`/users/me/saved-experiences/${experienceId}`, { method: "DELETE" });
   notifyNavCountsChanged();
+}
+
+export async function uploadUserAvatar(file: File): Promise<UserProfile> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await apiUpload<{ user: UserProfile }>("/users/me/avatar/upload", formData);
+  return response.user;
 }

@@ -47,6 +47,43 @@ export async function getTrip(tripId: string): Promise<TripDetailResponse> {
 
 export type { TripDetailResponse };
 
+export type CreateItineraryItemInput = {
+  type: "destination" | "stay" | "experience" | "restaurant" | "custom";
+  destinationId?: string;
+  stayId?: string;
+  experienceId?: string;
+  restaurantId?: string;
+  title?: string;
+  startTime?: string;
+  endTime?: string;
+  notes?: string;
+};
+
+export async function createTripDay(
+  tripId: string,
+  title?: string,
+): Promise<{ id: string; dayIndex: number }> {
+  const response = await apiFetch<{ day: { id: string; dayIndex: number } }>(
+    `/trips/${tripId}/days`,
+    {
+      method: "POST",
+      body: title ? { title } : {},
+    },
+  );
+  return response.day;
+}
+
+export async function addItineraryItem(
+  tripId: string,
+  dayId: string,
+  input: CreateItineraryItemInput,
+): Promise<void> {
+  await apiFetch(`/trips/${tripId}/days/${dayId}/items`, {
+    method: "POST",
+    body: input,
+  });
+}
+
 export async function createTrip(input: {
   title: string;
   destinationId?: string;

@@ -52,5 +52,9 @@ export const env = {
   smtpPass: process.env.SMTP_PASS ?? "",
   mailFrom: process.env.MAIL_FROM ?? "GoWithUs <noreply@localhost>",
   paymentWebhookSecret: process.env.PAYMENT_WEBHOOK_SECRET ?? "",
+  supabaseUrl: process.env.SUPABASE_URL ?? "",
+  supabaseSecretKey: process.env.SUPABASE_SECRET_KEY ?? "",
+  supabaseAvatarsBucket: process.env.SUPABASE_AVATARS_BUCKET ?? "avatars",
+  supabaseDocumentsBucket: process.env.SUPABASE_DOCUMENTS_BUCKET ?? "travel-documents",
   isProduction: (process.env.NODE_ENV ?? "development") === "production",
 } as const;

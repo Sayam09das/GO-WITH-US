@@ -1,5 +1,7 @@
 import { logUserActivity } from "../../lib/activity.js";
 import { AppError } from "../../lib/errors.js";
+import { storageEnv, uploadUserFile } from "../../lib/supabase-storage.js";
+import { assertAvatarMime } from "../../lib/upload.js";
 import { usersRepository } from "./users.repository.js";
 import type { UpdateProfileInput } from "./users.schemas.js";
 import type {
@@ -51,6 +53,21 @@ export const usersService = {
 
   async updateAvatar(userId: string, avatar: string): Promise<UserProfile> {
     const user = await usersRepository.updateProfile(userId, { avatarUrl: avatar });
+    return toUserProfile(user);
+  },
+
+  async uploadAvatar(userId: string, file: Express.Multer.File): Promise<UserProfile> {
+    assertAvatarMime(file.mimetype);
+
+    const upload = await uploadUserFile({
+      bucket: storageEnv.supabaseAvatarsBucket,
+      userId,
+      fileName: file.originalname || "avatar.jpg",
+      mimeType: file.mimetype,
+      buffer: file.buffer,
+    });
+
+    const user = await usersRepository.updateProfile(userId, { avatarUrl: upload.publicUrl });
     return toUserProfile(user);
   },
 

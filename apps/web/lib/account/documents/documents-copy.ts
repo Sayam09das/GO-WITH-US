@@ -17,6 +17,9 @@ export interface TravelDocumentItem {
   category: Exclude<DocumentCategory, "all">;
 }
 
+/** Shared id for the hidden file input (header + browse labels). */
+export const TRAVEL_DOCUMENT_FILE_INPUT_ID = "travel-document-file-input";
+
 export const DOCUMENTS_PAGE_COPY = {
   eyebrow: "TRAVEL ESSENTIALS",
   heading: "Travel Documents",
