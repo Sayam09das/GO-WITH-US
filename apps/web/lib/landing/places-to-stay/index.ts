@@ -1,1 +1,1 @@
-export { PLACES_TO_STAY_COPY } from "./config";
+export { PLACES_TO_STAY_COPY, PLACES_TO_STAY_GRID_PAGE_SIZE } from "./config";

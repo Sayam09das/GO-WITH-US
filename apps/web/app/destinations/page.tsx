@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { DestinationsHero } from "@/components/destinations";
+import { DestinationsCatalogSkeleton } from "@/components/destinations/catalog";
 import { DestinationsCatalogLoader } from "@/components/destinations/catalog/destinations-catalog-loader";
-import { CatalogPageSkeleton } from "@/components/states";
 import { buildCatalogTitle, buildPageMetadata, trimDescription } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -17,7 +17,7 @@ export default function DestinationsPage() {
   return (
     <main>
       <DestinationsHero />
-      <Suspense fallback={<CatalogPageSkeleton />}>
+      <Suspense fallback={<DestinationsCatalogSkeleton label="Loading destinations…" />}>
         <DestinationsCatalogLoader />
       </Suspense>
     </main>

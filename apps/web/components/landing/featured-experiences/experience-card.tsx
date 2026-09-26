@@ -17,17 +17,21 @@ const FALLBACK_EXPERIENCE_IMAGE = "/landingImg/travelimg/travel-1.jpg";
 interface ExperienceCardProps {
   experience: ExperienceListItem;
   index: number;
+  eagerLoad?: boolean;
 }
 
-function ExperienceCard({ experience, index }: ExperienceCardProps) {
+function ExperienceCard({ experience, index, eagerLoad = false }: ExperienceCardProps) {
   const reducedMotion = useReducedMotion();
   const imageSrc = experience.heroImage?.trim() || FALLBACK_EXPERIENCE_IMAGE;
 
   return (
     <div data-fe-card data-fe-card-index={index} className="h-full">
       <motion.div
+        initial={reducedMotion ? false : { opacity: 0, y: 20 }}
+        whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-40px" }}
+        transition={{ duration: 0.45, delay: Math.min(index % 9, 8) * 0.04, ease: [0, 0, 0.2, 1] }}
         whileHover={reducedMotion ? undefined : { y: -4 }}
-        transition={{ duration: 0.22, ease: [0, 0, 0.2, 1] }}
         className="h-full"
       >
         <Card className="h-full gap-0 overflow-hidden border-border/70 py-0 shadow-sm transition-shadow duration-200 hover:shadow-md">
@@ -43,6 +47,7 @@ function ExperienceCard({ experience, index }: ExperienceCardProps) {
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 quality={85}
+                loading={eagerLoad ? "eager" : "lazy"}
                 className={cn("object-cover", experience.objectPosition ?? "object-center")}
               />
             </motion.div>

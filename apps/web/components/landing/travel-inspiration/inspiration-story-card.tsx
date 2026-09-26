@@ -11,6 +11,8 @@ import { TRAVEL_INSPIRATION_COPY } from "@/lib/landing/travel-inspiration";
 import { cn } from "@/lib/utils";
 import type { InspirationStory } from "@/types/inspiration";
 
+const FALLBACK_INSPIRATION_IMAGE = "/landingImg/travelimg/travel-1.jpg";
+
 interface InspirationStoryCardProps {
   story: InspirationStory;
   variant?: "compact" | "standard";
@@ -20,18 +22,34 @@ interface InspirationStoryCardProps {
 function InspirationStoryCard({ story, variant = "standard", index }: InspirationStoryCardProps) {
   const reducedMotion = useReducedMotion();
   const isCompact = variant === "compact";
+  const imageSrc = story.heroImage?.trim() || FALLBACK_INSPIRATION_IMAGE;
 
   return (
-    <div data-ti-card data-ti-card-index={index} className="h-full min-h-0">
+    <div data-ti-card data-ti-card-index={index} className={cn(!isCompact && "h-full")}>
       <motion.div
+        initial={reducedMotion ? false : { opacity: 0, y: 20 }}
+        whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-40px" }}
+        transition={{
+          duration: 0.45,
+          delay: Math.min(index, 4) * 0.05,
+          ease: [0, 0, 0.2, 1],
+        }}
         whileHover={reducedMotion ? undefined : { y: -3 }}
-        transition={{ duration: 0.22, ease: [0, 0, 0.2, 1] }}
-        className="h-full min-h-0"
+        className={cn(!isCompact && "h-full")}
       >
-        <Card className="flex h-full min-h-0 flex-col gap-0 overflow-hidden border-border/70 py-0 shadow-sm transition-shadow duration-200 hover:shadow-md">
+        <Card
+          className={cn(
+            "gap-0 overflow-hidden border-border/70 py-0 shadow-sm transition-shadow duration-200 hover:shadow-md",
+            !isCompact && "flex h-full flex-col",
+          )}
+        >
           <Link
             href={`/inspiration/${story.slug}`}
-            className="group flex h-full min-h-0 flex-col focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            className={cn(
+              "group flex flex-col focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
+              !isCompact && "h-full",
+            )}
             aria-label={`${story.title} — ${story.readLabel}`}
           >
             <div
@@ -47,9 +65,10 @@ function InspirationStoryCard({ story, variant = "standard", index }: Inspiratio
                 transition={{ duration: 0.45, ease: [0, 0, 0.2, 1] }}
               >
                 <Image
-                  src={story.heroImage}
+                  src={imageSrc}
                   alt={story.imageAlt}
                   fill
+                  loading={index < 3 ? "eager" : "lazy"}
                   sizes={
                     isCompact
                       ? "(max-width: 1024px) 100vw, 22vw"
@@ -63,8 +82,8 @@ function InspirationStoryCard({ story, variant = "standard", index }: Inspiratio
 
             <CardContent
               className={cn(
-                "flex flex-1 flex-col gap-2 px-4 sm:px-5",
-                isCompact ? "py-3.5 sm:py-4" : "py-4 sm:py-5",
+                "flex flex-col gap-2 px-4 sm:px-5",
+                isCompact ? "py-3.5 sm:py-4" : "flex-1 py-4 sm:py-5",
               )}
             >
               <div className="flex min-h-6 flex-wrap items-center gap-2">
@@ -81,7 +100,7 @@ function InspirationStoryCard({ story, variant = "standard", index }: Inspiratio
                 className={cn(
                   "line-clamp-2 font-bold leading-snug text-heading transition-colors group-hover:text-primary",
                   isCompact
-                    ? "min-h-[2.75rem] text-base sm:text-[1.0625rem]"
+                    ? "text-base sm:text-[1.0625rem]"
                     : "min-h-[3.25rem] text-base sm:text-lg",
                 )}
               >
@@ -92,9 +111,7 @@ function InspirationStoryCard({ story, variant = "standard", index }: Inspiratio
                 data-ti-excerpt
                 className={cn(
                   "leading-relaxed text-muted-foreground",
-                  isCompact
-                    ? "line-clamp-2 min-h-[2.5rem] text-sm"
-                    : "line-clamp-3 min-h-[4.125rem] text-sm",
+                  isCompact ? "line-clamp-2 text-sm" : "line-clamp-3 min-h-[4.125rem] text-sm",
                 )}
               >
                 {story.excerpt}

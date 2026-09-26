@@ -1,155 +1,49 @@
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
-import { gsap, registerGsapPlugins, ScrollTrigger } from "@/lib/animation/gsap";
-import { bindLayerParallax } from "@/lib/animation/scroll-parallax";
+import { useMemo } from "react";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
 import { cn } from "@/lib/utils";
 import type { StayListItem } from "@/types/stay";
-import { FeaturedStay } from "./featured-stay";
+import { PlacesToStayGrid } from "./places-to-stay-grid";
 import { PlacesToStayHeader } from "./places-to-stay-header";
-import { SupportingStayCard } from "./supporting-stay-card";
 
 interface PlacesToStaySectionProps {
-  featured?: StayListItem;
-  supportingStays: StayListItem[];
+  stays: StayListItem[];
 }
 
-function PlacesToStaySection({ featured, supportingStays }: PlacesToStaySectionProps) {
-  const sectionRef = useRef<HTMLElement>(null);
-  const supportingRef = useRef<HTMLDivElement>(null);
-  const reducedMotion = useReducedMotion();
-  const resolvedFeatured = featured ?? supportingStays[0];
-  const resolvedSupporting = featured
-    ? supportingStays
-    : supportingStays.filter((stay) => stay.id !== resolvedFeatured?.id);
-
-  useLayoutEffect(() => {
-    const section = sectionRef.current;
-    const supporting = supportingRef.current;
-    if (reducedMotion || !section || !resolvedFeatured) {
-      return;
+function sortStaysForDisplay(stays: StayListItem[]): StayListItem[] {
+  return [...stays].sort((left, right) => {
+    if (left.isFeatured && !right.isFeatured) {
+      return -1;
     }
+    if (!left.isFeatured && right.isFeatured) {
+      return 1;
+    }
+    return 0;
+  });
+}
 
-    registerGsapPlugins();
+function PlacesToStaySection({ stays }: PlacesToStaySectionProps) {
+  const reducedMotion = useReducedMotion();
 
-    const ctx = gsap.context(() => {
-      gsap.set("[data-pts-featured], [data-pts-supporting]", { autoAlpha: 0, y: 32 });
-      gsap.set("[data-pts-image-mask]", {
-        clipPath: "inset(6% 6% 6% 6% round 1.25rem)",
-        autoAlpha: 0.92,
-      });
-      gsap.set("[data-pts-title], [data-pts-description], [data-pts-location], [data-pts-link]", {
-        autoAlpha: 0,
-        y: 14,
-      });
+  const orderedStays = useMemo(() => sortStaysForDisplay(stays), [stays]);
 
-      const timeline = gsap.timeline({
-        scrollTrigger: {
-          trigger: section,
-          start: "top 82%",
-          once: true,
-        },
-        defaults: { ease: "power2.out" },
-      });
-
-      timeline
-        .to("[data-pts-featured]", {
-          autoAlpha: 1,
-          y: 0,
-          duration: 0.7,
-        })
-        .to(
-          "[data-pts-featured] [data-pts-image-mask]",
-          {
-            clipPath: "inset(0% 0% 0% 0% round 1.25rem)",
-            autoAlpha: 1,
-            duration: 0.8,
-          },
-          "-=0.45",
-        )
-        .to(
-          "[data-pts-featured] [data-pts-title], [data-pts-featured] [data-pts-description], [data-pts-featured] [data-pts-location], [data-pts-featured] [data-pts-link]",
-          {
-            autoAlpha: 1,
-            y: 0,
-            duration: 0.45,
-            stagger: 0.06,
-          },
-          "-=0.5",
-        )
-        .to(
-          "[data-pts-supporting]",
-          {
-            autoAlpha: 1,
-            y: 0,
-            duration: 0.65,
-            stagger: 0.12,
-          },
-          "-=0.35",
-        )
-        .to(
-          "[data-pts-supporting] [data-pts-image-mask]",
-          {
-            clipPath: "inset(0% 0% 0% 0% round 1.25rem)",
-            autoAlpha: 1,
-            duration: 0.7,
-            stagger: 0.1,
-          },
-          "-=0.5",
-        )
-        .to(
-          "[data-pts-supporting] [data-pts-title], [data-pts-supporting] [data-pts-location], [data-pts-supporting] [data-pts-link]",
-          {
-            autoAlpha: 1,
-            y: 0,
-            duration: 0.4,
-            stagger: 0.05,
-          },
-          "-=0.45",
-        );
-
-      if (supporting) {
-        bindLayerParallax({
-          root: supporting,
-          layerSelector: "[data-pts-parallax]",
-        });
-      }
-
-      requestAnimationFrame(() => ScrollTrigger.refresh());
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, [reducedMotion, resolvedFeatured]);
-
-  if (!resolvedFeatured) {
+  if (orderedStays.length === 0) {
     return null;
   }
 
   return (
     <section
-      ref={sectionRef}
       aria-labelledby="places-to-stay-heading"
       className={cn(
         "travel-section bg-background",
-        reducedMotion &&
-          "[&_[data-pts-description]]:opacity-100 [&_[data-pts-featured]]:opacity-100 [&_[data-pts-image-mask]]:opacity-100 [&_[data-pts-link]]:opacity-100 [&_[data-pts-location]]:opacity-100 [&_[data-pts-supporting]]:opacity-100 [&_[data-pts-title]]:opacity-100",
+        reducedMotion && "[&_[data-pts-image-mask]]:opacity-100",
       )}
     >
       <div className="container-travel">
         <div className="flex flex-col gap-10 sm:gap-12 lg:gap-14">
           <PlacesToStayHeader />
-
-          <FeaturedStay stay={resolvedFeatured} />
-
-          <div
-            ref={supportingRef}
-            className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-12 lg:grid-rows-[auto_auto] lg:gap-6 xl:gap-8"
-          >
-            {resolvedSupporting.map((stay, index) => (
-              <SupportingStayCard key={stay.id} stay={stay} index={index} />
-            ))}
-          </div>
+          <PlacesToStayGrid stays={orderedStays} />
         </div>
       </div>
     </section>

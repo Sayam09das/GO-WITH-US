@@ -8,15 +8,15 @@ type ExperienceListResponse = {
   experiences: ApiExperienceListItem[];
 };
 
-function orderFeaturedExperiences(items: ExperienceListItem[]): ExperienceListItem[] {
+function orderFeaturedExperiences(
+  items: ExperienceListItem[],
+  limit?: number,
+): ExperienceListItem[] {
   const featured = items.find((item) => item.isFeatured);
   const supporting = items.filter((item) => !item.isFeatured);
 
-  if (!featured) {
-    return items.slice(0, 4);
-  }
-
-  return [featured, ...supporting].slice(0, 4);
+  const ordered = featured ? [featured, ...supporting] : items;
+  return limit ? ordered.slice(0, limit) : ordered;
 }
 
 async function fetchExperienceList(limit: number): Promise<ExperienceListItem[]> {
@@ -33,7 +33,7 @@ export async function getFeaturedExperiences(): Promise<ExperienceListItem[]> {
     const response = await apiFetch<ExperienceListResponse>("/experiences/featured");
     const mapped = response.experiences.map(mapExperienceListItem);
     if (mapped.length > 0) {
-      return orderFeaturedExperiences(mapped);
+      return orderFeaturedExperiences(mapped, 4);
     }
   } catch {
     // Fall through to catalog list.
@@ -41,7 +41,7 @@ export async function getFeaturedExperiences(): Promise<ExperienceListItem[]> {
 
   try {
     const listed = await fetchExperienceList(12);
-    const ordered = orderFeaturedExperiences(listed);
+    const ordered = orderFeaturedExperiences(listed, 4);
     if (ordered.length > 0) {
       return ordered;
     }
@@ -49,7 +49,7 @@ export async function getFeaturedExperiences(): Promise<ExperienceListItem[]> {
     // Fall through to homepage showcase.
   }
 
-  return orderFeaturedExperiences(FEATURED_EXPERIENCES_HOMEPAGE_SHOWCASE);
+  return orderFeaturedExperiences(FEATURED_EXPERIENCES_HOMEPAGE_SHOWCASE, 4);
 }
 
 export async function getExperienceBySlug(slug: string): Promise<ExperienceListItem | undefined> {
