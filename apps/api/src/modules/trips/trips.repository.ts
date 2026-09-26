@@ -294,39 +294,36 @@ export const tripsRepository = {
   },
 
   async createDay(userId: string, tripId: string, title?: string) {
-    return prisma.$transaction(async (tx) => {
-      const trip = await tx.trip.findFirst({
-        where: { id: tripId, userId },
-        include: { tripDays: { orderBy: { dayIndex: "desc" }, take: 1 } },
-      });
-
-      if (!trip) {
-        return null;
-      }
-
-      const nextIndex = (trip.tripDays[0]?.dayIndex ?? 0) + 1;
-      const nextDate =
-        trip.startDate && trip.endDate ? addDaysToDate(trip.startDate, nextIndex - 1) : null;
-      const nextEndDate = nextDate ?? undefined;
-
-      const day = await tx.tripDay.create({
-        data: {
-          tripId,
-          dayIndex: nextIndex,
-          dayDate: nextDate,
-          title: title ?? `Day ${nextIndex}`,
-        },
-      });
-
-      if (trip.endDate && nextEndDate && nextEndDate > trip.endDate) {
-        await tx.trip.update({
-          where: { id: tripId },
-          data: { endDate: nextEndDate },
-        });
-      }
-
-      return day;
+    const trip = await prisma.trip.findFirst({
+      where: { id: tripId, userId },
+      include: { tripDays: { orderBy: { dayIndex: "desc" }, take: 1 } },
     });
+
+    if (!trip) {
+      return null;
+    }
+
+    const nextIndex = (trip.tripDays[0]?.dayIndex ?? 0) + 1;
+    const nextDate =
+      trip.startDate && trip.endDate ? addDaysToDate(trip.startDate, nextIndex - 1) : null;
+
+    const day = await prisma.tripDay.create({
+      data: {
+        tripId,
+        dayIndex: nextIndex,
+        dayDate: nextDate,
+        title: title ?? `Day ${nextIndex}`,
+      },
+    });
+
+    if (trip.endDate && nextDate && nextDate > trip.endDate) {
+      await prisma.trip.update({
+        where: { id: tripId },
+        data: { endDate: nextDate },
+      });
+    }
+
+    return day;
   },
 
   async updateDay(

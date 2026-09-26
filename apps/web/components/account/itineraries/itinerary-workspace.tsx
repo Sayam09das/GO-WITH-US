@@ -3,11 +3,12 @@
 import { ArrowLeft, LoaderCircle, Plus } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { AddItineraryItemDialog } from "@/components/account/itineraries/add-itinerary-item-dialog";
 import { Button } from "@/components/ui/button";
 import { formatTripDateRange } from "@/lib/account/itineraries/itinerary-display";
 import { ApiRequestError } from "@/lib/api/client";
-import { getTrip, type TripDetailResponse } from "@/lib/api/trips";
+import { createTripDay, getTrip, type TripDetailResponse } from "@/lib/api/trips";
 import { cn } from "@/lib/utils";
 
 function formatTimelineTime(startTime: string | null, timeSlot: string): string {
@@ -32,40 +33,38 @@ function ItineraryWorkspace() {
   const tripId = params.tripId;
   const [trip, setTrip] = useState<TripDetailResponse | null>(null);
   const [activeDayIndex, setActiveDayIndex] = useState(1);
+  const [addOpen, setAddOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
+  const loadTrip = useCallback(async () => {
     setIsLoading(true);
+    setError(null);
 
-    void getTrip(tripId)
-      .then((detail) => {
-        if (!cancelled) {
-          setTrip(detail);
-          const firstDay = detail.days[0]?.dayIndex ?? 1;
-          setActiveDayIndex(firstDay);
-        }
-      })
-      .catch((cause) => {
-        if (!cancelled) {
-          if (cause instanceof ApiRequestError && cause.status === 401) {
-            setError("Sign in to view this itinerary.");
-            return;
-          }
-          setError("We couldn't load this itinerary.");
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
-      });
+    try {
+      let detail = await getTrip(tripId);
 
-    return () => {
-      cancelled = true;
-    };
+      if (detail.days.length === 0) {
+        await createTripDay(tripId);
+        detail = await getTrip(tripId);
+      }
+
+      setTrip(detail);
+      setActiveDayIndex(detail.days[0]?.dayIndex ?? 1);
+    } catch (cause) {
+      if (cause instanceof ApiRequestError && cause.status === 401) {
+        setError("Sign in to view this itinerary.");
+      } else {
+        setError("We couldn't load this itinerary.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   }, [tripId]);
+
+  useEffect(() => {
+    void loadTrip();
+  }, [loadTrip]);
 
   const activeDay = useMemo(
     () => trip?.days.find((day) => day.dayIndex === activeDayIndex) ?? trip?.days[0],
@@ -163,8 +162,7 @@ function ItineraryWorkspace() {
 
           {activeDay.items.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              No activities planned for this day yet. Add destinations, stays, and experiences from
-              discovery.
+              No activities planned for this day yet. Use Add to itinerary below.
             </p>
           ) : (
             <ol className="relative border-l border-border/70 pl-6">
@@ -192,7 +190,13 @@ function ItineraryWorkspace() {
       ) : null}
 
       <div className="rounded-[1.25rem] border border-dashed border-border/70 bg-muted/20 p-6 text-center">
-        <Button variant="outline" className="rounded-full" disabled>
+        <Button
+          type="button"
+          variant="outline"
+          className="rounded-full"
+          disabled={!activeDay}
+          onClick={() => setAddOpen(true)}
+        >
           <Plus aria-hidden="true" className="size-4" />
           Add to itinerary
         </Button>
@@ -200,6 +204,18 @@ function ItineraryWorkspace() {
           Destination · Experience · Restaurant · Stay · Custom activity
         </p>
       </div>
+
+      {activeDay ? (
+        <AddItineraryItemDialog
+          tripId={tripId}
+          dayId={activeDay.id}
+          open={addOpen}
+          onOpenChange={setAddOpen}
+          onAdded={() => {
+            void loadTrip();
+          }}
+        />
+      ) : null}
     </div>
   );
 }

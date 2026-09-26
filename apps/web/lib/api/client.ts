@@ -96,3 +96,37 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
 
   return payload?.data as T;
 }
+
+export async function apiUpload<T>(path: string, formData: FormData): Promise<T> {
+  let response: Response;
+
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      method: "POST",
+      credentials: "include",
+      signal: AbortSignal.timeout(API_FETCH_TIMEOUT_MS),
+      body: formData,
+    });
+  } catch (error) {
+    if (error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError")) {
+      throw new ApiRequestError(408, "REQUEST_TIMEOUT", "API request timed out.");
+    }
+
+    throw new ApiRequestError(0, "NETWORK_ERROR", "Unable to reach the API.");
+  }
+
+  const payload = (await response.json().catch(() => null)) as {
+    data?: T;
+    error?: { code?: string; message?: string };
+  } | null;
+
+  if (!response.ok) {
+    throw new ApiRequestError(
+      response.status,
+      payload?.error?.code ?? "REQUEST_FAILED",
+      payload?.error?.message ?? "Request failed.",
+    );
+  }
+
+  return payload?.data as T;
+}

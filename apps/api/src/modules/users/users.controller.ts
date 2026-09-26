@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { sendData } from "../../lib/errors.js";
+import { assertUploadedFile, uploadSingle } from "../../lib/upload.js";
 import { getAuthUserId, handleControllerError } from "../../middleware/auth.js";
 import {
   destinationIdParamSchema,
@@ -39,6 +40,23 @@ export const usersController = {
     } catch (error) {
       handleControllerError(error, res);
     }
+  },
+
+  uploadAvatar(req: Request, res: Response) {
+    uploadSingle(req, res, async (error) => {
+      if (error) {
+        handleControllerError(error, res);
+        return;
+      }
+
+      try {
+        const file = assertUploadedFile(req.file);
+        const profile = await usersService.uploadAvatar(getAuthUserId(req), file);
+        sendData(res, 200, { user: profile });
+      } catch (cause) {
+        handleControllerError(cause, res);
+      }
+    });
   },
 
   async listSavedDestinations(req: Request, res: Response) {

@@ -231,6 +231,29 @@ export type BookingSummary = {
   createdAt: string;
 };
 
+export type TravelDocumentCategory =
+  | "bookings"
+  | "flights"
+  | "stays"
+  | "experiences"
+  | "invoices"
+  | "other";
+
+export type TravelDocumentSummary = {
+  id: string;
+  name: string;
+  category: TravelDocumentCategory;
+  tripId: string | null;
+  tripLabel: string | null;
+  dateLabel: string;
+  mimeType: string;
+  fileType: string;
+  fileSizeLabel: string;
+  sizeBytes: number;
+  publicUrl: string;
+  createdAt: string;
+};
+
 export type StoryListItem = {
   id: string;
   slug: string;
