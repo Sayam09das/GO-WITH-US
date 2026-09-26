@@ -1,6 +1,5 @@
 import { createApp } from "./app.js";
 import { env } from "./config/env.js";
-import "./config/providers.js";
 import { logger } from "./infrastructure/logging/logger.js";
 import { closeQueues } from "./infrastructure/queue/queues.js";
 import { connectRedis, disconnectRedis } from "./infrastructure/redis/redis.js";
@@ -9,8 +8,6 @@ import { disconnectPrisma } from "./lib/db.js";
 const app = createApp();
 
 async function startServer(): Promise<void> {
-  await connectRedis();
-
   const server = app.listen(env.port, env.host, () => {
     logger.info("server.started", {
       host: env.host,
@@ -19,6 +16,14 @@ async function startServer(): Promise<void> {
       healthReady: `http://localhost:${env.port}/health/ready`,
       apiBase: `http://localhost:${env.port}/api/v1`,
     });
+  });
+
+  void connectRedis().then((connected) => {
+    if (!connected) {
+      logger.warn("redis.startup_skipped", {
+        message: "API is running without Redis. Caching and queues are degraded.",
+      });
+    }
   });
 
   async function shutdown(signal: string) {

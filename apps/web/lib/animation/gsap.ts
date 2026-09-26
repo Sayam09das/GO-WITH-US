@@ -20,3 +20,23 @@ export function registerGsapPlugins(): typeof gsap {
 }
 
 export { gsap, ScrollTrigger };
+
+/** If the trigger is already past its start, finish the timeline so content is not left at autoAlpha 0. */
+export function revealScrollTimelineIfAlreadyVisible(
+  section: HTMLElement,
+  timeline: gsap.core.Timeline,
+  startRatio = 0.85,
+): void {
+  requestAnimationFrame(() => {
+    ScrollTrigger.refresh();
+    const scrollTrigger = timeline.scrollTrigger;
+    if (!scrollTrigger || scrollTrigger.progress > 0) {
+      return;
+    }
+
+    const threshold = window.innerHeight * startRatio;
+    if (section.getBoundingClientRect().top < threshold) {
+      timeline.progress(1);
+    }
+  });
+}

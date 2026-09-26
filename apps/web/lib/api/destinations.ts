@@ -1,5 +1,6 @@
 import type { DestinationListItem as ApiDestinationListItem } from "@gowithus/types";
 import { filterDestinations } from "@/lib/destinations/catalog/filter";
+import { POPULAR_DESTINATIONS_HOMEPAGE_SHOWCASE } from "@/lib/landing/popular-destinations";
 import type { DestinationCatalogFilters, DestinationListItem } from "@/types/destination";
 import { apiFetch } from "./client";
 import { mapDestinationListItem } from "./mappers";
@@ -68,7 +69,7 @@ async function fetchAllDestinations(): Promise<DestinationListItem[]> {
   return [...merged.values()];
 }
 
-export async function getPopularDestinations(limit = 6): Promise<DestinationListItem[]> {
+async function fetchPopularFromApi(limit: number): Promise<DestinationListItem[]> {
   try {
     const response = await apiFetch<DestinationListResponse>("/destinations/featured");
     const featured = response.destinations.slice(0, limit).map(mapDestinationListItem);
@@ -80,11 +81,35 @@ export async function getPopularDestinations(limit = 6): Promise<DestinationList
   }
 
   try {
-    const all = await fetchAllDestinations();
-    return all.slice(0, limit);
+    const listed = await apiFetch<DestinationListResponse>(
+      `/destinations?limit=${limit}&page=1&sort=popularity`,
+    );
+    if (listed.destinations.length > 0) {
+      return listed.destinations.map(mapDestinationListItem);
+    }
   } catch {
-    return [];
+    // Fall through to homepage showcase.
   }
+
+  try {
+    const all = await fetchAllDestinations();
+    if (all.length > 0) {
+      return all.slice(0, limit);
+    }
+  } catch {
+    // Fall through to homepage showcase.
+  }
+
+  return [];
+}
+
+export async function getPopularDestinations(limit = 6): Promise<DestinationListItem[]> {
+  const fromApi = await fetchPopularFromApi(limit);
+  if (fromApi.length > 0) {
+    return fromApi;
+  }
+
+  return POPULAR_DESTINATIONS_HOMEPAGE_SHOWCASE.slice(0, limit);
 }
 
 export async function getAllDestinations(): Promise<DestinationListItem[]> {

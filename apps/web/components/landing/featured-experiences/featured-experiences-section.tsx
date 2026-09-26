@@ -1,10 +1,13 @@
 "use client";
 
 import { useLayoutEffect, useRef } from "react";
-import { EmptyState } from "@/components/states";
-import { gsap, registerGsapPlugins, ScrollTrigger } from "@/lib/animation/gsap";
+import {
+  gsap,
+  registerGsapPlugins,
+  revealScrollTimelineIfAlreadyVisible,
+} from "@/lib/animation/gsap";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
-import { FEATURED_EXPERIENCES_COPY } from "@/lib/landing/featured-experiences";
+import { FEATURED_EXPERIENCES_HOMEPAGE_SHOWCASE } from "@/lib/landing/featured-experiences";
 import { cn } from "@/lib/utils";
 import type { ExperienceListItem } from "@/types/experience";
 import { ExperienceCard } from "./experience-card";
@@ -18,11 +21,13 @@ function FeaturedExperiencesSection({ experiences }: FeaturedExperiencesSectionP
   const sectionRef = useRef<HTMLElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
+  const displayExperiences =
+    experiences.length > 0 ? experiences : FEATURED_EXPERIENCES_HOMEPAGE_SHOWCASE;
 
   useLayoutEffect(() => {
     const section = sectionRef.current;
     const grid = gridRef.current;
-    if (reducedMotion || !section || !grid || experiences.length === 0) {
+    if (reducedMotion || !section || !grid || displayExperiences.length === 0) {
       return;
     }
 
@@ -76,11 +81,11 @@ function FeaturedExperiencesSection({ experiences }: FeaturedExperiencesSectionP
           "-=0.4",
         );
 
-      requestAnimationFrame(() => ScrollTrigger.refresh());
+      revealScrollTimelineIfAlreadyVisible(section, timeline);
     }, sectionRef);
 
     return () => ctx.revert();
-  }, [reducedMotion, experiences.length]);
+  }, [reducedMotion, displayExperiences]);
 
   return (
     <section
@@ -100,18 +105,9 @@ function FeaturedExperiencesSection({ experiences }: FeaturedExperiencesSectionP
             ref={gridRef}
             className="grid grid-cols-1 gap-5 min-[520px]:grid-cols-2 lg:grid-cols-4 lg:gap-6"
           >
-            {experiences.length === 0 ? (
-              <EmptyState
-                className="col-span-full"
-                title="Experiences will appear here"
-                description="Start the API and seed the catalog to show curated experiences on the homepage."
-                action={{ label: FEATURED_EXPERIENCES_COPY.cta, href: "/experiences" }}
-              />
-            ) : (
-              experiences.map((experience, index) => (
-                <ExperienceCard key={experience.id} experience={experience} index={index} />
-              ))
-            )}
+            {displayExperiences.map((experience, index) => (
+              <ExperienceCard key={experience.id} experience={experience} index={index} />
+            ))}
           </div>
         </div>
       </div>

@@ -19,6 +19,8 @@ function createRedisClient(): Redis | null {
     maxRetriesPerRequest: null,
     enableReadyCheck: true,
     lazyConnect: true,
+    connectTimeout: 5_000,
+    commandTimeout: 5_000,
   });
 
   client.on("error", (error: Error) => {

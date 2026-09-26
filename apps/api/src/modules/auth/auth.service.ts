@@ -50,9 +50,10 @@ export const authService = {
       passwordHash,
     });
 
-    const verifiedUser = env.isProduction ? user : await authRepository.markEmailVerified(user.id);
+    const verifyByEmail = env.isProduction || env.smtpHost.length > 0;
+    const verifiedUser = verifyByEmail ? user : await authRepository.markEmailVerified(user.id);
 
-    if (env.isProduction) {
+    if (verifyByEmail) {
       await this.issueEmailVerification(
         verifiedUser.id,
         verifiedUser.email,

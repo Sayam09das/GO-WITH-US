@@ -1,4 +1,5 @@
-const DEFAULT_API_BASE_URL = "http://127.0.0.1:4000/api/v1";
+const DEFAULT_SITE_ORIGIN = "http://127.0.0.1:3000";
+const PROXY_API_BASE = "/api/v1";
 
 function normalizeApiV1Base(raw: string): string {
   const trimmed = raw.trim().replace(/\/$/, "");
@@ -8,20 +9,34 @@ function normalizeApiV1Base(raw: string): string {
   return `${trimmed}/api/v1`;
 }
 
+function resolveSiteOrigin(): string {
+  return (
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() ??
+    process.env.APP_URL?.trim() ??
+    DEFAULT_SITE_ORIGIN
+  ).replace(/\/$/, "");
+}
+
 function resolveApiBaseUrl(): string {
-  if (typeof window === "undefined" && process.env.API_URL?.trim()) {
-    return normalizeApiV1Base(process.env.API_URL);
+  const publicUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+
+  // Relative API base → same-origin proxy (required for HttpOnly session cookies in the browser).
+  if (publicUrl?.startsWith("/")) {
+    if (typeof window === "undefined") {
+      return `${resolveSiteOrigin()}${normalizeApiV1Base(publicUrl)}`;
+    }
+    return normalizeApiV1Base(publicUrl);
   }
 
-  if (process.env.NEXT_PUBLIC_API_URL?.trim()) {
-    return normalizeApiV1Base(process.env.NEXT_PUBLIC_API_URL);
+  if (typeof window !== "undefined") {
+    return PROXY_API_BASE;
   }
 
-  return DEFAULT_API_BASE_URL;
+  return `${resolveSiteOrigin()}${PROXY_API_BASE}`;
 }
 
 const API_BASE_URL = resolveApiBaseUrl();
-const API_FETCH_TIMEOUT_MS = 5_000;
+const API_FETCH_TIMEOUT_MS = typeof window === "undefined" ? 20_000 : 15_000;
 
 export class ApiRequestError extends Error {
   constructor(
