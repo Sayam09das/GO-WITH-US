@@ -16,6 +16,7 @@ import { destinationsRouter } from "./modules/destinations/destinations.routes.j
 import { discoveryRouter } from "./modules/discovery/discovery.routes.js";
 import { experiencesRouter } from "./modules/experiences/experiences.routes.js";
 import { paymentsRouter } from "./modules/payments/payments.routes.js";
+import { placesRouter } from "./modules/places/places.routes.js";
 import { restaurantsRouter } from "./modules/restaurants/restaurants.routes.js";
 import { reviewsRouter } from "./modules/reviews/reviews.routes.js";
 import { searchRouter } from "./modules/search/search.routes.js";
@@ -114,6 +115,7 @@ export function createApp(): Express {
   apiRouter.use("/stays", staysRouter);
   apiRouter.use("/experiences", experiencesRouter);
   apiRouter.use("/restaurants", restaurantsRouter);
+  apiRouter.use("/places", placesRouter);
   apiRouter.use("/stories", storiesRouter);
   apiRouter.use("/reviews", reviewsRouter);
   apiRouter.use("/bookings", bookingsRouter);

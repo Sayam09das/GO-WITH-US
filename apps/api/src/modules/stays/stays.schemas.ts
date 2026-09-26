@@ -10,7 +10,7 @@ const guestsSchema = z.object({
 
 export const listStaysQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
-  limit: z.coerce.number().int().min(1).max(50).default(12),
+  limit: z.coerce.number().int().min(1).max(100).default(12),
   q: z.string().trim().max(120).optional(),
   destination: z.string().trim().max(160).optional(),
   propertyType: propertyTypeSchema.optional(),
@@ -48,7 +48,7 @@ export const staySearchSchema = z.object({
   rating: z.number().min(1).max(5).optional(),
   sort: sortSchema.default("recommended"),
   page: z.number().int().min(1).default(1),
-  limit: z.number().int().min(1).max(50).default(12),
+  limit: z.number().int().min(1).max(100).default(12),
 });
 
 export const staySlugParamSchema = z.object({

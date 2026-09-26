@@ -17,12 +17,14 @@ export type ExperienceListItem = {
   id: string;
   slug: string;
   title: string;
+  name: string;
   destination: string;
   destinationSlug: string;
   category: string;
   categoryLabel: string;
   description: string;
   heroImage: string;
+  coverImage: string;
   imageAlt: string;
   durationLabel: string | null;
   price: {
@@ -151,12 +153,14 @@ export function toExperienceListItem(
     id: experience.id,
     slug: experience.slug,
     title: experience.title,
+    name: experience.title,
     destination: experience.destination.title,
     destinationSlug: experience.destination.slug,
     category: categoryToApi(experience.category),
     categoryLabel: categoryLabel(experience.category),
     description: experience.overview,
     heroImage: experience.heroImage,
+    coverImage: experience.heroImage,
     imageAlt: experience.title,
     durationLabel: experience.durationLabel,
     price: {

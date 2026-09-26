@@ -9,6 +9,7 @@ import type {
   PaymentStatus,
   Stay,
 } from "../../generated/client.js";
+import { AppError } from "../../lib/errors.js";
 import { buildStayAvailability } from "../stays/stays.types.js";
 
 export type BookingGuestCounts = {
@@ -115,12 +116,15 @@ export function calculateStayBookingPrice(input: {
   checkOut: string;
   guests: BookingGuestCounts;
   roomId?: string;
+  rooms?: number;
+  quotedTotal?: number;
 }) {
   const availability = buildStayAvailability({
     stay: input.stay,
     checkIn: input.checkIn,
     checkOut: input.checkOut,
     guests: input.guests,
+    rooms: input.rooms,
   });
 
   if (!availability.isAvailable) {
@@ -136,6 +140,14 @@ export function calculateStayBookingPrice(input: {
 
   if (!selectedRoom || selectedRoom.totalPrice == null) {
     return { available: false as const, availability };
+  }
+
+  if (input.quotedTotal != null && input.quotedTotal !== selectedRoom.totalPrice) {
+    throw new AppError(409, "PRICE_CHANGED", "The price for this stay has changed.", {
+      previousTotal: input.quotedTotal,
+      currentTotal: selectedRoom.totalPrice,
+      currency: "USD",
+    });
   }
 
   return {

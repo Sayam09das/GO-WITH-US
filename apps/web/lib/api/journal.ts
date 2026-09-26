@@ -1,5 +1,4 @@
 import type { StoryListItem as ApiStoryListItem } from "@gowithus/types";
-import { JOURNAL_FIXTURE } from "@/data/fixtures/loaders/journal";
 import type { JournalStory } from "@/types/journal";
 import { apiFetch } from "./client";
 import { mapJournalStory } from "./mappers";
@@ -8,9 +7,20 @@ type StoryListResponse = {
   stories: ApiStoryListItem[];
 };
 
+function orderJournalStories(items: JournalStory[]): JournalStory[] {
+  const featured = items.find((item) => item.isFeatured);
+  const supporting = items.filter((item) => !item.isFeatured);
+  return featured ? [featured, ...supporting] : items;
+}
+
+async function fetchStoryList(limit: number): Promise<JournalStory[]> {
+  const response = await apiFetch<StoryListResponse>(`/stories?limit=${limit}&page=1`);
+  return response.stories.map(mapJournalStory);
+}
+
 export async function getFeaturedJournalStory(): Promise<JournalStory | undefined> {
   const stories = await getJournalStories();
-  return stories.find((item) => item.isFeatured);
+  return stories.find((item) => item.isFeatured) ?? stories[0];
 }
 
 export async function getSupportingJournalStories(): Promise<JournalStory[]> {
@@ -20,19 +30,27 @@ export async function getSupportingJournalStories(): Promise<JournalStory[]> {
 
 export async function getJournalStories(): Promise<JournalStory[]> {
   try {
-    const response = await apiFetch<StoryListResponse>("/stories?limit=20&page=1");
-    const mapped = response.stories.map(mapJournalStory);
-    const featured = mapped.find((item) => item.isFeatured);
-    const supporting = mapped.filter((item) => !item.isFeatured);
-    return featured ? [featured, ...supporting] : mapped;
+    const response = await apiFetch<StoryListResponse>("/stories/featured");
+    const mapped = orderJournalStories(response.stories.map(mapJournalStory));
+    if (mapped.length > 0) {
+      return mapped;
+    }
   } catch {
-    const featured = JOURNAL_FIXTURE.find((item) => item.isFeatured);
-    const supporting = JOURNAL_FIXTURE.filter((item) => !item.isFeatured);
-    return featured ? [featured, ...supporting] : JOURNAL_FIXTURE;
+    // Fall through to full catalog list.
+  }
+
+  try {
+    return orderJournalStories(await fetchStoryList(20));
+  } catch {
+    return [];
   }
 }
 
 export async function getJournalStoryBySlug(slug: string): Promise<JournalStory | undefined> {
-  const stories = await getJournalStories();
-  return stories.find((item) => item.slug === slug);
+  try {
+    const response = await apiFetch<{ story: ApiStoryListItem }>(`/stories/${slug}`);
+    return mapJournalStory(response.story);
+  } catch {
+    return undefined;
+  }
 }

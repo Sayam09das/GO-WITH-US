@@ -1,8 +1,10 @@
 "use client";
 
 import { useLayoutEffect, useRef } from "react";
-import { gsap, registerGsapPlugins } from "@/lib/animation/gsap";
+import { EmptyState } from "@/components/states";
+import { gsap, registerGsapPlugins, ScrollTrigger } from "@/lib/animation/gsap";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
+import { TRAVEL_JOURNAL_COPY } from "@/lib/landing/travel-journal";
 import { cn } from "@/lib/utils";
 import type { JournalStory } from "@/types/journal";
 import { JournalStoryCarousel } from "./journal-story-carousel";
@@ -73,13 +75,29 @@ function TravelJournalSection({ stories }: TravelJournalSectionProps) {
           },
           "-=0.45",
         );
+
+      requestAnimationFrame(() => ScrollTrigger.refresh());
     }, sectionRef);
 
     return () => ctx.revert();
   }, [reducedMotion, stories.length]);
 
   if (stories.length === 0) {
-    return null;
+    return (
+      <section
+        aria-labelledby="travel-journal-heading"
+        className="travel-section overflow-x-clip bg-section-warm"
+      >
+        <div className="container-travel flex flex-col gap-10 sm:gap-12">
+          <TravelJournalHeader />
+          <EmptyState
+            title="Journal stories will appear here"
+            description="Start the API and seed stories to enable the diagonal story carousel."
+            action={{ label: TRAVEL_JOURNAL_COPY.readStory, href: "/journal" }}
+          />
+        </div>
+      </section>
+    );
   }
 
   return (

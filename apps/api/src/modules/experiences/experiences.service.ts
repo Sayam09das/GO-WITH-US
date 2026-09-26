@@ -2,67 +2,13 @@ import { CACHE_KEYS, CACHE_TTL } from "../../infrastructure/cache/cache.keys.js"
 import { cacheService } from "../../infrastructure/cache/cache.service.js";
 import { AppError } from "../../lib/errors.js";
 import { reviewCatalog } from "../../lib/review-catalog.js";
-import {
-  mapExperienceAvailabilityToResult,
-  mapProviderListingToExperienceListItem,
-  mergeExperienceSearchResults,
-} from "../../providers/experiences/experiences.mapper.js";
-import { providerFactory } from "../../providers/index.js";
-import { locationService } from "../../services/location/location.service.js";
 import { experiencesRepository } from "./experiences.repository.js";
 import type { ExperienceSearchInput, ListExperiencesQuery } from "./experiences.schemas.js";
 import {
   buildPaginationMeta,
-  type ExperienceListItem,
   toExperienceDetail,
   toExperienceListItem,
 } from "./experiences.types.js";
-
-function paginateItems<T>(items: T[], page: number, limit: number): T[] {
-  const start = (page - 1) * limit;
-  return items.slice(start, start + limit);
-}
-
-async function searchProviderExperiences(
-  input: ExperienceSearchInput,
-): Promise<ExperienceListItem[]> {
-  const experienceProvider = providerFactory.getExperienceProvider();
-  if (!experienceProvider.isConfigured()) {
-    return [];
-  }
-
-  let destination: string | undefined;
-
-  if (input.location) {
-    const nearby = locationService.normalizeNearbyLocation(input.location);
-    destination = `${nearby.latitude},${nearby.longitude}`;
-  } else if (input.destination) {
-    const coordinates = await locationService.resolvePlaceCoordinates({
-      query: input.destination,
-    });
-    destination = coordinates ? `${coordinates.latitude},${coordinates.longitude}` : undefined;
-  }
-
-  if (!destination) {
-    return [];
-  }
-
-  const listings = await experienceProvider.searchListings({
-    destination,
-    date: input.date,
-    query: input.query,
-    limit: input.limit,
-    location: input.location
-      ? {
-          latitude: input.location.lat,
-          longitude: input.location.lng,
-          radiusMeters: input.location.radius,
-        }
-      : undefined,
-  });
-
-  return listings.map(mapProviderListingToExperienceListItem);
-}
 
 export const experiencesService = {
   async list(input: ListExperiencesQuery, userId?: string) {
@@ -95,34 +41,15 @@ export const experiencesService = {
         )
       : new Set<string>();
 
-    const catalogItems = result.experiences.map((experience) =>
-      toExperienceListItem(experience, savedIds.has(experience.id)),
-    );
-
-    const experienceProvider = providerFactory.getExperienceProvider();
-    const useProviderSearch =
-      experienceProvider.isConfigured() &&
-      (Boolean(input.location) || Boolean(input.destination) || Boolean(input.query));
-
-    const providerItems = useProviderSearch ? await searchProviderExperiences(input) : [];
-    const merged = mergeExperienceSearchResults(catalogItems, providerItems);
-    const paginated = paginateItems(merged, input.page, input.limit);
-
     return {
-      experiences: paginated,
-      meta: {
-        ...buildPaginationMeta({
-          page: input.page,
-          limit: input.limit,
-          total: merged.length,
-        }),
-        ...(providerItems.length > 0
-          ? {
-              provider: experienceProvider.name,
-              providerCount: providerItems.length,
-            }
-          : {}),
-      },
+      experiences: result.experiences.map((experience) =>
+        toExperienceListItem(experience, savedIds.has(experience.id)),
+      ),
+      meta: buildPaginationMeta({
+        page: result.page,
+        limit: result.limit,
+        total: result.total,
+      }),
     };
   },
 
@@ -227,21 +154,6 @@ export const experiencesService = {
 
     if (!experience) {
       throw new AppError(404, "NOT_FOUND", "Experience not found.");
-    }
-
-    const experienceProvider = providerFactory.getExperienceProvider();
-    if (experienceProvider.isConfigured()) {
-      const providerAvailability = await experienceProvider.searchAvailability({
-        experienceId: experience.id,
-        sourceId: experience.slug,
-        date: input.date,
-        startTime: input.startTime,
-        guests: input.guests,
-      });
-
-      if (providerAvailability) {
-        return mapExperienceAvailabilityToResult(providerAvailability);
-      }
     }
 
     const totalGuests = input.guests.adults + input.guests.children;

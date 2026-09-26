@@ -12,48 +12,39 @@ import type { InspirationStory } from "@/types/inspiration";
 import type { JournalStory } from "@/types/journal";
 import type { RestaurantListItem } from "@/types/restaurant";
 import type { StayListItem } from "@/types/stay";
-import {
-  getDestinationEditorial,
-  getExperienceEditorial,
-  getInspirationEditorial,
-  getJournalEditorial,
-  getStayEditorial,
-} from "./catalog-enrichment";
+
+function normalizePropertyType(value: string): StayListItem["propertyType"] {
+  if (
+    value === "boutique-hotel" ||
+    value === "villa" ||
+    value === "eco-lodge" ||
+    value === "apartment" ||
+    value === "resort" ||
+    value === "lodge"
+  ) {
+    return value === "lodge" ? "boutique-hotel" : value;
+  }
+
+  return "boutique-hotel";
+}
 
 export function mapDestinationListItem(item: ApiDestinationListItem): DestinationListItem {
-  const editorial = getDestinationEditorial(item.slug);
-
   return {
     id: item.id,
     slug: item.slug,
     title: item.title,
-    location: editorial?.location ?? item.title,
+    location: item.location ?? item.title,
     country: item.country,
     region: item.region,
-    style: editorial?.style ?? item.style ?? "Discovery",
-    category: editorial?.category ?? item.category ?? "Editorial",
+    style: item.style ?? "Discovery",
+    category: item.category ?? "Culture",
     budgetTier: item.budgetTier,
-    popularity: editorial?.popularity ?? item.popularity,
+    popularity: item.popularity,
     heroImage: item.heroImage,
-    imageAlt: editorial?.imageAlt ?? item.imageAlt,
+    imageAlt: item.imageAlt ?? item.title,
     rating: item.rating,
-    priceLabel: editorial?.priceLabel ?? item.priceLabel,
-    objectPosition: editorial?.objectPosition,
+    priceLabel: item.priceLabel,
   };
-}
-
-function resolveStayDestination(
-  destination: ApiStayListItem["destination"] | { title?: string } | string | null | undefined,
-): string {
-  if (typeof destination === "string") {
-    return destination;
-  }
-
-  if (destination && typeof destination === "object" && "title" in destination) {
-    return destination.title ?? "Unknown";
-  }
-
-  return "Unknown";
 }
 
 export function mapStayListItem(
@@ -64,39 +55,36 @@ export function mapStayListItem(
     description?: string;
   },
 ): StayListItem {
-  const editorial = getStayEditorial(item.slug);
-
   return {
     id: item.id,
     slug: item.slug,
     name: item.name,
-    destination: resolveStayDestination(item.destination),
-    propertyType: (editorial?.propertyType ?? item.propertyType) as StayListItem["propertyType"],
-    propertyTypeLabel: editorial?.propertyTypeLabel ?? item.propertyType,
-    description: editorial?.description ?? item.description ?? item.overview ?? item.name,
+    destination: item.destination,
+    propertyType: normalizePropertyType(item.propertyType),
+    propertyTypeLabel: item.propertyType,
+    description: item.description ?? item.overview ?? item.name,
     heroImage: item.coverImage ?? item.heroImage ?? "",
-    imageAlt: editorial?.imageAlt ?? item.imageAlt,
-    objectPosition: editorial?.objectPosition,
-    isFeatured: editorial?.isFeatured,
-    layoutVariant: editorial?.layoutVariant,
+    imageAlt: item.imageAlt ?? item.name,
+    isFeatured: item.isFeatured,
   };
 }
 
-export function mapExperienceListItem(item: ApiExperienceListItem): ExperienceListItem {
-  const editorial = getExperienceEditorial(item.slug);
+export function mapExperienceListItem(
+  item: ApiExperienceListItem & { title?: string; heroImage?: string; description?: string },
+): ExperienceListItem {
+  const title = item.name ?? item.title ?? "Experience";
 
   return {
     id: item.id,
     slug: item.slug,
-    title: item.name,
+    title,
     destination: item.destination,
-    category: (editorial?.category ?? item.category) as ExperienceListItem["category"],
-    categoryLabel: editorial?.categoryLabel ?? item.category,
-    description: editorial?.description ?? item.name,
-    heroImage: item.coverImage,
-    imageAlt: editorial?.imageAlt ?? item.name,
-    objectPosition: editorial?.objectPosition,
-    isFeatured: editorial?.isFeatured,
+    category: item.category as ExperienceListItem["category"],
+    categoryLabel: item.category,
+    description: item.description ?? title,
+    heroImage: item.heroImage ?? item.coverImage ?? "",
+    imageAlt: title,
+    isFeatured: item.isFeatured,
   };
 }
 
@@ -116,38 +104,31 @@ export function mapRestaurantListItem(item: ApiRestaurantListItem): RestaurantLi
 }
 
 export function mapJournalStory(item: ApiStoryListItem): JournalStory {
-  const editorial = getJournalEditorial(item.slug);
-
   return {
     id: item.id,
     slug: item.slug,
     title: item.title,
-    destination: editorial?.destination ?? "GO WITH US",
+    destination: "GO WITH US",
     excerpt: item.excerpt,
-    category: (editorial?.category ?? "travel-tips") as JournalStory["category"],
-    categoryLabel: editorial?.categoryLabel ?? item.category,
-    readLabel: editorial?.readLabel ?? `${item.readTimeMinutes} min read`,
+    category: "travel-tips",
+    categoryLabel: item.category,
+    readLabel: `${item.readTimeMinutes} min read`,
     heroImage: item.coverImage,
-    imageAlt: editorial?.imageAlt ?? item.title,
-    objectPosition: editorial?.objectPosition,
+    imageAlt: item.title,
     isFeatured: item.isFeatured,
-    layoutVariant: editorial?.layoutVariant,
   };
 }
 
 export function mapInspirationStory(item: ApiStoryListItem): InspirationStory {
-  const editorial = getInspirationEditorial(item.slug);
-
   return {
     id: item.id,
     slug: item.slug,
     title: item.title,
     excerpt: item.excerpt,
-    category: editorial?.category ?? item.category,
-    readLabel: editorial?.readLabel ?? `${item.readTimeMinutes} min read`,
+    category: item.category,
+    readLabel: `${item.readTimeMinutes} min read`,
     heroImage: item.coverImage,
-    imageAlt: editorial?.imageAlt ?? item.title,
-    objectPosition: editorial?.objectPosition,
+    imageAlt: item.title,
     isFeatured: item.isFeatured,
   };
 }

@@ -3,12 +3,12 @@ import { enqueueBookingPostCreate } from "../../infrastructure/queue/enqueue.js"
 import { logUserActivity } from "../../lib/activity.js";
 import { generateBookingReference } from "../../lib/catalog-utils.js";
 import { AppError } from "../../lib/errors.js";
-import { revalidateStayBookingPrice } from "../../services/accommodation/stay-booking-pricing.service.js";
 import { parseTimeString } from "../trips/trip-utils.js";
 import { bookingsRepository } from "./bookings.repository.js";
 import type { BookingStatusFilter, CreateBookingInput } from "./bookings.schemas.js";
 import {
   calculateExperienceBookingPrice,
+  calculateStayBookingPrice,
   toBookingDetail,
   toBookingListItem,
 } from "./bookings.types.js";
@@ -38,7 +38,7 @@ export const bookingsService = {
         throw new AppError(404, "NOT_FOUND", "Stay not found.");
       }
 
-      const pricing = await revalidateStayBookingPrice({
+      const pricing = calculateStayBookingPrice({
         stay,
         checkIn: input.checkIn!,
         checkOut: input.checkOut!,

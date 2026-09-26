@@ -5,7 +5,6 @@ import type {
   PropertyType,
   Stay,
 } from "../../generated/client.js";
-import type { ProviderSource } from "../../providers/provider.types.js";
 
 export type StayDestinationSummary = {
   id: string;
@@ -22,6 +21,7 @@ export type StayListItem = {
   destination: string;
   destinationSlug: string;
   propertyType: string;
+  description: string;
   coverImage: string;
   imageAlt: string;
   price: {
@@ -32,6 +32,7 @@ export type StayListItem = {
   rating: number;
   reviewCount: number;
   amenities: string[];
+  isFeatured: boolean;
   isSaved: boolean;
   source?: "catalog" | "provider";
   provider?: string;
@@ -139,11 +140,7 @@ export type StayAvailabilityResult = {
     }
   >;
   meta: {
-    inventoryModel: "guidance" | "provider";
-    provider?: ProviderSource;
-    fetchedAt?: string;
-    expiresAt?: string;
-    stale?: boolean;
+    inventoryModel: "guidance";
   };
 };
 
@@ -272,6 +269,7 @@ export function toStayListItem(
     destination: stay.destination.title,
     destinationSlug: stay.destination.slug,
     propertyType: propertyTypeToApi(stay.propertyType),
+    description: stay.overview,
     coverImage: stay.heroImage,
     imageAlt: stay.title,
     price: {
@@ -282,6 +280,7 @@ export function toStayListItem(
     rating: decimalToNumber(stay.ratingAvg),
     reviewCount: stay.reviewCount,
     amenities: stay.amenities,
+    isFeatured: stay.isFeatured,
     isSaved,
   };
 }

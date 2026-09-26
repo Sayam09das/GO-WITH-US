@@ -1,4 +1,26 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
+const DEFAULT_API_BASE_URL = "http://127.0.0.1:4000/api/v1";
+
+function normalizeApiV1Base(raw: string): string {
+  const trimmed = raw.trim().replace(/\/$/, "");
+  if (trimmed.endsWith("/api/v1")) {
+    return trimmed;
+  }
+  return `${trimmed}/api/v1`;
+}
+
+function resolveApiBaseUrl(): string {
+  if (typeof window === "undefined" && process.env.API_URL?.trim()) {
+    return normalizeApiV1Base(process.env.API_URL);
+  }
+
+  if (process.env.NEXT_PUBLIC_API_URL?.trim()) {
+    return normalizeApiV1Base(process.env.NEXT_PUBLIC_API_URL);
+  }
+
+  return DEFAULT_API_BASE_URL;
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
 const API_FETCH_TIMEOUT_MS = 5_000;
 
 export class ApiRequestError extends Error {

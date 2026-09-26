@@ -404,362 +404,45 @@ Complete restaurant discovery pages, itinerary workspace UI, and end-to-end QA p
 
 ---
 
-## Step 15 — External Travel Providers
+## Catalog data architecture (PostgreSQL)
 
-### Step 15.1 — Provider Architecture
+**Status:** Current
 
-**Status:** Complete (scaffolding)
-
-External travel APIs are isolated behind a dedicated provider layer. Domain services never call third-party HTTP APIs directly.
+GO WITH US serves all travel discovery catalog data from **PostgreSQL**. The API does not call third-party travel providers (no Foursquare, Booking/RapidAPI, or Amadeus integrations).
 
 **Flow:**
 
 ```
-Controller → Domain Service → Provider Interface → Provider Implementation → External API
+Next.js frontend
+       ↓
+     fetch()
+       ↓
+Express REST API (Fastify-style modular routes)
+       ↓
+Service layer
+       ↓
+Repository / Prisma
+       ↓
+PostgreSQL (seeded GO WITH US catalog)
 ```
 
-**Folder layout:**
+**Catalog entities** (destinations, stays, experiences, restaurants, places, stories, reviews) live in PostgreSQL and are populated with the curated seed under `apps/api/src/db/seed/`.
 
-```
-apps/api/src/providers/
-├── index.ts                         # ProviderFactory (env-driven selection)
-├── provider.types.ts
-├── places/
-│   ├── places.provider.ts           # PlacesProvider interface
-│   ├── places.types.ts              # NormalizedPlace
-│   ├── places.mapper.ts
-│   ├── noop.places.provider.ts
-│   └── foursquare/
-│       ├── foursquare.client.ts     # HTTP only
-│       └── foursquare.provider.ts
-├── accommodation/
-│   ├── accommodation.provider.ts
-│   ├── accommodation.types.ts
-│   ├── accommodation.mapper.ts
-│   ├── noop.accommodation.provider.ts
-│   └── booking/
-│       ├── booking.client.ts
-│       └── booking.provider.ts
-└── experiences/
-    ├── experiences.provider.ts
-    ├── experiences.types.ts
-    ├── experiences.mapper.ts
-    ├── noop.experiences.provider.ts
-    └── amadeus/
-        ├── amadeus.client.ts
-        └── amadeus.provider.ts
-```
+**Global search** (`GET /api/v1/search`, `POST /api/v1/search`) queries PostgreSQL-backed services, including dedicated **places** (`GET /api/v1/places`).
 
-**Provider categories:**
+**Availability & booking pricing** for stays and experiences uses **guidance inventory** computed from seeded catalog fields (`estimatedNightlyFrom`, room templates, guest limits). Prices are validated server-side at booking creation; optional `quotedTotal` on stay bookings returns `PRICE_CHANGED` if the guidance total differs.
 
-| Category | Interface | Default | Used by |
-|----------|-----------|---------|---------|
-| Places | `PlacesProvider` | `noop` | `restaurantsService`, `destinationsService` |
-| Accommodation | `AccommodationProvider` | `noop` | `staysService.getAvailability()` |
-| Experiences | `ExperienceProvider` | `noop` | `experiencesService.getAvailability()` |
+**Location helpers** (`apps/api/src/services/location/`) validate coordinates and radius for nearby search requests. Reverse geocoding labels are not provided without external geodata.
 
-**Environment variables** (see `apps/api/.env.example`):
+**Seed catalog:**
 
 ```bash
-PLACES_PROVIDER=              # or foursquare
-ACCOMMODATION_PROVIDER=       # or booking
-EXPERIENCE_PROVIDER=          # or amadeus
-FOURSQUARE_API_KEY=
-BOOKING_API_KEY=
-AMADEUS_CLIENT_ID=
-AMADEUS_CLIENT_SECRET=
+pnpm --filter @gowithus/api db:seed
 ```
 
-Legacy names (`PROVIDER_PLACES`, `AMADEUS_API_KEY`, etc.) are still accepted for backward compatibility.
+Seeds **50 destinations**, **50 stays**, **50 experiences**, **50 restaurants**, **50 places**, **150+ reviews**, categories/tags, demo users, and editorial stories. Requires PostgreSQL (`DATABASE_URL` or `DIRECT_URL` in `apps/api/.env`).
 
-When provider env vars are unset or set to `none`, noop providers return empty results and domain services fall back to the existing Prisma seed catalog / guidance inventory.
-
-**Integration points (without breaking existing routes):**
-
-- `staysService.getAvailability()` — tries `AccommodationProvider` first, falls back to `buildStayAvailability()`
-- `experiencesService.getAvailability()` — tries `ExperienceProvider` first, falls back to guidance inventory
-- `restaurantsService.search()` — augments DB results with optional `placeSuggestions` from `PlacesProvider`
-- `destinationsService.search()` — optional autocomplete suggestions via `PlacesProvider`
-
-**Rules:**
-
-- Controllers and routes are unchanged
-- Prisma repositories remain the source of truth for published catalog content
-- External responses are normalized before reaching services/controllers
-- Provider API keys stay server-side only
-
----
-
-### Step 15.2 — Provider Configuration
-
-**Status:** Complete
-
-Provider credentials and selection are centralized in `apps/api/src/config/providers.ts`. `env.ts` loads core server secrets only; provider keys never appear in `apps/web` or `NEXT_PUBLIC_*` variables.
-
-**Configuration flow:**
-
-```
-process.env → loadProvidersConfig() → validateProvidersConfig() → providersConfig → ProviderFactory
-```
-
-**Startup validation:** If `PLACES_PROVIDER=foursquare` but `FOURSQUARE_API_KEY` is missing, the API fails fast at startup with a clear error instead of failing mid-search.
-
-**Shared HTTP client:** `providers/lib/provider-http.client.ts` wraps native `fetch()` with:
-
-- Mandatory timeouts (`PROVIDER_HTTP_TIMEOUT_MS`, default 8s)
-- Selective retries for network errors, `429`, and `5xx` only
-- Sanitized `PROVIDER_UNAVAILABLE` responses (no provider HTTP details exposed to clients)
-- No logging of API keys, auth headers, or secrets
-
-**Never commit:** `.env`, `.env.local` — only `apps/api/.env.example` with placeholders.
-
----
-
-### Step 15.3 — Location & Geolocation
-
-**Status:** Complete (foundation)
-
-**Location service:** `apps/api/src/services/location/`
-
-- Validates latitude (`-90` → `90`), longitude (`-180` → `180`)
-- Normalizes nearby radius (`1 km` → `50 km`, default `10 km`)
-- Reverse geocoding via `PlacesProvider.reverseGeocode()` when configured
-- Does not persist user GPS coordinates
-
-**Global search endpoint:** `/api/v1/search`
-
-| Method | Use case |
-|--------|----------|
-| `GET /search?q=` | Text search across destinations, stays, experiences, restaurants, stories |
-| `POST /search` or `QUERY /search` | Nearby search with `{ location: { lat, lng, radius }, query?, types? }` |
-
-**Architecture:**
-
-```
-Frontend (browser geolocation)
-        ↓
-/api/v1/search
-        ↓
-SearchService
-        ↓
-LocationService (validate + reverse geocode)
-        ↓
-ProviderFactory → PlacesProvider → external API
-        ↓
-Normalized results (+ Prisma catalog fallback)
-```
-
-Supports destination text search, near-me coordinate search, radius filtering, and location labels for display. Map integration and persistent user location storage are out of scope for this step.
-
-### Step 15.4 — Places Provider
-
-**Status:** Complete
-
-**Provider layer:** `apps/api/src/providers/places/`
-
-| File | Role |
-|------|------|
-| `places.provider.ts` | Internal contract: `search`, `searchNearby`, `getDetails`, `autocomplete`, `reverseGeocode` |
-| `places.types.ts` | `NormalizedPlace` — GO WITH US place format |
-| `places.mapper.ts` | Foursquare → normalized place + autocomplete helpers |
-| `foursquare/foursquare.client.ts` | HTTP only (URL, headers, timeout, retries) |
-| `foursquare/foursquare.provider.ts` | Foursquare adapter implementing `PlacesProvider` |
-
-Controllers and services call `ProviderFactory.getPlacesProvider()` — never Foursquare directly.
-
-**Normalized place shape** (frontend-facing via search):
-
-```json
-{
-  "provider": "foursquare",
-  "providerPlaceId": "abc123",
-  "name": "Example Restaurant",
-  "category": "restaurant",
-  "address": "Example Street",
-  "city": "Kolkata",
-  "country": "India",
-  "latitude": 22.57,
-  "longitude": 88.36,
-  "rating": null,
-  "image": null
-}
-```
-
-Provider selection: `PLACES_PROVIDER=foursquare` (or `none` for catalog-only). API keys live in `apps/api/.env` only — never `NEXT_PUBLIC_*`.
-
-### Step 15.5 — Destination Synchronization
-
-**Status:** Complete (service + schema; worker stub)
-
-**Schema additions** on `destinations`:
-
-- `provider`, `providerPlaceId` (unique together)
-- `city`, `latitude`, `longitude`
-- `providerSyncedAt`, `syncStatus` (`ACTIVE` | `STALE` | `FAILED`)
-
-Migration: `apps/api/prisma/migrations/20250926030000_provider_sync_fields/`
-
-**Sync service:** `apps/api/src/services/sync/destination-sync.service.ts`
-
-- `upsertFromPlace()` — creates or refreshes provider-owned fields only
-- `syncDestination(providerPlaceId)` — fetch live details then upsert
-- `enqueueSync()` — queues `sync-destination` job on the cleanup queue
-
-Editorial fields (`overview`, `heroImage`, `isFeatured`, SEO content) are never overwritten on update.
-
-User search returns live provider results without blocking on DB sync. Persist when a result becomes a GO WITH US destination.
-
-### Step 15.6 — Real Restaurant Search
-
-**Status:** Complete
-
-Existing endpoint unchanged: `QUERY /api/v1/restaurants/search`
-
-```
-Restaurant Controller → Restaurant Service → PlacesProvider → Foursquare
-                                              ↓
-                                    restaurants.mapper.ts
-                                              ↓
-                                    GO WITH US restaurant list items
-```
-
-**New request fields:**
-
-```json
-{
-  "query": "Italian",
-  "destination": "Bali",
-  "location": { "lat": 22.57, "lng": 88.36, "radius": 5000 },
-  "priceLevel": [2],
-  "sort": "rating"
-}
-```
-
-- Resolves destination text → coordinates via `LocationService.resolvePlaceCoordinates()`
-- Nearby search uses `PlacesProvider.searchNearby()`
-- Provider results merge with Prisma catalog; ephemeral results are not bulk-inserted
-- Saved/review/trip flows continue to use GO WITH US restaurant IDs
-
-### Step 15.7 — Real Experience Search
-
-**Status:** Complete
-
-Existing endpoint unchanged: `QUERY /api/v1/experiences/search`
-
-```
-Experience Controller → Experience Service → ExperienceProvider → Amadeus
-                                              ↓
-                                    experiences.mapper.ts
-                                              ↓
-                                    GO WITH US experience list items
-```
-
-**New request fields:**
-
-```json
-{
-  "query": "boat tour",
-  "destination": "Labuan Bajo",
-  "location": { "lat": -8.49, "lng": 119.88, "radius": 10000 },
-  "date": "2026-10-12",
-  "sort": "rating"
-}
-```
-
-Experiences use a separate provider domain (`providers/experiences/`) from places. Provider results are returned live; PostgreSQL records are created only when users save, review, book, or add to trips.
-
-### Step 15.8 — Real Accommodation Search
-
-**Status:** Complete
-
-Existing endpoints unchanged: `GET /api/v1/stays`, `QUERY /api/v1/stays/search`, `GET /api/v1/stays/:slug`, `QUERY /api/v1/stays/:stayId/availability`.
-
-```
-Stay Controller → Stay Service → AccommodationProvider → Booking.com (when configured)
-                                      ↓
-                            accommodation.mapper.ts
-                                      ↓
-                               GO WITH US Stay
-```
-
-**Search request** (dates + guests required for live provider results):
-
-```json
-{
-  "destination": "Bali",
-  "checkIn": "2026-10-12",
-  "checkOut": "2026-10-16",
-  "guests": { "adults": 2, "children": 0 },
-  "rooms": 1
-}
-```
-
-- Resolves destination → provider `dest_id` via linked GO WITH US destination `providerPlaceId` or numeric ID
-- Merges provider listings with Prisma catalog
-- `Stay` model stores `provider`, `providerPropertyId`, coordinates — live prices are not persisted
-
-Provider selection: `ACCOMMODATION_PROVIDER=booking` + `BOOKING_API_KEY` in `apps/api/.env`.
-
-### Step 15.9 — Live Availability & Pricing
-
-**Status:** Complete
-
-`QUERY /api/v1/stays/:stayId/availability` uses `providerPropertyId` when configured:
-
-- Returns normalized room options with price breakdown (`baseAmount`, `taxAmount`, `feeAmount`, `totalAmount`, `currency`)
-- Includes `fetchedAt` / `expiresAt` in response meta
-- Redis-cached with short TTL (`provider:stays:availability:*`)
-- When provider is configured for a linked stay, failures return `PROVIDER_UNAVAILABLE` — guidance inventory is not shown as live inventory
-
-**Booking revalidation** at `POST /api/v1/bookings`:
-
-- Re-checks live availability + current price before creating a stay booking
-- Optional `quotedTotal` triggers `PRICE_CHANGED` (409) if price moved
-- Returns `AVAILABILITY_CHANGED` (409) if room no longer available
-- Never trusts client-submitted prices
-
-### Step 15.10 — Provider → GO WITH US Normalization
-
-**Status:** Complete
-
-Normalized types live in each provider domain:
-
-| Domain | Types | Mapper |
-|--------|-------|--------|
-| Places | `NormalizedPlace` | `places.mapper.ts` |
-| Experiences | `NormalizedExperienceListing` | `experiences.mapper.ts` |
-| Accommodation | `NormalizedAccommodationListing`, `NormalizedRoomOption`, `NormalizedPriceBreakdown` | `accommodation.mapper.ts` |
-
-Services and controllers consume normalized models only — never raw provider JSON.
-
-### Step 15.11 — Redis Caching
-
-**Status:** Complete (foundation)
-
-Cache layer: `apps/api/src/infrastructure/cache/`
-
-| Key pattern | TTL | Use |
-|-------------|-----|-----|
-| `provider:stays:search:*` | 120s | Accommodation discovery |
-| `provider:stays:availability:*` | 60s | Live room/rate checks |
-| `provider:places:search:*` | 120s | Place discovery |
-
-- Caches **normalized** results with envelope (`fetchedAt`, `expiresAt`)
-- `getOrSetWithLock()` prevents cache stampede via Redis lock
-- Stale cache may be returned with `meta.stale: true` while refreshing in background
-- Availability cache keys include dates, guests, and rooms
-
-### Step 15.12 — Provider Failure & Fallback
-
-**Status:** Complete (foundation)
-
-Infrastructure: `apps/api/src/infrastructure/providers/`
-
-- **Error classification:** `TIMEOUT`, `RATE_LIMITED`, `UNAUTHORIZED`, `FORBIDDEN`, `BAD_REQUEST`, `UNAVAILABLE`, `NETWORK_ERROR`
-- **Circuit breaker:** opens after repeated failures, half-open retry after 30s
-- **HTTP client:** selective retries with backoff; maps errors to `PROVIDER_UNAVAILABLE` or `PROVIDER_RATE_LIMITED`
-- **Availability:** never falls back to guidance when a provider-linked stay requires live inventory
-- **Discovery:** stale cache fallback with `meta.stale: true` where acceptable
+**Environment:** See `apps/api/.env.example`—database, Redis, auth, and mail only. No provider API keys are required to run locally.
 
 ---
 

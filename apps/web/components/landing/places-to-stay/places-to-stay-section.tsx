@@ -1,7 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useRef } from "react";
-import { gsap, registerGsapPlugins } from "@/lib/animation/gsap";
+import { gsap, registerGsapPlugins, ScrollTrigger } from "@/lib/animation/gsap";
 import { bindLayerParallax } from "@/lib/animation/scroll-parallax";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
 import { cn } from "@/lib/utils";
@@ -19,11 +19,15 @@ function PlacesToStaySection({ featured, supportingStays }: PlacesToStaySectionP
   const sectionRef = useRef<HTMLElement>(null);
   const supportingRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
+  const resolvedFeatured = featured ?? supportingStays[0];
+  const resolvedSupporting = featured
+    ? supportingStays
+    : supportingStays.filter((stay) => stay.id !== resolvedFeatured?.id);
 
   useLayoutEffect(() => {
     const section = sectionRef.current;
     const supporting = supportingRef.current;
-    if (reducedMotion || !section) {
+    if (reducedMotion || !section || !resolvedFeatured) {
       return;
     }
 
@@ -111,12 +115,14 @@ function PlacesToStaySection({ featured, supportingStays }: PlacesToStaySectionP
           layerSelector: "[data-pts-parallax]",
         });
       }
+
+      requestAnimationFrame(() => ScrollTrigger.refresh());
     }, sectionRef);
 
     return () => ctx.revert();
-  }, [reducedMotion]);
+  }, [reducedMotion, resolvedFeatured]);
 
-  if (!featured) {
+  if (!resolvedFeatured) {
     return null;
   }
 
@@ -134,13 +140,13 @@ function PlacesToStaySection({ featured, supportingStays }: PlacesToStaySectionP
         <div className="flex flex-col gap-10 sm:gap-12 lg:gap-14">
           <PlacesToStayHeader />
 
-          <FeaturedStay stay={featured} />
+          <FeaturedStay stay={resolvedFeatured} />
 
           <div
             ref={supportingRef}
             className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-12 lg:grid-rows-[auto_auto] lg:gap-6 xl:gap-8"
           >
-            {supportingStays.map((stay, index) => (
+            {resolvedSupporting.map((stay, index) => (
               <SupportingStayCard key={stay.id} stay={stay} index={index} />
             ))}
           </div>

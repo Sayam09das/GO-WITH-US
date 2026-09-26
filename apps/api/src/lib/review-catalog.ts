@@ -83,6 +83,9 @@ async function updateCatalogReviewAggregates(
     case "restaurant":
       await tx.restaurant.update({ where: { id: itemId }, data });
       break;
+    case "place":
+      await tx.place.update({ where: { id: itemId }, data });
+      break;
   }
 }
 
@@ -196,7 +199,8 @@ export const reviewCatalog = {
 
     const itineraryItem = await prisma.itineraryItem.findFirst({
       where: {
-        itemType: itemType === "restaurant" ? "restaurant" : itemType,
+        itemType:
+          itemType === "restaurant" ? "restaurant" : itemType === "place" ? "place" : itemType,
         itemId,
         trip: { userId },
       },

@@ -1,5 +1,4 @@
 import type { ExperienceListItem as ApiExperienceListItem } from "@gowithus/types";
-import { EXPERIENCES_FIXTURE } from "@/data/fixtures/loaders/experiences";
 import type { ExperienceListItem } from "@/types/experience";
 import { apiFetch } from "./client";
 import { mapExperienceListItem } from "./mappers";
@@ -8,31 +7,42 @@ type ExperienceListResponse = {
   experiences: ApiExperienceListItem[];
 };
 
-export async function getAllExperiences(): Promise<ExperienceListItem[]> {
-  try {
-    const response = await apiFetch<ExperienceListResponse>("/experiences?limit=100&page=1");
-    return response.experiences.map(mapExperienceListItem);
-  } catch {
-    return EXPERIENCES_FIXTURE;
+function orderFeaturedExperiences(items: ExperienceListItem[]): ExperienceListItem[] {
+  const featured = items.find((item) => item.isFeatured);
+  const supporting = items.filter((item) => !item.isFeatured);
+
+  if (!featured) {
+    return items.slice(0, 4);
   }
+
+  return [featured, ...supporting].slice(0, 4);
+}
+
+async function fetchExperienceList(limit: number): Promise<ExperienceListItem[]> {
+  const response = await apiFetch<ExperienceListResponse>(`/experiences?limit=${limit}&page=1`);
+  return response.experiences.map(mapExperienceListItem);
+}
+
+export async function getAllExperiences(): Promise<ExperienceListItem[]> {
+  return fetchExperienceList(100);
 }
 
 export async function getFeaturedExperiences(): Promise<ExperienceListItem[]> {
   try {
     const response = await apiFetch<ExperienceListResponse>("/experiences/featured");
     const mapped = response.experiences.map(mapExperienceListItem);
-    const featured = mapped.find((item) => item.isFeatured);
-    const supporting = mapped.filter((item) => !item.isFeatured);
-
-    if (!featured) {
-      return mapped.slice(0, 4);
+    if (mapped.length > 0) {
+      return orderFeaturedExperiences(mapped);
     }
-
-    return [featured, ...supporting];
   } catch {
-    const featured = EXPERIENCES_FIXTURE.find((item) => item.isFeatured);
-    const supporting = EXPERIENCES_FIXTURE.filter((item) => !item.isFeatured);
-    return featured ? [featured, ...supporting] : EXPERIENCES_FIXTURE.slice(0, 4);
+    // Fall through to catalog list.
+  }
+
+  try {
+    const listed = await fetchExperienceList(12);
+    return orderFeaturedExperiences(listed);
+  } catch {
+    return [];
   }
 }
 
@@ -41,6 +51,6 @@ export async function getExperienceBySlug(slug: string): Promise<ExperienceListI
     const response = await apiFetch<{ experience: ApiExperienceListItem }>(`/experiences/${slug}`);
     return mapExperienceListItem(response.experience);
   } catch {
-    return EXPERIENCES_FIXTURE.find((item) => item.slug === slug);
+    return undefined;
   }
 }
