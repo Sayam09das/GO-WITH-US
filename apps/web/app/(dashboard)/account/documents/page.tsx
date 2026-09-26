@@ -1,7 +1,9 @@
-import { FileText } from "lucide-react";
+import { Plus } from "lucide-react";
 import type { Metadata } from "next";
-import { AccountPageHeader } from "@/components/account/account-page-header";
-import { EmptyState } from "@/components/states";
+import { DocumentsContent } from "@/components/account/documents/documents-content";
+import { EditorialPageHeader } from "@/components/account/editorial-page-header";
+import { Button } from "@/components/ui/button";
+import { DOCUMENTS_PAGE_COPY } from "@/lib/account/documents/documents-copy";
 import { buildPageMetadata, buildPageTitle } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -14,19 +16,18 @@ export const metadata: Metadata = buildPageMetadata({
 export default function AccountDocumentsPage() {
   return (
     <div className="container-travel py-10 sm:py-12 lg:py-14">
-      <AccountPageHeader
-        title="Travel documents"
-        description="Confirmations, tickets, and receipts in one calm place when you need them."
+      <EditorialPageHeader
+        eyebrow={DOCUMENTS_PAGE_COPY.eyebrow}
+        heading={DOCUMENTS_PAGE_COPY.heading}
+        supporting={DOCUMENTS_PAGE_COPY.supporting}
+        action={
+          <Button type="button" className="w-full rounded-full px-5 sm:w-auto" disabled>
+            <Plus aria-hidden="true" className="size-4" />
+            {DOCUMENTS_PAGE_COPY.addDocument}
+          </Button>
+        }
       />
-      <section className="max-w-lg rounded-[1.25rem] border border-border/60 bg-background p-8 shadow-sm">
-        <EmptyState
-          icon={FileText}
-          title="No documents yet"
-          description="When you confirm bookings, PDFs and reference numbers will show up here for easy access."
-          action={{ href: "/account/bookings", label: "View bookings" }}
-          secondaryAction={{ href: "/trips", label: "Plan a trip" }}
-        />
-      </section>
+      <DocumentsContent />
     </div>
   );
 }

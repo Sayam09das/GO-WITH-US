@@ -92,6 +92,7 @@ export function mapTripSummaryToUpcomingTrip(trip: TripSummary): UpcomingTrip {
 function mapSavedDestination(item: SavedDestinationSummary): SavedPlaceItem {
   return {
     id: item.id,
+    catalogId: item.destinationId,
     name: item.title,
     location: item.region,
     country: item.country,
@@ -110,6 +111,7 @@ function mapSavedDestination(item: SavedDestinationSummary): SavedPlaceItem {
 function mapSavedStay(item: SavedStaySummary): SavedPlaceItem {
   return {
     id: item.id,
+    catalogId: item.stayId,
     name: item.title,
     location: item.destination.title,
     country: item.destination.country,
@@ -128,6 +130,7 @@ function mapSavedStay(item: SavedStaySummary): SavedPlaceItem {
 function mapSavedExperience(item: SavedExperienceSummary): SavedPlaceItem {
   return {
     id: item.id,
+    catalogId: item.experienceId,
     name: item.title,
     location: item.destination.title,
     country: item.destination.country,

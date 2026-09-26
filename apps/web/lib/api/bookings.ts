@@ -9,8 +9,23 @@ type ApiBookingListItem = {
   paymentStatus: BookingSummary["paymentStatus"];
   startDate: string | null;
   endDate: string | null;
+  guestCount: number;
   totalAmount: number;
   currency: string;
+  createdAt: string;
+};
+
+type ApiBookingItem = {
+  roomLabel: string | null;
+  checkIn: string | null;
+  checkOut: string | null;
+  guests: { adults: number; children: number };
+};
+
+type ApiBookingDetail = ApiBookingListItem & {
+  items: ApiBookingItem[];
+  payments: { amount: number; status: BookingSummary["paymentStatus"] }[];
+  cancellationNote: string | null;
 };
 
 type BookingListResponse = {
@@ -26,8 +41,10 @@ function mapBookingSummary(item: ApiBookingListItem): BookingSummary {
     paymentStatus: item.paymentStatus,
     startDate: item.startDate,
     endDate: item.endDate,
+    guestCount: item.guestCount,
     totalAmount: item.totalAmount,
     currency: item.currency,
+    createdAt: item.createdAt,
   };
 }
 
@@ -37,6 +54,11 @@ export async function listBookings(
   const query = status ? `?status=${status}` : "";
   const response = await apiFetch<BookingListResponse>(`/bookings${query}`);
   return response.items.map(mapBookingSummary);
+}
+
+export async function getBooking(bookingId: string): Promise<ApiBookingDetail> {
+  const response = await apiFetch<{ booking: ApiBookingDetail }>(`/bookings/${bookingId}`);
+  return response.booking;
 }
 
 export async function createBooking(input: {

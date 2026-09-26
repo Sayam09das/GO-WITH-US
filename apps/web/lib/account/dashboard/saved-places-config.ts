@@ -1,7 +1,8 @@
-export type SavedPlaceType = "destination" | "stay" | "experience";
+export type SavedPlaceType = "destination" | "stay" | "experience" | "story";
 
 export interface SavedPlaceItem {
   id: string;
+  catalogId: string;
   name: string;
   location: string;
   country: string;
@@ -42,6 +43,7 @@ export const SAVED_PLACES_LINKS = {
 export const SAVED_PLACES_FIXTURE: SavedPlaceItem[] = [
   {
     id: "saved-kyoto",
+    catalogId: "dest-kyoto",
     name: "Kyoto",
     location: "Kyoto",
     country: "Japan",
@@ -58,6 +60,7 @@ export const SAVED_PLACES_FIXTURE: SavedPlaceItem[] = [
   },
   {
     id: "saved-cliffside-amalfi",
+    catalogId: "stay-amalfi",
     name: "Cliffside House Amalfi",
     location: "Amalfi",
     country: "Italy",
@@ -74,6 +77,7 @@ export const SAVED_PLACES_FIXTURE: SavedPlaceItem[] = [
   },
   {
     id: "saved-sunset-sailing",
+    catalogId: "exp-sailing",
     name: "Sunset sailing along the coast",
     location: "Amalfi Coast",
     country: "Italy",

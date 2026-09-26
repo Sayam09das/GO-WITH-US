@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { AccountPageHeader } from "@/components/account/account-page-header";
-import { BookingsList } from "@/components/account/bookings/bookings-list";
+import { BookingsContent } from "@/components/account/bookings/bookings-content";
+import { EditorialPageHeader } from "@/components/account/editorial-page-header";
+import { BOOKINGS_PAGE_COPY } from "@/lib/account/bookings/bookings-copy";
 import { buildPageMetadata, buildPageTitle } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -13,11 +14,12 @@ export const metadata: Metadata = buildPageMetadata({
 export default function AccountBookingsPage() {
   return (
     <div className="container-travel py-10 sm:py-12 lg:py-14">
-      <AccountPageHeader
-        title="Bookings"
-        description="Track pending and confirmed reservations for stays and experiences."
+      <EditorialPageHeader
+        eyebrow={BOOKINGS_PAGE_COPY.eyebrow}
+        heading={BOOKINGS_PAGE_COPY.heading}
+        supporting={BOOKINGS_PAGE_COPY.supporting}
       />
-      <BookingsList />
+      <BookingsContent />
     </div>
   );
 }
