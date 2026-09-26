@@ -4,12 +4,15 @@ import { Bell } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { DashboardProfileMenu } from "@/components/account/dashboard/dashboard-profile-menu";
-import { IconButton } from "@/components/ui/icon-button";
+import { Button } from "@/components/ui/button";
 import { DASHBOARD_HEADER_COPY } from "@/lib/account";
+import { useNotificationUnreadCount } from "@/lib/hooks/use-notification-unread-count";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
+import { cn } from "@/lib/utils";
 
 function DashboardUtilityBar() {
   const reducedMotion = useReducedMotion();
+  const unreadCount = useNotificationUnreadCount();
 
   return (
     <div
@@ -37,13 +40,29 @@ function DashboardUtilityBar() {
           whileHover={reducedMotion ? undefined : { scale: 1.04 }}
           transition={{ duration: 0.18 }}
         >
-          <IconButton
+          <Button
+            asChild
             variant="ghost"
-            label={DASHBOARD_HEADER_COPY.notificationsLabel}
-            icon={Bell}
-            iconClassName="size-[1.125rem]"
-            className="size-10 rounded-full text-muted-foreground hover:text-heading"
-          />
+            size="icon"
+            className="relative size-10 rounded-full text-muted-foreground hover:text-heading"
+          >
+            <Link
+              href="/account/notifications"
+              aria-label={DASHBOARD_HEADER_COPY.notificationsLabel}
+            >
+              <Bell aria-hidden="true" className="size-[1.125rem]" />
+              {unreadCount > 0 ? (
+                <span
+                  className={cn(
+                    "absolute top-1.5 right-1.5 flex min-w-[1.125rem] items-center justify-center rounded-full bg-primary px-1 text-[0.625rem] font-bold leading-none text-primary-foreground",
+                    unreadCount > 9 ? "px-1.5" : "",
+                  )}
+                >
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              ) : null}
+            </Link>
+          </Button>
         </motion.div>
         <DashboardProfileMenu />
       </div>

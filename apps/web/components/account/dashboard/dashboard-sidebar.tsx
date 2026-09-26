@@ -9,6 +9,7 @@ import {
   DASHBOARD_SIDEBAR_GROUPS,
   DASHBOARD_SIDEBAR_HELP,
   DASHBOARD_SIDEBAR_WIDTH_CLASS,
+  dashboardSidebarNavLinkClasses,
   isDashboardNavActive,
 } from "@/lib/account";
 import { cn } from "@/lib/utils";
@@ -57,12 +58,7 @@ function DashboardSidebar({ className }: DashboardSidebarProps) {
           <Link
             href={DASHBOARD_SIDEBAR_HELP.href}
             aria-current={helpActive ? "page" : undefined}
-            className={cn(
-              "inline-flex min-h-10 items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors duration-200",
-              helpActive
-                ? "bg-muted/60 font-semibold text-heading"
-                : "font-medium text-muted-foreground hover:bg-muted/35 hover:text-heading",
-            )}
+            className={dashboardSidebarNavLinkClasses(helpActive)}
           >
             <CircleHelp aria-hidden="true" className="size-4" />
             {DASHBOARD_SIDEBAR_HELP.label}

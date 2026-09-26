@@ -16,7 +16,8 @@
     "db:repair-catalog": "prisma db execute --file prisma/scripts/repair-catalog-columns.sql",
     "db:repair-trips": "prisma db execute --file prisma/scripts/repair-trips-schema.sql",
     "db:repair-documents": "prisma db execute --file prisma/scripts/repair-travel-documents.sql",
-    "db:repair-schema": "pnpm db:repair-catalog && pnpm db:repair-trips && pnpm db:repair-documents",
+    "db:repair-profile": "prisma db execute --file prisma/scripts/repair-user-profile-preferences.sql",
+    "db:repair-schema": "pnpm db:repair-catalog && pnpm db:repair-trips && pnpm db:repair-documents && pnpm db:repair-profile",
     "db:studio": "prisma studio"
   },
   "prisma": {
@@ -24,6 +25,7 @@
   },
   "dependencies": {
     "@gowithus/jobs": "workspace:*",
+    "@gowithus/types": "workspace:*",
     "@prisma/adapter-pg": "^7.0.0",
     "@prisma/client": "^7.0.0",
     "@supabase/supabase-js": "^2.117.2",

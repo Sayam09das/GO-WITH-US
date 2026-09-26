@@ -35,7 +35,7 @@ function DashboardSidebarUser({ className }: DashboardSidebarUserProps) {
             whileHover={reducedMotion ? undefined : { scale: 1.005 }}
             whileTap={reducedMotion ? undefined : { scale: 0.995 }}
             transition={{ duration: 0.18 }}
-            className="flex w-full min-h-11 items-center gap-3 rounded-xl px-2 py-2 text-left outline-none transition-colors hover:bg-muted/35 focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            className="flex w-full min-h-11 items-center gap-3 rounded-xl px-2 py-2 text-left outline-none transition-[background-color,transform] duration-200 hover:bg-muted/60 active:bg-muted/75 focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >
             <Avatar className="size-10 bg-primary/10 text-primary">
               <AvatarFallback className="bg-primary/10 text-sm font-semibold text-primary">

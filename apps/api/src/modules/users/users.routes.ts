@@ -8,6 +8,7 @@ const usersRouter = Router();
 usersRouter.use(requireAuth);
 
 usersRouter.get("/me", usersController.getMe);
+usersRouter.get("/me/stats", usersController.getProfileStats);
 usersRouter.patch("/me", usersController.patchMe);
 usersRouter.patch("/me/avatar", usersController.patchAvatar);
 usersRouter.post("/me/avatar/upload", usersController.uploadAvatar);

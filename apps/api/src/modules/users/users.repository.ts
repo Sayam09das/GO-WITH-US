@@ -2,6 +2,14 @@ import type { Prisma, TripStatus } from "../../generated/client.js";
 import { prisma } from "../../lib/db.js";
 
 export const usersRepository = {
+  countTrips(userId: string) {
+    return prisma.trip.count({ where: { userId } });
+  },
+
+  countSavedItems(userId: string) {
+    return prisma.savedItem.count({ where: { userId } });
+  },
+
   findById(id: string) {
     return prisma.user.findUnique({ where: { id } });
   },

@@ -1,3 +1,4 @@
+import { PROFILE_INTEREST_IDS, PROFILE_STYLE_TAG_IDS } from "@gowithus/types";
 import { z } from "zod";
 
 const optionalText = (max: number) =>
@@ -8,12 +9,34 @@ const optionalText = (max: number) =>
     .optional()
     .or(z.literal("").transform(() => undefined));
 
+const profilePreferencesSchema = z
+  .object({
+    dateOfBirth: z.string().trim().max(32).optional().nullable(),
+    preferredCurrency: optionalText(12),
+    preferredLanguage: optionalText(80),
+    travelPace: optionalText(40),
+    accommodationPreference: optionalText(80),
+  })
+  .partial()
+  .optional();
+
 export const updateProfileSchema = z.object({
   name: z.string().trim().min(2).max(120).optional(),
   bio: optionalText(500),
   phone: optionalText(40),
   country: optionalText(120),
   timezone: optionalText(80),
+  homeCity: optionalText(120),
+  budgetPreference: z.enum(["budget", "moderate", "luxury"]).optional().nullable(),
+  travelInterests: z
+    .array(z.string().refine((value) => PROFILE_INTEREST_IDS.has(value)))
+    .max(12)
+    .optional(),
+  travelStyleTags: z
+    .array(z.string().refine((value) => PROFILE_STYLE_TAG_IDS.has(value)))
+    .max(10)
+    .optional(),
+  preferences: profilePreferencesSchema,
 });
 
 export const updateAvatarSchema = z.object({

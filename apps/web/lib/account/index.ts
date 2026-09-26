@@ -25,6 +25,7 @@ export {
   type DashboardSidebarNavGroup,
   type DashboardSidebarNavItem,
   type DashboardUser,
+  dashboardSidebarNavLinkClasses,
   EXPLORE_DESTINATION_PANELS,
   EXPLORE_SECTION_COPY,
   EXPLORE_SECTION_LINKS,

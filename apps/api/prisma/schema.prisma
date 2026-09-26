@@ -200,9 +200,10 @@ model User {
   country          String?
   timezone         String?
   homeCity         String?     @map("home_city")
-  travelStyles     String[]    @map("travel_styles")
-  budgetPreference BudgetTier? @map("budget_preference")
-  createdAt        DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  travelStyles        String[]    @map("travel_styles")
+  budgetPreference    BudgetTier? @map("budget_preference")
+  profilePreferences  Json?       @map("profile_preferences")
+  createdAt           DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt        DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   savedItems              SavedItem[]

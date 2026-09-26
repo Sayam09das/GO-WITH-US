@@ -1,18 +1,48 @@
-import type { User } from "../../generated/client.js";
+import type {
+  ProfilePreferences,
+  ProfileTravelInterestId,
+  ProfileTravelStyleTagId,
+  UserProfile,
+} from "@gowithus/types";
+import { PROFILE_INTEREST_IDS, PROFILE_STYLE_TAG_IDS } from "@gowithus/types";
+import type { Prisma, User } from "../../generated/client.js";
 
-export type UserProfile = {
-  id: string;
-  name: string;
-  email: string;
-  avatar: string | null;
-  bio: string | null;
-  phone: string | null;
-  country: string | null;
-  timezone: string | null;
-  emailVerified: boolean;
-};
+function parseProfilePreferences(value: Prisma.JsonValue | null | undefined): ProfilePreferences {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return {};
+  }
+
+  const record = value as Record<string, unknown>;
+
+  return {
+    dateOfBirth: typeof record.dateOfBirth === "string" ? record.dateOfBirth : null,
+    preferredCurrency:
+      typeof record.preferredCurrency === "string" ? record.preferredCurrency : null,
+    preferredLanguage:
+      typeof record.preferredLanguage === "string" ? record.preferredLanguage : null,
+    travelPace: typeof record.travelPace === "string" ? record.travelPace : null,
+    accommodationPreference:
+      typeof record.accommodationPreference === "string" ? record.accommodationPreference : null,
+  };
+}
+
+function splitTravelStyles(travelStyles: string[]): {
+  travelInterests: ProfileTravelInterestId[];
+  travelStyleTags: ProfileTravelStyleTagId[];
+} {
+  const travelInterests = travelStyles.filter((style): style is ProfileTravelInterestId =>
+    PROFILE_INTEREST_IDS.has(style),
+  );
+  const travelStyleTags = travelStyles.filter((style): style is ProfileTravelStyleTagId =>
+    PROFILE_STYLE_TAG_IDS.has(style),
+  );
+
+  return { travelInterests, travelStyleTags };
+}
 
 export function toUserProfile(user: User): UserProfile {
+  const { travelInterests, travelStyleTags } = splitTravelStyles(user.travelStyles);
+
   return {
     id: user.id,
     name: user.fullName,
@@ -23,6 +53,11 @@ export function toUserProfile(user: User): UserProfile {
     country: user.country,
     timezone: user.timezone,
     emailVerified: user.emailVerified,
+    homeCity: user.homeCity,
+    budgetPreference: user.budgetPreference,
+    travelInterests,
+    travelStyleTags,
+    preferences: parseProfilePreferences(user.profilePreferences),
   };
 }
 
@@ -88,3 +123,5 @@ export type UserActivityItem = {
   title: string;
   createdAt: string;
 };
+
+export type { UserProfile };
