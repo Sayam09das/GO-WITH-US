@@ -1,4 +1,5 @@
 import type { ExperienceListItem as ApiExperienceListItem } from "@gowithus/types";
+import { FEATURED_EXPERIENCES_HOMEPAGE_SHOWCASE } from "@/lib/landing/featured-experiences";
 import type { ExperienceListItem } from "@/types/experience";
 import { apiFetch } from "./client";
 import { mapExperienceListItem } from "./mappers";
@@ -40,10 +41,15 @@ export async function getFeaturedExperiences(): Promise<ExperienceListItem[]> {
 
   try {
     const listed = await fetchExperienceList(12);
-    return orderFeaturedExperiences(listed);
+    const ordered = orderFeaturedExperiences(listed);
+    if (ordered.length > 0) {
+      return ordered;
+    }
   } catch {
-    return [];
+    // Fall through to homepage showcase.
   }
+
+  return orderFeaturedExperiences(FEATURED_EXPERIENCES_HOMEPAGE_SHOWCASE);
 }
 
 export async function getExperienceBySlug(slug: string): Promise<ExperienceListItem | undefined> {

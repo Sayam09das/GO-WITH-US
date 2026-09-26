@@ -9,23 +9,27 @@ import { getInspirationStories } from "@/lib/api/inspiration";
 import { getJournalStories } from "@/lib/api/journal";
 import { getFeaturedStay, getSupportingStays } from "@/lib/api/stays";
 import { withApiFallback } from "@/lib/api/with-api-fallback";
+import { FEATURED_EXPERIENCES_HOMEPAGE_SHOWCASE } from "@/lib/landing/featured-experiences";
 
 export async function HomeCatalogSections() {
   const [
+    experiencesRaw,
     destinations,
     featuredStay,
     supportingStays,
-    experiences,
     inspirationStories,
     journalStories,
   ] = await Promise.all([
-    withApiFallback(getPopularDestinations(6), []),
+    getFeaturedExperiences(),
+    getPopularDestinations(6),
     withApiFallback(getFeaturedStay(), undefined),
     withApiFallback(getSupportingStays(), []),
-    withApiFallback(getFeaturedExperiences(), []),
     withApiFallback(getInspirationStories(), []),
     withApiFallback(getJournalStories(), []),
   ]);
+
+  const experiences =
+    experiencesRaw.length > 0 ? experiencesRaw : FEATURED_EXPERIENCES_HOMEPAGE_SHOWCASE;
 
   const inspirationFeatured =
     inspirationStories.find((story) => story.isFeatured) ?? inspirationStories[0];

@@ -2,9 +2,12 @@
 
 import Link from "next/link";
 import { useLayoutEffect, useRef } from "react";
-import { EmptyState } from "@/components/states";
 import { Button } from "@/components/ui/button";
-import { gsap, registerGsapPlugins, ScrollTrigger } from "@/lib/animation/gsap";
+import {
+  gsap,
+  registerGsapPlugins,
+  revealScrollTimelineIfAlreadyVisible,
+} from "@/lib/animation/gsap";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
 import { POPULAR_DESTINATIONS_COPY } from "@/lib/landing/popular-destinations";
 import { cn } from "@/lib/utils";
@@ -23,7 +26,7 @@ function PopularDestinationsSection({ destinations }: PopularDestinationsSection
   useLayoutEffect(() => {
     const section = sectionRef.current;
     const grid = gridRef.current;
-    if (reducedMotion || !section || !grid || destinations.length === 0) {
+    if (reducedMotion || !section || !grid) {
       return;
     }
 
@@ -118,11 +121,11 @@ function PopularDestinationsSection({ destinations }: PopularDestinationsSection
           "-=0.2",
         );
 
-      requestAnimationFrame(() => ScrollTrigger.refresh());
+      revealScrollTimelineIfAlreadyVisible(section, timeline);
     }, sectionRef);
 
     return () => ctx.revert();
-  }, [reducedMotion, destinations.length]);
+  }, [reducedMotion]);
 
   return (
     <section
@@ -139,18 +142,9 @@ function PopularDestinationsSection({ destinations }: PopularDestinationsSection
           ref={gridRef}
           className="grid grid-cols-1 gap-5 min-[520px]:grid-cols-2 lg:grid-cols-3 lg:gap-6"
         >
-          {destinations.length === 0 ? (
-            <EmptyState
-              className="col-span-full"
-              title="Destinations will appear here"
-              description="Start the API and run the catalog seed to load curated destinations from PostgreSQL."
-              action={{ label: POPULAR_DESTINATIONS_COPY.ctaLabel, href: "/destinations" }}
-            />
-          ) : (
-            destinations.map((destination, index) => (
-              <DestinationCard key={destination.id} destination={destination} index={index} />
-            ))
-          )}
+          {destinations.map((destination, index) => (
+            <DestinationCard key={destination.id} destination={destination} index={index} />
+          ))}
         </div>
 
         <div data-pd-cta className="mt-10 flex justify-center sm:mt-12">
