@@ -5,6 +5,7 @@ import type {
   PropertyType,
   Stay,
 } from "../../generated/client.js";
+import { decimalToNumber } from "../../lib/decimal.js";
 
 export type StayDestinationSummary = {
   id: string;
@@ -143,10 +144,6 @@ export type StayAvailabilityResult = {
     inventoryModel: "guidance";
   };
 };
-
-function decimalToNumber(value: { toNumber(): number } | null | undefined): number {
-  return value ? Number(value.toNumber()) : 0;
-}
 
 function propertyTypeToApi(value: PropertyType): string {
   return value.replace(/_/g, "-");

@@ -26,9 +26,17 @@ export function SavedPlacesList() {
       })
       .catch((cause) => {
         if (!cancelled) {
-          if (cause instanceof ApiRequestError && cause.status === 401) {
-            setError("Sign in to view your saved places.");
-            return;
+          if (cause instanceof ApiRequestError) {
+            if (cause.status === 401) {
+              setError("Sign in to view your saved places.");
+              return;
+            }
+            if (cause.status >= 500) {
+              setError(
+                "We couldn't load your saves. Sign out and sign in again, and make sure the API is running locally.",
+              );
+              return;
+            }
           }
           setError("We couldn't load your saved places right now.");
         }

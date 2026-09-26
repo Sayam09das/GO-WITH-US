@@ -1,3 +1,4 @@
+import { Prisma } from "../../generated/client.js";
 import { logUserActivity } from "../../lib/activity.js";
 import { AppError } from "../../lib/errors.js";
 import { inferTimeSlot, parseTimeString } from "./trip-utils.js";
@@ -41,6 +42,25 @@ function assertDayFound<T>(day: T | null | undefined): T {
 }
 
 function mapRepositoryError(error: unknown): never {
+  if (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    (error.code === "P2021" || error.code === "P2022" || error.code === "P2028")
+  ) {
+    throw new AppError(
+      503,
+      "SCHEMA_OUT_OF_DATE",
+      "Trip planning is temporarily unavailable. Run pnpm --filter @gowithus/api db:repair-schema, then try again.",
+    );
+  }
+
+  if (error instanceof Error && error.message.includes("does not exist")) {
+    throw new AppError(
+      503,
+      "SCHEMA_OUT_OF_DATE",
+      "Trip planning is temporarily unavailable. Run pnpm --filter @gowithus/api db:repair-schema, then try again.",
+    );
+  }
+
   if (isItineraryOutOfRangeError(error)) {
     throw new AppError(
       409,
@@ -189,7 +209,7 @@ export const tripsService = {
       type: "CREATED_TRIP",
       title: `Created trip: ${trip.title}`,
       metadata: { tripId: trip.id },
-    });
+    }).catch(() => undefined);
 
     return toTripDetail({
       trip,

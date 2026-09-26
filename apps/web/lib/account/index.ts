@@ -1,3 +1,4 @@
+export { navCountForHref, useNavCounts } from "@/lib/navigation";
 export {
   buildDashboardGreeting,
   DASHBOARD_HEADER_COPY,

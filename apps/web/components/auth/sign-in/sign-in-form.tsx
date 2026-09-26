@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import {
   AuthBrandHeader,
@@ -16,11 +16,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { login } from "@/lib/api/auth";
 import { ApiRequestError } from "@/lib/api/client";
-import { AUTH_EMAIL_PATTERN, SIGN_IN_COPY } from "@/lib/auth";
+import { AUTH_EMAIL_PATTERN, notifyAuthSessionChanged, SIGN_IN_COPY } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 function SignInForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const nextPath = searchParams.get("next");
+  const safeNext =
+    nextPath?.startsWith("/") && !nextPath.startsWith("//") ? nextPath : "/account/profile";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -58,7 +62,8 @@ function SignInForm() {
         password,
         rememberMe,
       });
-      router.push("/account/profile");
+      notifyAuthSessionChanged();
+      router.push(safeNext);
     } catch (error) {
       if (error instanceof ApiRequestError && error.code === "EMAIL_NOT_VERIFIED") {
         router.push(`/verify-email?email=${encodeURIComponent(trimmedEmail)}`);

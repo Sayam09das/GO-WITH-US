@@ -7,6 +7,12 @@ export {
   UTILITY_NAV_ITEMS,
 } from "./config";
 export {
+  EMPTY_NAV_COUNTS,
+  fetchNavCounts,
+  type NavCounts,
+  navCountForHref,
+} from "./fetch-nav-counts";
+export {
   accountNavClass,
   brandWordmarkClass,
   isDarkOverlay,
@@ -14,6 +20,8 @@ export {
   navIndicatorClass,
   navLinkTextClass,
 } from "./nav-appearance";
+export { NavCountsProvider, useNavCounts } from "./nav-counts-context";
+export { NAV_COUNTS_CHANGED_EVENT, notifyNavCountsChanged } from "./nav-counts-events";
 export { isAccountActive, isNavItemActive } from "./routes";
 export {
   type NavbarOverlayTone,

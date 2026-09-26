@@ -34,18 +34,18 @@ function buildTripListWhere(userId: string, status?: TripStatusFilter): Prisma.T
 }
 
 async function syncTripDays(
-  tx: Prisma.TransactionClient,
+  db: Pick<Prisma.TransactionClient, "tripDay" | "itineraryItem">,
   tripId: string,
   startDate: Date,
   endDate: Date,
 ) {
   const dayCount = countTripDays(startDate, endDate);
-  const existingDays = await tx.tripDay.findMany({
+  const existingDays = await db.tripDay.findMany({
     where: { tripId },
     orderBy: { dayIndex: "asc" },
   });
 
-  const itemsOutsideRange = await tx.itineraryItem.findFirst({
+  const itemsOutsideRange = await db.itineraryItem.findFirst({
     where: {
       tripId,
       dayIndex: { gt: dayCount },
@@ -62,18 +62,18 @@ async function syncTripDays(
     const existing = existingDays.find((day) => day.dayIndex === dayIndex);
 
     if (existing) {
-      await tx.tripDay.update({
+      await db.tripDay.update({
         where: { id: existing.id },
         data: { dayDate },
       });
-      await tx.itineraryItem.updateMany({
+      await db.itineraryItem.updateMany({
         where: { tripId, dayIndex },
         data: { dayDate },
       });
       continue;
     }
 
-    await tx.tripDay.create({
+    await db.tripDay.create({
       data: {
         tripId,
         dayIndex,
@@ -84,7 +84,7 @@ async function syncTripDays(
   }
 
   if (existingDays.length > dayCount) {
-    await tx.tripDay.deleteMany({
+    await db.tripDay.deleteMany({
       where: {
         tripId,
         dayIndex: { gt: dayCount },
@@ -93,22 +93,22 @@ async function syncTripDays(
   }
 }
 
-async function refreshTripStatus(tx: Prisma.TransactionClient, tripId: string) {
-  const trip = await tx.trip.findUnique({ where: { id: tripId } });
+async function refreshTripStatus(db: Pick<Prisma.TransactionClient, "trip">, tripId: string) {
+  const trip = await db.trip.findUnique({ where: { id: tripId } });
   if (!trip) {
     return null;
   }
 
   const computedStatus = computeTripStatus(trip);
   if (shouldPersistStatus(trip.status, computedStatus)) {
-    return tx.trip.update({
+    return db.trip.update({
       where: { id: tripId },
       data: { status: computedStatus },
       include: tripInclude,
     });
   }
 
-  return tx.trip.findUnique({
+  return db.trip.findUnique({
     where: { id: tripId },
     include: tripInclude,
   });
@@ -162,35 +162,34 @@ export const tripsRepository = {
     description?: string;
     coverImage?: string;
   }) {
-    return prisma.$transaction(async (tx) => {
-      const startDate = input.startDate ? new Date(`${input.startDate}T00:00:00.000Z`) : null;
-      const endDate = input.endDate ? new Date(`${input.endDate}T00:00:00.000Z`) : null;
-      const status = computeTripStatus({
-        status: "draft",
+    const startDate = input.startDate ? new Date(`${input.startDate}T00:00:00.000Z`) : null;
+    const endDate = input.endDate ? new Date(`${input.endDate}T00:00:00.000Z`) : null;
+    const status = computeTripStatus({
+      status: "draft",
+      startDate,
+      endDate,
+    });
+
+    const trip = await prisma.trip.create({
+      data: {
+        userId: input.userId,
+        title: input.title,
+        destinationId: input.destinationId,
         startDate,
         endDate,
-      });
-
-      const trip = await tx.trip.create({
-        data: {
-          userId: input.userId,
-          title: input.title,
-          destinationId: input.destinationId,
-          startDate,
-          endDate,
-          description: input.description,
-          coverImage: input.coverImage,
-          status,
-        },
-        include: tripInclude,
-      });
-
-      if (startDate && endDate) {
-        await syncTripDays(tx, trip.id, startDate, endDate);
-      }
-
-      return refreshTripStatus(tx, trip.id);
+        description: input.description,
+        coverImage: input.coverImage,
+        status,
+      },
+      include: tripInclude,
     });
+
+    if (startDate && endDate) {
+      await syncTripDays(prisma, trip.id, startDate, endDate);
+    }
+
+    const refreshed = await refreshTripStatus(prisma, trip.id);
+    return refreshed ?? trip;
   },
 
   async updateTrip(

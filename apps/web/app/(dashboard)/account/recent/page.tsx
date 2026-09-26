@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AccountPageHeader } from "@/components/account/account-page-header";
 import { DashboardRecentCard } from "@/components/account/dashboard/dashboard-recent-card";
 import { DashboardRecentEmpty } from "@/components/account/dashboard/dashboard-recent-empty";
-import { DashboardRecentHeader } from "@/components/account/dashboard/dashboard-recent-header";
 import { Button } from "@/components/ui/button";
 import { mapActivityToRecentItems } from "@/lib/api/dashboard-mappers";
 import { listUserActivity } from "@/lib/api/users.server";
@@ -21,21 +21,29 @@ export default async function AccountRecentPage() {
 
   return (
     <div className="container-travel py-10 sm:py-12 lg:py-14">
-      <DashboardRecentHeader />
+      <AccountPageHeader
+        title="Recently viewed"
+        description="A running log of destinations and places you've opened recently."
+      />
 
       {!activity.length ? (
-        <div className="mt-8 space-y-4">
+        <div className="mt-2 max-w-lg space-y-4 rounded-[1.25rem] border border-border/60 bg-background p-8 shadow-sm">
           <DashboardRecentEmpty />
           <Button asChild variant="outline">
             <Link href="/destinations">Start exploring</Link>
           </Button>
         </div>
       ) : (
-        <div className="mt-8 flex flex-wrap gap-3">
-          {items.map((item) => (
-            <DashboardRecentCard key={item.id} item={item} />
-          ))}
-        </div>
+        <section aria-labelledby="recent-activity-heading">
+          <h2 id="recent-activity-heading" className="sr-only">
+            Activity items
+          </h2>
+          <div className="flex flex-wrap gap-3">
+            {items.map((item) => (
+              <DashboardRecentCard key={item.id} item={item} />
+            ))}
+          </div>
+        </section>
       )}
     </div>
   );

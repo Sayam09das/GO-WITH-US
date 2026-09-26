@@ -1,8 +1,8 @@
 import { DestinationsCatalogSection } from "@/components/destinations/catalog/destinations-catalog-section";
-import { getAllDestinations } from "@/lib/api/destinations";
+import { getAllDestinationsForCatalog } from "@/lib/api/destinations.server";
 import { withApiFallback } from "@/lib/api/with-api-fallback";
 
 export async function DestinationsCatalogLoader() {
-  const destinations = await withApiFallback(getAllDestinations(), []);
+  const destinations = await withApiFallback(getAllDestinationsForCatalog(), []);
   return <DestinationsCatalogSection initialDestinations={destinations} />;
 }

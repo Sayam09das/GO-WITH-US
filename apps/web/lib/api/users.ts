@@ -6,6 +6,7 @@ import type {
   UserActivityItem,
   UserProfile,
 } from "@gowithus/types";
+import { notifyNavCountsChanged } from "@/lib/navigation/nav-counts-events";
 import { apiFetch } from "./client";
 
 type UserResponse = { user: UserProfile };
@@ -35,30 +36,18 @@ export async function updateUserProfile(
 }
 
 export async function listSavedDestinations(): Promise<SavedDestinationSummary[]> {
-  try {
-    const response = await apiFetch<SavedDestinationsResponse>("/users/me/saved-destinations");
-    return response.savedDestinations;
-  } catch {
-    return [];
-  }
+  const response = await apiFetch<SavedDestinationsResponse>("/users/me/saved-destinations");
+  return response.savedDestinations;
 }
 
 export async function listSavedStays(): Promise<SavedStaySummary[]> {
-  try {
-    const response = await apiFetch<SavedStaysResponse>("/users/me/saved-stays");
-    return response.savedStays;
-  } catch {
-    return [];
-  }
+  const response = await apiFetch<SavedStaysResponse>("/users/me/saved-stays");
+  return response.savedStays;
 }
 
 export async function listSavedExperiences(): Promise<SavedExperienceSummary[]> {
-  try {
-    const response = await apiFetch<SavedExperiencesResponse>("/users/me/saved-experiences");
-    return response.savedExperiences;
-  } catch {
-    return [];
-  }
+  const response = await apiFetch<SavedExperiencesResponse>("/users/me/saved-experiences");
+  return response.savedExperiences;
 }
 
 export async function listSavedRestaurants(): Promise<SavedRestaurantSummary[]> {
@@ -81,24 +70,30 @@ export async function listUserActivity(): Promise<UserActivityItem[]> {
 
 export async function saveDestination(destinationId: string): Promise<void> {
   await apiFetch(`/users/me/saved-destinations/${destinationId}`, { method: "POST" });
+  notifyNavCountsChanged();
 }
 
 export async function unsaveDestination(destinationId: string): Promise<void> {
   await apiFetch(`/users/me/saved-destinations/${destinationId}`, { method: "DELETE" });
+  notifyNavCountsChanged();
 }
 
 export async function saveStay(stayId: string): Promise<void> {
   await apiFetch(`/users/me/saved-stays/${stayId}`, { method: "POST" });
+  notifyNavCountsChanged();
 }
 
 export async function unsaveStay(stayId: string): Promise<void> {
   await apiFetch(`/users/me/saved-stays/${stayId}`, { method: "DELETE" });
+  notifyNavCountsChanged();
 }
 
 export async function saveExperience(experienceId: string): Promise<void> {
   await apiFetch(`/users/me/saved-experiences/${experienceId}`, { method: "POST" });
+  notifyNavCountsChanged();
 }
 
 export async function unsaveExperience(experienceId: string): Promise<void> {
   await apiFetch(`/users/me/saved-experiences/${experienceId}`, { method: "DELETE" });
+  notifyNavCountsChanged();
 }

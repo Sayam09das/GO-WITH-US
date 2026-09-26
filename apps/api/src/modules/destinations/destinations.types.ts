@@ -1,4 +1,5 @@
 import type { BudgetTier, Destination, Experience, Stay } from "../../generated/client.js";
+import { decimalToNumber } from "../../lib/decimal.js";
 
 export type DestinationListItem = {
   id: string;
@@ -79,10 +80,6 @@ function budgetTierPriceLabel(tier: BudgetTier): string {
     case "luxury":
       return "From $600";
   }
-}
-
-function decimalToNumber(value: { toNumber(): number } | null | undefined): number {
-  return value ? Number(value.toNumber()) : 0;
 }
 
 export function toDestinationListItem(

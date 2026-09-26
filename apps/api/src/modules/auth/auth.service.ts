@@ -182,7 +182,12 @@ export const authService = {
       throw new AppError(401, "UNAUTHENTICATED", "Authentication required.");
     }
 
-    await authRepository.touchSession(session.id);
+    try {
+      await authRepository.touchSession(session.id);
+    } catch (error) {
+      console.error("session.touch_failed", error);
+    }
+
     return toPublicUser(session.user);
   },
 

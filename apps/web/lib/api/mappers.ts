@@ -13,6 +13,38 @@ import type { JournalStory } from "@/types/journal";
 import type { RestaurantListItem } from "@/types/restaurant";
 import type { StayListItem } from "@/types/stay";
 
+type CatalogDestinationField =
+  | string
+  | {
+      title: string;
+      slug?: string;
+      country?: string;
+      region?: string;
+    };
+
+function resolveCatalogDestinationLabel(
+  destination: CatalogDestinationField,
+  locationLabel?: string,
+): string {
+  if (locationLabel?.trim()) {
+    return locationLabel.trim();
+  }
+
+  if (typeof destination === "string") {
+    return destination;
+  }
+
+  if (destination.country) {
+    return `${destination.title}, ${destination.country}`;
+  }
+
+  return destination.title;
+}
+
+function formatPropertyTypeLabel(value: string): string {
+  return value.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
 function normalizePropertyType(value: string): StayListItem["propertyType"] {
   if (
     value === "boutique-hotel" ||
@@ -53,15 +85,18 @@ export function mapStayListItem(
     locationLabel?: string;
     overview?: string;
     description?: string;
+    destination?: CatalogDestinationField;
   },
 ): StayListItem {
+  const destinationField = (item.destination ?? "") as CatalogDestinationField;
+
   return {
     id: item.id,
     slug: item.slug,
     name: item.name,
-    destination: item.destination,
+    destination: resolveCatalogDestinationLabel(destinationField, item.locationLabel),
     propertyType: normalizePropertyType(item.propertyType),
-    propertyTypeLabel: item.propertyType,
+    propertyTypeLabel: formatPropertyTypeLabel(item.propertyType),
     description: item.description ?? item.overview ?? item.name,
     heroImage: item.coverImage ?? item.heroImage ?? "",
     imageAlt: item.imageAlt ?? item.name,
@@ -70,15 +105,22 @@ export function mapStayListItem(
 }
 
 export function mapExperienceListItem(
-  item: ApiExperienceListItem & { title?: string; heroImage?: string; description?: string },
+  item: ApiExperienceListItem & {
+    title?: string;
+    heroImage?: string;
+    description?: string;
+    locationLabel?: string;
+    destination?: CatalogDestinationField;
+  },
 ): ExperienceListItem {
   const title = item.name ?? item.title ?? "Experience";
+  const destinationField = (item.destination ?? "") as CatalogDestinationField;
 
   return {
     id: item.id,
     slug: item.slug,
     title,
-    destination: item.destination,
+    destination: resolveCatalogDestinationLabel(destinationField, item.locationLabel),
     category: item.category as ExperienceListItem["category"],
     categoryLabel: item.category,
     description: item.description ?? title,
