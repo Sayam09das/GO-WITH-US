@@ -1,10 +1,10 @@
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient } from "@prisma/client";
 import { config } from "dotenv";
 import type { CatalogIds } from "../src/db/seed/helpers.js";
 import { seedDestinations } from "../src/db/seed/seed-destinations.js";
-import { PrismaClient } from "../src/generated/client.js";
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const apiRoot = resolve(currentDir, "..");

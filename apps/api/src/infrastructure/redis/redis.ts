@@ -21,11 +21,19 @@ function createRedisClient(): Redis | null {
     lazyConnect: true,
     connectTimeout: 5_000,
     commandTimeout: 5_000,
+    // Optional Redis: stop endless reconnect loops when URL is wrong or service is down.
+    retryStrategy: (times) => (times > 5 ? null : Math.min(times * 200, 2_000)),
   });
 
+  let lastErrorLogAt = 0;
   client.on("error", (error: Error) => {
     globalForRedis.redisAvailable = false;
-    logger.error("redis.error", { message: error.message });
+    const now = Date.now();
+    if (now - lastErrorLogAt < 10_000) {
+      return;
+    }
+    lastErrorLogAt = now;
+    logger.error("redis.error", { message: error.message || "Redis connection error" });
   });
 
   client.on("connect", () => {
