@@ -8,8 +8,12 @@ type StayListResponse = {
 };
 
 async function fetchStayList(limit: number): Promise<StayListItem[]> {
-  const response = await apiFetch<StayListResponse>(`/stays?limit=${limit}&page=1`);
-  return response.stays.map(mapStayListItem);
+  try {
+    const response = await apiFetch<StayListResponse>(`/stays?limit=${limit}&page=1`);
+    return response.stays.map(mapStayListItem);
+  } catch {
+    return [];
+  }
 }
 
 export async function getAllStays(): Promise<StayListItem[]> {

@@ -36,16 +36,20 @@ async function fetchAllDestinations(
   let totalPages = 1;
 
   do {
-    const listed = await fetcher<DestinationListResponse>(
-      `/destinations?limit=${limit}&page=${page}&sort=popular`,
-    );
+    try {
+      const listed = await fetcher<DestinationListResponse>(
+        `/destinations?limit=${limit}&page=${page}&sort=popular`,
+      );
 
-    for (const item of listed.destinations) {
-      merged.set(item.slug, mapDestinationListItem(item));
+      for (const item of listed.destinations) {
+        merged.set(item.slug, mapDestinationListItem(item));
+      }
+
+      totalPages = listed.meta?.totalPages ?? 1;
+      page += 1;
+    } catch {
+      break;
     }
-
-    totalPages = listed.meta?.totalPages ?? 1;
-    page += 1;
   } while (page <= totalPages);
 
   return [...merged.values()];
