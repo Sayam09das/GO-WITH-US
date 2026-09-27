@@ -6,6 +6,35 @@ This is **not** a booking marketplace or OTA. See [`docs/PRODUCT.md`](docs/PRODU
 
 ---
 
+## Production URLs
+
+| Surface | URL |
+| :--- | :--- |
+| **Live web app** | [https://go-with-us-web.vercel.app](https://go-with-us-web.vercel.app) |
+| **API (Render)** | [https://go-with-us-5jyq.onrender.com](https://go-with-us-5jyq.onrender.com) |
+| **API health** | [https://go-with-us-5jyq.onrender.com/health/ready](https://go-with-us-5jyq.onrender.com/health/ready) |
+| **GitHub** | [https://github.com/Sayam09das/GO-WITH-US](https://github.com/Sayam09das/GO-WITH-US) |
+
+**Vercel (web)** — set in Project → Environment Variables:
+
+| Variable | Production value |
+| :--- | :--- |
+| `API_URL` | `https://go-with-us-5jyq.onrender.com` |
+| `NEXT_PUBLIC_API_URL` | `/api/v1` |
+| `NEXT_PUBLIC_SITE_URL` | `https://go-with-us-web.vercel.app` |
+
+**Render (API)** — must match the Vercel origin for CORS and cookies:
+
+| Variable | Production value |
+| :--- | :--- |
+| `APP_ORIGIN` | `https://go-with-us-web.vercel.app` |
+| `APP_URL` | `https://go-with-us-web.vercel.app` |
+| `API_URL` | `https://go-with-us-5jyq.onrender.com` |
+
+Full local vs production templates: [`apps/web/.env.example`](apps/web/.env.example), [`.env.example`](.env.example), [`apps/api/.env.example`](apps/api/.env.example).
+
+---
+
 ## Stack
 
 | Layer | Technology |
@@ -147,13 +176,13 @@ Host **`apps/web`** on Vercel; keep **API** and **worker** on your container hos
 
 1. Import the repo in Vercel → **Root Directory** `apps/web` (install/build commands live in [`apps/web/vercel.json`](apps/web/vercel.json)).
 2. From `apps/web`: `vercel link` (and `vercel env pull` for local previews).
-3. Set environment variables (Production + Preview):
+3. Set environment variables (Production + Preview) — see [Production URLs](#production-urls) for current values:
 
    | Variable | Example |
    | :--- | :--- |
-   | `API_URL` | `https://api.your-domain.com` (rewrite target for `/api/v1`) |
+   | `API_URL` | `https://go-with-us-5jyq.onrender.com` (rewrite target for `/api/v1`) |
    | `NEXT_PUBLIC_API_URL` | `/api/v1` |
-   | `NEXT_PUBLIC_SITE_URL` | `https://your-project.vercel.app` |
+   | `NEXT_PUBLIC_SITE_URL` | `https://go-with-us-web.vercel.app` |
 
 4. On the API host, set `APP_ORIGIN` / `APP_URL` to the same site URL so session cookies and CORS match the Vercel origin.
 
