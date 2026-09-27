@@ -141,6 +141,24 @@ Root [`.dockerignore`](.dockerignore) keeps images small. API entrypoint: [`dock
 
 Production pull example: [`docker-compose.prod.example.yml`](docker-compose.prod.example.yml) and [`docker/README.md`](docker/README.md).
 
+### Vercel (Next.js web UI)
+
+Host **`apps/web`** on Vercel; keep **API** and **worker** on your container host (GHCR images from [`deploy.yml`](.github/workflows/deploy.yml)).
+
+1. Import the repo in Vercel → **Root Directory** `apps/web` (install/build commands live in [`apps/web/vercel.json`](apps/web/vercel.json)).
+2. From `apps/web`: `vercel link` (and `vercel env pull` for local previews).
+3. Set environment variables (Production + Preview):
+
+   | Variable | Example |
+   | :--- | :--- |
+   | `API_URL` | `https://api.your-domain.com` (rewrite target for `/api/v1`) |
+   | `NEXT_PUBLIC_API_URL` | `/api/v1` |
+   | `NEXT_PUBLIC_SITE_URL` | `https://your-project.vercel.app` |
+
+4. On the API host, set `APP_ORIGIN` / `APP_URL` to the same site URL so session cookies and CORS match the Vercel origin.
+
+Docker builds still use Next **standalone** output; Vercel builds skip standalone automatically when `VERCEL=1`.
+
 ---
 
 ## CI/CD
