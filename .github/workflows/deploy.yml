@@ -107,7 +107,7 @@ jobs:
             ${{ steps.image.outputs.prefix }}-web:${{ github.sha }}
           build-args: |
             NEXT_PUBLIC_API_URL=/api/v1
-            NEXT_PUBLIC_SITE_URL=${{ vars.PUBLIC_SITE_URL != '' && vars.PUBLIC_SITE_URL || 'http://localhost:3000' }}
+            NEXT_PUBLIC_SITE_URL=${{ vars.PUBLIC_SITE_URL || 'http://localhost:3000' }}
             API_URL=http://api:4000
           cache-from: type=gha
           cache-to: type=gha,mode=max
