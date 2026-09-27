@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/worker.ts",
-    "build": "tsc -p tsconfig.build.json",
+    "build": "pnpm --filter @gowithus/utils build && tsc -p tsconfig.build.json",
     "start": "node dist/worker.js",
     "typecheck": "tsc --noEmit"
   },
