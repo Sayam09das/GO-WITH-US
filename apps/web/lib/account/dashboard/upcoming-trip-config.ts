@@ -38,22 +38,3 @@ export const UPCOMING_TRIP_LINKS = {
   allTrips: "/trips",
   explore: "/account/discover",
 } as const;
-
-/** Fixture upcoming trip until trips API is wired. Set to `null` for empty state. */
-export const UPCOMING_TRIP_FIXTURE: UpcomingTrip | null = {
-  id: "trip-kyoto-2026",
-  destination: "Kyoto, Japan",
-  country: "Japan",
-  dateRange: "12 — 18 October 2026",
-  nightsLabel: "Japan · 6 nights",
-  description: "A week of quiet temples, hidden streets, local food and slow mornings.",
-  status: "confirmed",
-  statusLabel: "Confirmed",
-  image: {
-    src: "/landingImg/travelimg/travel-5.jpg",
-    alt: "Traditional Kyoto street with wooden architecture and soft morning light",
-    objectPosition: "object-center",
-  },
-  tripHref: "/trips",
-  itineraryHref: "/account/itineraries",
-};

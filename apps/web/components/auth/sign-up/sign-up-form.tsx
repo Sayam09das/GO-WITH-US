@@ -3,12 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
-import {
-  AuthBrandHeader,
-  AuthDivider,
-  AuthSocialButtons,
-  PasswordInput,
-} from "@/components/auth/shared";
+import { AuthBrandHeader, PasswordInput } from "@/components/auth/shared";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
@@ -28,7 +23,6 @@ function SignUpForm() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const [socialNotice, setSocialNotice] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<{
     fullName?: string;
     email?: string;
@@ -39,7 +33,6 @@ function SignUpForm() {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setSocialNotice(null);
 
     const trimmedName = fullName.trim();
     const trimmedEmail = email.trim();
@@ -92,21 +85,6 @@ function SignUpForm() {
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-8">
       <AuthBrandHeader title={SIGN_UP_COPY.title} subtitle={SIGN_UP_COPY.subtitle} />
-
-      <div data-auth-reveal className="will-change-transform">
-        <AuthSocialButtons
-          googleLabel={SIGN_UP_COPY.googleLabel}
-          facebookLabel={SIGN_UP_COPY.facebookLabel}
-          onUnavailable={() => setSocialNotice(SIGN_UP_COPY.socialComingSoon)}
-        />
-        {socialNotice ? (
-          <p role="status" className="mt-3 text-sm text-muted-foreground">
-            {socialNotice}
-          </p>
-        ) : null}
-      </div>
-
-      <AuthDivider label={SIGN_UP_COPY.divider} />
 
       <form
         data-auth-reveal

@@ -33,6 +33,10 @@ This is **not** a booking marketplace or OTA. See [`docs/PRODUCT.md`](docs/PRODU
 
 Full local vs production templates: [`apps/web/.env.example`](apps/web/.env.example), [`.env.example`](.env.example), [`apps/api/.env.example`](apps/api/.env.example).
 
+**Pre-launch checklist:** [`docs/PRODUCTION_CHECKLIST.md`](docs/PRODUCTION_CHECKLIST.md)
+
+**Portfolio screenshots:** add images to [`docs/screenshots/`](docs/screenshots/) and link them here when ready.
+
 ---
 
 ## Stack
@@ -230,6 +234,7 @@ Detailed ops notes: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md), [`docs/BACKEND_S
 | Backend | [`docs/BACKEND_ARCHITECTURE.md`](docs/BACKEND_ARCHITECTURE.md), [`docs/BACKEND_SETUP.md`](docs/BACKEND_SETUP.md) |
 | API contract | [`docs/API_SPECIFICATION.md`](docs/API_SPECIFICATION.md) |
 | Deployment | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) |
+| Production checklist | [`docs/PRODUCTION_CHECKLIST.md`](docs/PRODUCTION_CHECKLIST.md) |
 
 ---
 

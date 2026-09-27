@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "pnpm --filter @gowithus/types build && prisma generate && tsc -p tsconfig.build.json",
+    "prestart": "test -f dist/server.js || (echo 'Missing dist/server.js — run pnpm --filter @gowithus/api build on deploy' >&2 && exit 1)",
     "start": "node dist/server.js",
     "typecheck": "prisma generate && tsc --noEmit",
     "db:generate": "prisma generate",
@@ -26,7 +27,6 @@
   },
   "dependencies": {
     "@gowithus/jobs": "workspace:*",
-    "@gowithus/utils": "workspace:*",
     "@gowithus/types": "workspace:*",
     "@prisma/adapter-pg": "^7.0.0",
     "@prisma/client": "^7.0.0",

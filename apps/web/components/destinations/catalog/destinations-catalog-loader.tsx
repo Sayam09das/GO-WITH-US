@@ -1,8 +1,12 @@
 import { DestinationsCatalogSection } from "@/components/destinations/catalog/destinations-catalog-section";
+import { CatalogLoadError } from "@/components/states/catalog-load-error";
 import { getAllDestinationsForCatalog } from "@/lib/api/destinations.server";
-import { withApiFallback } from "@/lib/api/with-api-fallback";
+import { tryApiLoad } from "@/lib/api/with-api-fallback";
 
 export async function DestinationsCatalogLoader() {
-  const destinations = await withApiFallback(getAllDestinationsForCatalog(), []);
-  return <DestinationsCatalogSection initialDestinations={destinations} />;
+  const loaded = await tryApiLoad(getAllDestinationsForCatalog());
+  if (!loaded.ok) {
+    return <CatalogLoadError />;
+  }
+  return <DestinationsCatalogSection initialDestinations={loaded.value} />;
 }
