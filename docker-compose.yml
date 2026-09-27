@@ -46,11 +46,24 @@ services:
       APP_URL: ${APP_URL:-http://localhost:3000}
       API_URL: ${API_URL:-http://localhost:4000}
       SESSION_SECRET: ${SESSION_SECRET:-change_me_in_production}
+      RUN_DB_MIGRATIONS: ${RUN_DB_MIGRATIONS:-true}
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:4000/health/ready').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
 
   worker:
     build:
@@ -69,9 +82,27 @@ services:
       SMTP_PASS: ${SMTP_PASS:-}
       MAIL_FROM: ${MAIL_FROM:-GoWithUs <noreply@localhost>}
     depends_on:
-      postgres:
+      api:
         condition: service_healthy
-      redis:
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api/v1}
+        NEXT_PUBLIC_SITE_URL: ${APP_URL:-http://localhost:3000}
+        API_URL: http://api:4000
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production
+      API_URL: http://api:4000
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api/v1}
+      NEXT_PUBLIC_SITE_URL: ${APP_URL:-http://localhost:3000}
+    depends_on:
+      api:
         condition: service_healthy
 
 volumes:
