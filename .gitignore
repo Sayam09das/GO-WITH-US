@@ -36,4 +36,5 @@ Thumbs.db
 .turbo/
 .vercel/
 .pnpm-store/
+dump.rdb
 

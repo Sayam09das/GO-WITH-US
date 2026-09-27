@@ -1,0 +1,56 @@
+# Production-oriented compose example.
+# 1. Copy to docker-compose.prod.yml
+# 2. Replace GHCR image prefixes with your registry paths (see Deploy workflow summary)
+# 3. Provide a .env file with production DATABASE_URL, REDIS_URL, SESSION_SECRET, APP_URL
+
+services:
+  api:
+    image: ghcr.io/your-org/go-with-us-api:latest
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      HOST: 0.0.0.0
+      RUN_DB_MIGRATIONS: "true"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:4000/health/ready').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 90s
+
+  worker:
+    image: ghcr.io/your-org/go-with-us-worker:latest
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+    depends_on:
+      api:
+        condition: service_healthy
+
+  web:
+    image: ghcr.io/your-org/go-with-us-web:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      API_URL: http://api:4000
+      NEXT_PUBLIC_API_URL: /api/v1
+    depends_on:
+      api:
+        condition: service_healthy
