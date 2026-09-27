@@ -6,10 +6,16 @@ const apiOrigin = (process.env.API_URL ?? "http://127.0.0.1:4000")
   .replace(/\/$/, "")
   .replace(/\/api\/v1$/i, "");
 
+const isVercel = process.env.VERCEL === "1";
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  output: "standalone",
-  outputFileTracingRoot: path.join(__dirname, "../.."),
+  ...(isVercel
+    ? {}
+    : {
+        output: "standalone" as const,
+        outputFileTracingRoot: path.join(__dirname, "../.."),
+      }),
   async rewrites() {
     return [
       {

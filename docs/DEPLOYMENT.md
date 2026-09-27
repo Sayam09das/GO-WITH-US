@@ -27,6 +27,16 @@ Internet
 
 Workers may run as a second Node process sharing the API codebase and Redis connection.
 
+### Vercel (web tier only)
+
+The marketing and dashboard UI (`apps/web`) can deploy to **Vercel** while API, Postgres, Redis, and worker stay on Docker/Kubernetes.
+
+* Vercel project **Root Directory**: `apps/web`.
+* Monorepo install/build: [`apps/web/vercel.json`](../apps/web/vercel.json).
+* Server-side rewrites proxy `/api/v1` to `API_URL` (see `apps/web/next.config.ts`), so browsers keep same-origin cookies when `NEXT_PUBLIC_API_URL=/api/v1`.
+* Set `NEXT_PUBLIC_SITE_URL` to the Vercel (or custom) domain; mirror that value on the API as `APP_ORIGIN` / `APP_URL`.
+* Do not put `DATABASE_URL`, `SESSION_SECRET`, or Redis URLs in Vercel unless you intentionally colocate backend secrets there (default: API host only).
+
 ---
 
 ## 3. Docker Compose (Development)
