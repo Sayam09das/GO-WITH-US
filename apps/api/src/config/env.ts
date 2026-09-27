@@ -45,9 +45,13 @@ export const env = {
     process.env.DIRECT_URL ??
     process.env.DATABASE_URL ??
     "postgresql://gowithus:gowithus@localhost:5432/gowithus?schema=public",
-  redisUrl:
-    process.env.REDIS_URL ??
-    ((process.env.NODE_ENV ?? "development") === "production" ? "" : "redis://localhost:6379"),
+  redisUrl: (() => {
+    const fromEnv = process.env.REDIS_URL?.trim();
+    if (fromEnv) {
+      return fromEnv;
+    }
+    return (process.env.NODE_ENV ?? "development") === "production" ? "" : "redis://localhost:6379";
+  })(),
   smtpHost: process.env.SMTP_HOST ?? "",
   smtpPort: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587,
   smtpUser: process.env.SMTP_USER ?? "",

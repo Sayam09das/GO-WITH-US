@@ -5,6 +5,7 @@ import { logger } from "../logging/logger.js";
 const globalForRedis = globalThis as typeof globalThis & {
   redis?: Redis | null;
   redisAvailable?: boolean;
+  redisAbandoned?: boolean;
 };
 
 function createRedisClient(): Redis | null {
@@ -21,27 +22,38 @@ function createRedisClient(): Redis | null {
     lazyConnect: true,
     connectTimeout: 5_000,
     commandTimeout: 5_000,
-    // Optional Redis: stop endless reconnect loops when URL is wrong or service is down.
-    retryStrategy: (times) => (times > 5 ? null : Math.min(times * 200, 2_000)),
+    enableOfflineQueue: false,
+    retryStrategy: () => null,
+    reconnectOnError: () => false,
   });
 
-  let lastErrorLogAt = 0;
   client.on("error", (error: Error) => {
-    globalForRedis.redisAvailable = false;
-    const now = Date.now();
-    if (now - lastErrorLogAt < 10_000) {
+    if (globalForRedis.redisAbandoned) {
       return;
     }
-    lastErrorLogAt = now;
-    logger.error("redis.error", { message: error.message || "Redis connection error" });
+    globalForRedis.redisAvailable = false;
+    logger.warn("redis.error", {
+      message: error.message || "Redis connection error",
+    });
   });
 
   client.on("connect", () => {
     globalForRedis.redisAvailable = true;
+    globalForRedis.redisAbandoned = false;
     logger.info("redis.connected");
   });
 
   return client;
+}
+
+function abandonRedis(client: Redis, reason: string): void {
+  globalForRedis.redisAbandoned = true;
+  globalForRedis.redisAvailable = false;
+  client.removeAllListeners();
+  if (client.status !== "end") {
+    client.disconnect(false);
+  }
+  logger.warn("redis.unavailable", { message: reason });
 }
 
 export const redis = globalForRedis.redis ?? createRedisClient();
@@ -55,11 +67,16 @@ export function isRedisConfigured(): boolean {
 }
 
 export function isRedisReady(): boolean {
-  return Boolean(redis && redis.status === "ready" && globalForRedis.redisAvailable !== false);
+  return Boolean(
+    redis &&
+      !globalForRedis.redisAbandoned &&
+      redis.status === "ready" &&
+      globalForRedis.redisAvailable !== false,
+  );
 }
 
 export async function connectRedis(): Promise<boolean> {
-  if (!redis) {
+  if (!redis || globalForRedis.redisAbandoned) {
     return false;
   }
 
@@ -70,18 +87,21 @@ export async function connectRedis(): Promise<boolean> {
   try {
     await redis.connect();
     globalForRedis.redisAvailable = true;
+    globalForRedis.redisAbandoned = false;
     return true;
   } catch (error) {
-    globalForRedis.redisAvailable = false;
-    logger.error("redis.connect_failed", {
-      message: error instanceof Error ? error.message : "Unknown Redis connection error",
-    });
+    const message = error instanceof Error ? error.message : "Unknown Redis connection error";
+    abandonRedis(redis, message);
     return false;
   }
 }
 
 export async function pingRedis(timeoutMs = 2_000): Promise<boolean> {
-  if (!redis) {
+  if (!redis || globalForRedis.redisAbandoned) {
+    return false;
+  }
+
+  if (redis.status !== "ready") {
     return false;
   }
 
