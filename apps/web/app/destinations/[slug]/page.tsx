@@ -7,9 +7,17 @@ import { DestinationDetailActions } from "@/components/destinations/detail/desti
 import { DestinationExperienceCard } from "@/components/destinations/detail/destination-experience-card";
 import { DestinationRelatedGrid } from "@/components/destinations/detail/destination-related-grid";
 import { DestinationStayCard } from "@/components/destinations/detail/destination-stay-card";
+import { JsonLd } from "@/components/seo/json-ld";
 import { Button } from "@/components/ui/button";
 import { getDestinationBySlugForPage } from "@/lib/api/destinations.server";
-import { buildPageMetadata, buildPageTitle, trimDescription } from "@/lib/seo";
+import {
+  buildBreadcrumbJsonLd,
+  buildDestinationJsonLd,
+  buildDestinationTitle,
+  buildPageMetadata,
+  buildPageTitle,
+  trimDescription,
+} from "@/lib/seo";
 
 type DestinationDetailPageProps = {
   params: Promise<{ slug: string }>;
@@ -28,7 +36,7 @@ export async function generateMetadata({ params }: DestinationDetailPageProps): 
   }
 
   return buildPageMetadata({
-    title: buildPageTitle(destination.title),
+    title: buildDestinationTitle(destination.title),
     description: trimDescription(destination.overview),
     path: `/destinations/${destination.slug}`,
   });
@@ -47,6 +55,21 @@ export default async function DestinationDetailPage({ params }: DestinationDetai
 
   return (
     <main>
+      <JsonLd
+        data={[
+          buildBreadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: "Destinations", path: "/destinations" },
+            { name: destination.title, path: `/destinations/${destination.slug}` },
+          ]),
+          buildDestinationJsonLd({
+            name: destination.title,
+            description: trimDescription(destination.overview),
+            path: `/destinations/${destination.slug}`,
+            image: destination.heroImage,
+          }),
+        ]}
+      />
       <section className="relative overflow-hidden bg-background">
         <div className="container-travel grid gap-8 py-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-end lg:py-14">
           <div className="flex flex-col gap-5">

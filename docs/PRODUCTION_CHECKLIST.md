@@ -16,7 +16,7 @@ Use this before portfolio launch or merging to `main`. Live URLs: see [README](.
 
 - View source on `/` → `og:url` uses your Vercel domain (not localhost).
 - `/sitemap.xml` → `<loc>` entries use your Vercel domain.
-- `/api/v1/health/ready` via browser proxy returns JSON from Render.
+- `/api/v1/health/ready` via the Vercel proxy returns JSON (`database`, `redis`, `status`) from Render.
 
 Production builds **fail** if `NEXT_PUBLIC_SITE_URL` is missing or localhost (`apps/web/next.config.ts` guard).
 
@@ -69,7 +69,7 @@ Email templates live in `apps/api/src/lib/email-templates.ts` (compiled to `dist
 - [ ] Metadata on key routes
 - [ ] Open Graph + Twitter cards (after `NEXT_PUBLIC_SITE_URL`)
 - [ ] `robots.txt`, `sitemap.xml`
-- [ ] JSON-LD on detail pages where implemented
+- [x] JSON-LD on destination, stay, and experience detail pages (+ site-wide WebSite on root layout)
 
 ---
 
