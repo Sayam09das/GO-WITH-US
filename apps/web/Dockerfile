@@ -22,7 +22,7 @@ ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 ENV API_URL=$API_URL
 
-RUN pnpm --filter @gowithus/web build
+RUN pnpm --filter @gowithus/web... build
 
 FROM node:22-alpine AS runner
 WORKDIR /app
