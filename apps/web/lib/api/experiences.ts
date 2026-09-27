@@ -20,12 +20,25 @@ function orderFeaturedExperiences(
 }
 
 async function fetchExperienceList(limit: number): Promise<ExperienceListItem[]> {
-  const response = await apiFetch<ExperienceListResponse>(`/experiences?limit=${limit}&page=1`);
-  return response.experiences.map(mapExperienceListItem);
+  try {
+    const response = await apiFetch<ExperienceListResponse>(`/experiences?limit=${limit}&page=1`);
+    return response.experiences.map(mapExperienceListItem);
+  } catch {
+    return [];
+  }
 }
 
 export async function getAllExperiences(): Promise<ExperienceListItem[]> {
-  return fetchExperienceList(100);
+  try {
+    const listed = await fetchExperienceList(100);
+    if (listed.length > 0) {
+      return listed;
+    }
+  } catch {
+    // Fall through when the catalog API is unreachable.
+  }
+
+  return FEATURED_EXPERIENCES_HOMEPAGE_SHOWCASE;
 }
 
 export async function getFeaturedExperiences(): Promise<ExperienceListItem[]> {
