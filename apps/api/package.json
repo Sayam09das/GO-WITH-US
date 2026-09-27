@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@gowithus/jobs": "workspace:*",
+    "@gowithus/utils": "workspace:*",
     "@gowithus/types": "workspace:*",
     "@prisma/adapter-pg": "^7.0.0",
     "@prisma/client": "^7.0.0",

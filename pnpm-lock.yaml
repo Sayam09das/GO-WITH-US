@@ -26,6 +26,9 @@ importers:
       '@gowithus/types':
         specifier: workspace:*
         version: link:../../packages/types
+      '@gowithus/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
       '@prisma/adapter-pg':
         specifier: ^7.0.0
         version: 7.10.0
@@ -187,6 +190,9 @@ importers:
       '@gowithus/jobs':
         specifier: workspace:*
         version: link:../../packages/jobs
+      '@gowithus/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
       bullmq:
         specifier: ^5.56.0
         version: 5.81.5

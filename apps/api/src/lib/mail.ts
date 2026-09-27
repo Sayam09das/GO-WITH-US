@@ -1,3 +1,4 @@
+import { renderTransactionalEmail } from "@gowithus/utils";
 import nodemailer from "nodemailer";
 import { env } from "../config/env.js";
 import { logger } from "../infrastructure/logging/logger.js";
@@ -18,18 +19,37 @@ const transporter =
       })
     : null;
 
+function emailSiteContext() {
+  return {
+    siteUrl: env.appUrl,
+    supportEmail: "hello@gowithus.com",
+  };
+}
+
 export async function sendVerificationEmail(input: {
   email: string;
   fullName: string;
   token: string;
 }): Promise<void> {
   const verifyUrl = `${env.apiUrl}/api/v1/auth/verify-email?token=${encodeURIComponent(input.token)}`;
+  const { html, text } = renderTransactionalEmail({
+    ...emailSiteContext(),
+    preheader: "Confirm your email to start planning with GO WITH US.",
+    headline: "Verify your email address",
+    greetingName: input.fullName,
+    paragraphs: [
+      "Thanks for joining GO WITH US. Confirm your email to save places, build trips, and access your account.",
+    ],
+    cta: { label: "Verify email address", href: verifyUrl },
+    footnote:
+      "This link expires in 24 hours. If you did not create an account, you can safely ignore this email.",
+  });
 
   await deliverEmail({
     to: input.email,
     subject: "Verify your GO WITH US account",
-    text: `Hi ${input.fullName},\n\nVerify your account:\n${verifyUrl}\n\nThis link expires in 24 hours.`,
-    html: `<p>Hi ${input.fullName},</p><p><a href="${verifyUrl}">Verify my email</a></p><p>This link expires in 24 hours.</p>`,
+    text,
+    html,
     devLabel: "verification",
     devUrl: verifyUrl,
   });
@@ -41,12 +61,24 @@ export async function sendPasswordResetEmail(input: {
   token: string;
 }): Promise<void> {
   const resetUrl = `${env.appUrl}/reset-password?token=${encodeURIComponent(input.token)}`;
+  const { html, text } = renderTransactionalEmail({
+    ...emailSiteContext(),
+    preheader: "Reset your GO WITH US password securely.",
+    headline: "Reset your password",
+    greetingName: input.fullName,
+    paragraphs: [
+      "We received a request to reset the password for your account. Choose a new password using the button below.",
+      "If you did not request this change, no action is needed. Your password will stay the same.",
+    ],
+    cta: { label: "Reset password", href: resetUrl },
+    footnote: "This link expires in 1 hour for your security.",
+  });
 
   await deliverEmail({
     to: input.email,
     subject: "Reset your GO WITH US password",
-    text: `Hi ${input.fullName},\n\nReset your password:\n${resetUrl}\n\nThis link expires in 1 hour.`,
-    html: `<p>Hi ${input.fullName},</p><p><a href="${resetUrl}">Reset password</a></p><p>This link expires in 1 hour.</p>`,
+    text,
+    html,
     devLabel: "password reset",
     devUrl: resetUrl,
   });
@@ -58,12 +90,24 @@ export async function sendBookingConfirmationEmail(input: {
   bookingReference: string;
 }): Promise<void> {
   const bookingsUrl = `${env.appUrl}/account/bookings`;
+  const { html, text } = renderTransactionalEmail({
+    ...emailSiteContext(),
+    preheader: `Your booking ${input.bookingReference} is on file with GO WITH US.`,
+    headline: "We received your booking request",
+    greetingName: input.fullName,
+    paragraphs: [
+      "Thank you for planning with GO WITH US. We have your booking details on file and will follow up if anything else is needed.",
+    ],
+    highlight: input.bookingReference,
+    cta: { label: "View booking details", href: bookingsUrl },
+    footnote: "This is a confirmation of receipt, not a payment receipt.",
+  });
 
   await deliverEmail({
     to: input.email,
     subject: `Booking received — ${input.bookingReference}`,
-    text: `Hi ${input.fullName},\n\nWe received your booking (${input.bookingReference}).\nView details: ${bookingsUrl}`,
-    html: `<p>Hi ${input.fullName},</p><p>We received your booking <strong>${input.bookingReference}</strong>.</p><p><a href="${bookingsUrl}">View booking details</a></p>`,
+    text,
+    html,
     devLabel: "booking confirmation",
     devUrl: bookingsUrl,
   });
