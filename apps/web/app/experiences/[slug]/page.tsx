@@ -5,11 +5,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BookingRequestForm } from "@/components/catalog/booking-request-form";
 import { ReviewsSection } from "@/components/catalog/reviews-section";
+import { JsonLd } from "@/components/seo/json-ld";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getExperienceBySlug } from "@/lib/api/experiences";
 import { listExperienceReviews } from "@/lib/api/reviews";
 import {
+  buildBreadcrumbJsonLd,
+  buildExperienceJsonLd,
   buildExperienceTitle,
   buildPageMetadata,
   buildPageTitle,
@@ -52,6 +55,21 @@ export default async function ExperienceDetailPage({ params }: ExperienceDetailP
 
   return (
     <main>
+      <JsonLd
+        data={[
+          buildBreadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: "Experiences", path: "/experiences" },
+            { name: experience.title, path: `/experiences/${experience.slug}` },
+          ]),
+          buildExperienceJsonLd({
+            name: experience.title,
+            description: trimDescription(experience.description),
+            path: `/experiences/${experience.slug}`,
+            image: experience.heroImage,
+          }),
+        ]}
+      />
       <section className="relative overflow-hidden bg-background">
         <div className="container-travel grid gap-8 py-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-end lg:py-14">
           <div className="flex flex-col gap-5">

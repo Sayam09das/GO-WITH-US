@@ -122,6 +122,14 @@ export function createApp(): Express {
     });
   });
 
+  apiRouter.get("/health/ready", healthReadyHandler);
+  apiRouter.get("/health/live", (_req, res) => {
+    res.json({
+      status: "alive",
+      service: "gowithus-api",
+    });
+  });
+
   apiRouter.use("/auth", authRouter);
   apiRouter.use("/discovery", discoveryRouter);
   apiRouter.use("/search", searchRouter);

@@ -5,11 +5,19 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BookingRequestForm } from "@/components/catalog/booking-request-form";
 import { ReviewsSection } from "@/components/catalog/reviews-section";
+import { JsonLd } from "@/components/seo/json-ld";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { listStayReviews } from "@/lib/api/reviews";
 import { getStayBySlug } from "@/lib/api/stays";
-import { buildPageMetadata, buildPageTitle, buildStayTitle, trimDescription } from "@/lib/seo";
+import {
+  buildBreadcrumbJsonLd,
+  buildPageMetadata,
+  buildPageTitle,
+  buildStayJsonLd,
+  buildStayTitle,
+  trimDescription,
+} from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
 type StayDetailPageProps = {
@@ -47,6 +55,21 @@ export default async function StayDetailPage({ params }: StayDetailPageProps) {
 
   return (
     <main>
+      <JsonLd
+        data={[
+          buildBreadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: "Stays", path: "/stays" },
+            { name: stay.name, path: `/stays/${stay.slug}` },
+          ]),
+          buildStayJsonLd({
+            name: stay.name,
+            description: trimDescription(stay.description),
+            path: `/stays/${stay.slug}`,
+            image: stay.heroImage,
+          }),
+        ]}
+      />
       <section className="relative overflow-hidden bg-background">
         <div className="container-travel grid gap-8 py-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-end lg:py-14">
           <div className="flex flex-col gap-5">

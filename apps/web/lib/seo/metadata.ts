@@ -31,27 +31,39 @@ export function trimDescription(text: string, max = DESCRIPTION_MAX): string {
   return `${truncated.slice(0, lastSpace > 0 ? lastSpace : max).trim()}…`;
 }
 
-export function buildPageTitle(pageTitle: string): string {
-  if (pageTitle.includes(SITE_NAME)) {
-    return pageTitle;
+const TITLE_SUFFIX = ` | ${SITE_NAME}`;
+
+/** Strip a legacy full title so the root layout template does not duplicate the brand. */
+function normalizeTitleSegment(title: string): string {
+  if (title.endsWith(TITLE_SUFFIX)) {
+    return title.slice(0, -TITLE_SUFFIX.length);
   }
-  return `${pageTitle} | ${SITE_NAME}`;
+  return title;
+}
+
+/** Full title for Open Graph, Twitter, and alt text (layout template adds brand to document title). */
+export function formatPublicTitle(segment: string): string {
+  return `${normalizeTitleSegment(segment)} | ${SITE_NAME}`;
+}
+
+export function buildPageTitle(pageTitle: string): string {
+  return normalizeTitleSegment(pageTitle);
 }
 
 export function buildCatalogTitle(section: string): string {
-  return buildPageTitle(section);
+  return section;
 }
 
 export function buildDestinationTitle(name: string): string {
-  return buildPageTitle(`${name} Travel Guide`);
+  return `${name} Travel Guide`;
 }
 
 export function buildStayTitle(name: string, city: string): string {
-  return buildPageTitle(`${name} — Stay in ${city}`);
+  return `${name} — Stay in ${city}`;
 }
 
 export function buildExperienceTitle(name: string, city: string): string {
-  return buildPageTitle(`${name} in ${city}`);
+  return `${name} in ${city}`;
 }
 
 export function buildPageMetadata({
@@ -65,26 +77,28 @@ export function buildPageMetadata({
   const canonical = absoluteUrl(path);
   const imagePath = ogImage ?? DEFAULT_OG_IMAGE_PATH;
   const imageUrl = imagePath.startsWith("http") ? imagePath : absoluteUrl(imagePath);
+  const titleSegment = normalizeTitleSegment(title);
+  const publicTitle = formatPublicTitle(titleSegment);
 
   return {
-    title,
+    title: titleSegment,
     description: trimDescription(description),
     alternates: {
       canonical,
     },
     robots: noIndex ? { index: false, follow: false } : { index: true, follow: true },
     openGraph: {
-      title,
+      title: publicTitle,
       description: trimDescription(description),
       url: canonical,
       siteName: SITE_NAME,
       locale: DEFAULT_LOCALE,
       type: ogType,
-      images: [{ url: imageUrl, alt: title }],
+      images: [{ url: imageUrl, alt: publicTitle }],
     },
     twitter: {
       card: ogImage ? "summary_large_image" : "summary",
-      title,
+      title: publicTitle,
       description: trimDescription(description),
       images: [imageUrl],
       ...(TWITTER_HANDLE ? { site: TWITTER_HANDLE, creator: TWITTER_HANDLE } : {}),
