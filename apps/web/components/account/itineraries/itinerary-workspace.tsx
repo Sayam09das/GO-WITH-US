@@ -5,10 +5,18 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AddItineraryItemDialog } from "@/components/account/itineraries/add-itinerary-item-dialog";
+import { EditItineraryItemDialog } from "@/components/account/itineraries/edit-itinerary-item-dialog";
+import { EditTripMetadataDialog } from "@/components/account/itineraries/edit-trip-metadata-dialog";
+import { ItineraryDayTimeline } from "@/components/account/itineraries/itinerary-day-timeline";
 import { Button } from "@/components/ui/button";
 import { formatTripDateRange } from "@/lib/account/itineraries/itinerary-display";
 import { ApiRequestError } from "@/lib/api/client";
-import { createTripDay, getTrip, type TripDetailResponse } from "@/lib/api/trips";
+import {
+  createTripDay,
+  getTrip,
+  type TripDetailDayItem,
+  type TripDetailResponse,
+} from "@/lib/api/trips";
 import { cn } from "@/lib/utils";
 
 function formatTimelineTime(startTime: string | null, timeSlot: string): string {
@@ -34,6 +42,9 @@ function ItineraryWorkspace() {
   const [trip, setTrip] = useState<TripDetailResponse | null>(null);
   const [activeDayIndex, setActiveDayIndex] = useState(1);
   const [addOpen, setAddOpen] = useState(false);
+  const [editItem, setEditItem] = useState<TripDetailDayItem | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [tripEditOpen, setTripEditOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -50,7 +61,10 @@ function ItineraryWorkspace() {
       }
 
       setTrip(detail);
-      setActiveDayIndex(detail.days[0]?.dayIndex ?? 1);
+      setActiveDayIndex((current) => {
+        const stillExists = detail.days.some((day) => day.dayIndex === current);
+        return stillExists ? current : (detail.days[0]?.dayIndex ?? 1);
+      });
     } catch (cause) {
       if (cause instanceof ApiRequestError && cause.status === 401) {
         setError("Sign in to view this itinerary.");
@@ -70,6 +84,10 @@ function ItineraryWorkspace() {
     () => trip?.days.find((day) => day.dayIndex === activeDayIndex) ?? trip?.days[0],
     [trip, activeDayIndex],
   );
+
+  const handleItemChanged = useCallback(() => {
+    void loadTrip();
+  }, [loadTrip]);
 
   if (isLoading) {
     return (
@@ -114,8 +132,14 @@ function ItineraryWorkspace() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" className="rounded-full" disabled>
-            Edit
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="rounded-full"
+            onClick={() => setTripEditOpen(true)}
+          >
+            Edit trip
           </Button>
           <Button variant="outline" size="sm" className="rounded-full" disabled>
             Share
@@ -158,6 +182,11 @@ function ItineraryWorkspace() {
             <h2 id="day-timeline-heading" className="mt-2 text-xl font-semibold text-heading">
               {activeDay.title}
             </h2>
+            {activeDay.items.length > 1 ? (
+              <p className="mt-2 text-xs text-muted-foreground">
+                Drag the handle on an activity to reorder your day.
+              </p>
+            ) : null}
           </div>
 
           {activeDay.items.length === 0 ? (
@@ -165,26 +194,18 @@ function ItineraryWorkspace() {
               No activities planned for this day yet. Use Add to itinerary below.
             </p>
           ) : (
-            <ol className="relative border-l border-border/70 pl-6">
-              {activeDay.items.map((item) => (
-                <li key={item.id} className="relative pb-8 last:pb-0">
-                  <span
-                    aria-hidden="true"
-                    className="absolute -left-[0.4375rem] top-1 size-2 rounded-full bg-primary"
-                  />
-                  <p className="text-sm font-semibold text-heading">
-                    {formatTimelineTime(item.startTime, item.timeSlot)}
-                  </p>
-                  <p className="mt-1 text-base font-medium text-heading">{item.title}</p>
-                  <p className="mt-1 text-xs uppercase tracking-[0.12em] text-muted-foreground">
-                    {item.type}
-                  </p>
-                  {item.notes ? (
-                    <p className="mt-2 text-sm text-muted-foreground">{item.notes}</p>
-                  ) : null}
-                </li>
-              ))}
-            </ol>
+            <ItineraryDayTimeline
+              tripId={tripId}
+              day={activeDay}
+              allDays={trip.days}
+              items={activeDay.items}
+              formatTime={formatTimelineTime}
+              onEdit={(selected) => {
+                setEditItem(selected);
+                setEditOpen(true);
+              }}
+              onChanged={handleItemChanged}
+            />
           )}
         </section>
       ) : null}
@@ -201,20 +222,35 @@ function ItineraryWorkspace() {
           Add to itinerary
         </Button>
         <p className="mt-3 text-xs text-muted-foreground">
-          Destination · Experience · Restaurant · Stay · Custom activity
+          Destination · Stay · Experience · Restaurant · Custom activity
         </p>
       </div>
 
+      <EditTripMetadataDialog
+        trip={trip}
+        open={tripEditOpen}
+        onOpenChange={setTripEditOpen}
+        onSaved={handleItemChanged}
+      />
+
       {activeDay ? (
-        <AddItineraryItemDialog
-          tripId={tripId}
-          dayId={activeDay.id}
-          open={addOpen}
-          onOpenChange={setAddOpen}
-          onAdded={() => {
-            void loadTrip();
-          }}
-        />
+        <>
+          <AddItineraryItemDialog
+            tripId={tripId}
+            dayId={activeDay.id}
+            open={addOpen}
+            onOpenChange={setAddOpen}
+            onAdded={handleItemChanged}
+          />
+          <EditItineraryItemDialog
+            tripId={tripId}
+            dayId={activeDay.id}
+            item={editItem}
+            open={editOpen}
+            onOpenChange={setEditOpen}
+            onSaved={handleItemChanged}
+          />
+        </>
       ) : null}
     </div>
   );

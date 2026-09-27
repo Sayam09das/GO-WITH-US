@@ -1,18 +1,21 @@
 import type {
   DestinationListItem as ApiDestinationListItem,
   ExperienceListItem as ApiExperienceListItem,
+  RestaurantListItem as ApiRestaurantListItem,
   StayListItem as ApiStayListItem,
   StoryListItem as ApiStoryListItem,
 } from "@gowithus/types";
 import type { DestinationListItem } from "@/types/destination";
 import type { ExperienceListItem } from "@/types/experience";
 import type { JournalStory } from "@/types/journal";
+import type { RestaurantListItem } from "@/types/restaurant";
 import type { StayListItem } from "@/types/stay";
 import { apiFetch } from "./client";
 import {
   mapDestinationListItem,
   mapExperienceListItem,
   mapJournalStory,
+  mapRestaurantListItem,
   mapStayListItem,
 } from "./mappers";
 
@@ -70,4 +73,49 @@ export async function searchDestinationsApi(
     },
   );
   return response.destinations.map(mapDestinationListItem);
+}
+
+export async function searchStaysApi(query: string, limit = 12): Promise<StayListItem[]> {
+  const trimmed = query.trim();
+  if (!trimmed) {
+    return [];
+  }
+
+  const response = await apiFetch<{ stays: ApiStayListItem[] }>("/stays/search", {
+    method: "POST",
+    body: { query: trimmed, page: 1, limit },
+  });
+  return response.stays.map(mapStayListItem);
+}
+
+export async function searchExperiencesApi(
+  query: string,
+  limit = 12,
+): Promise<ExperienceListItem[]> {
+  const trimmed = query.trim();
+  if (!trimmed) {
+    return [];
+  }
+
+  const response = await apiFetch<{ experiences: ApiExperienceListItem[] }>("/experiences/search", {
+    method: "POST",
+    body: { query: trimmed, page: 1, limit },
+  });
+  return response.experiences.map(mapExperienceListItem);
+}
+
+export async function searchRestaurantsApi(
+  query: string,
+  limit = 12,
+): Promise<RestaurantListItem[]> {
+  const trimmed = query.trim();
+  if (!trimmed) {
+    return [];
+  }
+
+  const response = await apiFetch<{ restaurants: ApiRestaurantListItem[] }>("/restaurants/search", {
+    method: "POST",
+    body: { query: trimmed, page: 1, limit },
+  });
+  return response.restaurants.map(mapRestaurantListItem);
 }

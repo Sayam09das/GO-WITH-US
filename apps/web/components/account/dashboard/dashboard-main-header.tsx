@@ -26,9 +26,15 @@ function DashboardMainHeader() {
         <p className="label-text text-[0.6875rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
           {DASHBOARD_HEADER_COPY.eyebrow}
         </p>
-        <h1 className="hero-heading text-[2rem] font-semibold leading-[1.08] tracking-tight text-heading sm:text-4xl lg:text-[2.75rem]">
-          {greeting}
-        </h1>
+        {isOverview ? (
+          <h1 className="hero-heading text-[2rem] font-semibold leading-[1.08] tracking-tight text-heading sm:text-4xl lg:text-[2.75rem]">
+            {greeting}
+          </h1>
+        ) : (
+          <p className="hero-heading text-[2rem] font-semibold leading-[1.08] tracking-tight text-heading sm:text-4xl lg:text-[2.75rem]">
+            {greeting}
+          </p>
+        )}
         <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
           {DASHBOARD_HEADER_COPY.supporting}
         </p>

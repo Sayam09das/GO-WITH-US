@@ -65,7 +65,6 @@ export const DASHBOARD_SIDEBAR_USER_COPY = {
 export const DASHBOARD_SIDEBAR_USER_LINKS = [
   { label: "Profile", href: "/account/profile" },
   { label: "Account settings", href: "/account/settings" },
-  { label: "Log out", href: "/sign-in" },
 ] as const;
 
 export const DASHBOARD_MOBILE_TAB_ITEMS: DashboardMobileTabItem[] = [

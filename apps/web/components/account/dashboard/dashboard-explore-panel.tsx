@@ -1,23 +1,72 @@
 "use client";
 
-import { ArrowRight, Bookmark } from "lucide-react";
+import { ArrowRight, Bookmark, LoaderCircle } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { IconButton } from "@/components/ui/icon-button";
 import { EXPLORE_SECTION_COPY, type ExploreDestinationPanel } from "@/lib/account";
+import { ApiRequestError } from "@/lib/api/client";
+import { getDestinationBySlug } from "@/lib/api/destinations";
+import { saveDestination, unsaveDestination } from "@/lib/api/users";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
 import { cn } from "@/lib/utils";
 
 interface DashboardExplorePanelProps {
   destination: ExploreDestinationPanel;
+  initialSaved?: boolean;
 }
 
-function DashboardExplorePanel({ destination }: DashboardExplorePanelProps) {
+function DashboardExplorePanel({ destination, initialSaved = false }: DashboardExplorePanelProps) {
   const reducedMotion = useReducedMotion();
-  const [isSaved, setIsSaved] = useState(false);
+  const [isSaved, setIsSaved] = useState(initialSaved);
+  const [isPending, setIsPending] = useState(false);
+  const [catalogDestinationId, setCatalogDestinationId] = useState<string | null>(null);
   const isFeatured = destination.layout === "featured";
+
+  const resolveCatalogDestinationId = useCallback(async (): Promise<string | null> => {
+    if (catalogDestinationId) {
+      return catalogDestinationId;
+    }
+
+    const detail = await getDestinationBySlug(destination.slug);
+    if (!detail?.id) {
+      return null;
+    }
+
+    setCatalogDestinationId(detail.id);
+    return detail.id;
+  }, [catalogDestinationId, destination.slug]);
+
+  async function toggleSave() {
+    if (isPending) {
+      return;
+    }
+
+    setIsPending(true);
+
+    try {
+      const destinationId = await resolveCatalogDestinationId();
+      if (!destinationId) {
+        return;
+      }
+
+      if (isSaved) {
+        await unsaveDestination(destinationId);
+        setIsSaved(false);
+      } else {
+        await saveDestination(destinationId);
+        setIsSaved(true);
+      }
+    } catch (error) {
+      if (error instanceof ApiRequestError && error.status === 401) {
+        return;
+      }
+    } finally {
+      setIsPending(false);
+    }
+  }
 
   return (
     <article
@@ -83,18 +132,20 @@ function DashboardExplorePanel({ destination }: DashboardExplorePanelProps) {
       <IconButton
         variant="ghost"
         label={isSaved ? EXPLORE_SECTION_COPY.unsaveLabel : EXPLORE_SECTION_COPY.saveLabel}
-        icon={Bookmark}
+        icon={isPending ? LoaderCircle : Bookmark}
         aria-pressed={isSaved}
+        disabled={isPending}
         onClick={(event) => {
           event.preventDefault();
           event.stopPropagation();
-          setIsSaved((saved) => !saved);
+          void toggleSave();
         }}
         className={cn(
           "absolute right-3 top-3 z-10 size-10 rounded-full border border-white/20 bg-black/25 text-white backdrop-blur-sm hover:bg-black/40 hover:text-white",
           isSaved && "text-primary",
+          isPending && "[&_svg]:animate-spin",
         )}
-        iconClassName={cn("size-[1.125rem]", isSaved && "fill-current")}
+        iconClassName={cn("size-[1.125rem]", isSaved && !isPending && "fill-current")}
       />
     </article>
   );

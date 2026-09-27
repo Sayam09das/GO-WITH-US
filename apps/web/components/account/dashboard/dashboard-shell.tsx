@@ -13,10 +13,10 @@ import { cn } from "@/lib/utils";
 
 interface DashboardShellProps {
   children: React.ReactNode;
-  user?: DashboardUser | null;
+  user: DashboardUser;
 }
 
-function DashboardShell({ children, user = null }: DashboardShellProps) {
+function DashboardShell({ children, user }: DashboardShellProps) {
   const shellRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
 

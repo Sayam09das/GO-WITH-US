@@ -11,12 +11,12 @@ export interface DashboardUser {
   initials: string;
 }
 
-/** Fixture user until auth session is wired. */
+/** @deprecated Do not use in UI — dashboard layout supplies the authenticated user. */
 export const DASHBOARD_USER: DashboardUser = {
-  firstName: "Sayam",
-  fullName: "Sayam Das",
-  email: "sayam@gowithus.com",
-  initials: "S",
+  firstName: "Traveler",
+  fullName: "Traveler",
+  email: "",
+  initials: "?",
 };
 
 export const DASHBOARD_HEADER_COPY = {
@@ -33,9 +33,14 @@ export const DASHBOARD_HEADER_COPY = {
   },
 } as const;
 
-export const DASHBOARD_PROFILE_LINKS = [
+export const DASHBOARD_PROFILE_NAV_LINKS = [
   { label: DASHBOARD_HEADER_COPY.profileLinks.profile, href: "/account/profile" },
   { label: DASHBOARD_HEADER_COPY.profileLinks.settings, href: "/account/settings" },
   { label: DASHBOARD_HEADER_COPY.profileLinks.help, href: "/account/help" },
+] as const;
+
+/** @deprecated Use DASHBOARD_PROFILE_NAV_LINKS plus logout action. */
+export const DASHBOARD_PROFILE_LINKS = [
+  ...DASHBOARD_PROFILE_NAV_LINKS,
   { label: DASHBOARD_HEADER_COPY.profileLinks.logOut, href: "/sign-in" },
 ] as const;

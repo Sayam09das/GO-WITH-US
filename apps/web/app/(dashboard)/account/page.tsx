@@ -39,7 +39,9 @@ export default async function AccountOverviewPage() {
     <>
       <DashboardHero />
       <DashboardUpcomingTripSection trip={upcomingTrip} />
-      <DashboardExploreSection />
+      <DashboardExploreSection
+        savedDestinationSlugs={overview?.savedDestinations.map((item) => item.slug) ?? []}
+      />
       <DashboardSavedPlacesSection savedPlaces={savedPlaces} />
       <DashboardInspirationSection content={inspiration} />
       <DashboardRecentSection items={recentItems} />
