@@ -14,9 +14,6 @@ export {
 } from "./explore-config";
 export { getDashboardInspiration } from "./get-dashboard-inspiration";
 export { getExploreDestinations } from "./get-explore-destinations";
-export { getRecentlyViewed } from "./get-recently-viewed";
-export { getSavedPlaces } from "./get-saved-places";
-export { getUpcomingTrip } from "./get-upcoming-trip";
 export { buildDashboardGreeting, getTimeGreeting } from "./greeting";
 export {
   DASHBOARD_HERO_COPY,
@@ -40,7 +37,6 @@ export {
 } from "./plan-journey-config";
 export {
   RECENTLY_VIEWED_EMPTY_COPY,
-  RECENTLY_VIEWED_FIXTURE,
   RECENTLY_VIEWED_LINKS,
   RECENTLY_VIEWED_SECTION_COPY,
   type RecentlyViewedItem,
@@ -48,7 +44,6 @@ export {
 } from "./recent-config";
 export {
   SAVED_PLACES_EMPTY_COPY,
-  SAVED_PLACES_FIXTURE,
   SAVED_PLACES_LINKS,
   SAVED_PLACES_SECTION_COPY,
   type SavedPlaceItem,
@@ -68,7 +63,6 @@ export {
 } from "./sidebar-config";
 export {
   UPCOMING_TRIP_EMPTY_COPY,
-  UPCOMING_TRIP_FIXTURE,
   UPCOMING_TRIP_LINKS,
   UPCOMING_TRIP_SECTION_COPY,
   type UpcomingTrip,

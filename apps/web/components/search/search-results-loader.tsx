@@ -1,5 +1,6 @@
+import { CatalogLoadError } from "@/components/states/catalog-load-error";
 import { searchGlobal } from "@/lib/api/search";
-import { withApiFallback } from "@/lib/api/with-api-fallback";
+import { tryApiLoad } from "@/lib/api/with-api-fallback";
 import { SearchResultsPanel } from "./search-results-panel";
 
 interface SearchResultsLoaderProps {
@@ -7,14 +8,18 @@ interface SearchResultsLoaderProps {
 }
 
 async function SearchResultsLoader({ query }: SearchResultsLoaderProps) {
-  const results = await withApiFallback(searchGlobal(query, 12), {
-    destinations: [],
-    stays: [],
-    experiences: [],
-    stories: [],
-  });
+  const loaded = await tryApiLoad(searchGlobal(query, 12));
 
-  return <SearchResultsPanel query={query} results={results} />;
+  if (!loaded.ok) {
+    return (
+      <CatalogLoadError
+        title="Search unavailable"
+        description="We could not load search results. Try again in a moment."
+      />
+    );
+  }
+
+  return <SearchResultsPanel query={query} results={loaded.value} />;
 }
 
 export { SearchResultsLoader };
