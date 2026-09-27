@@ -1,4 +1,4 @@
-import type { Notification } from "../../generated/client.js";
+import type { Notification } from "@prisma/client";
 
 export type NotificationFilterCategory = "trips" | "bookings" | "itineraries" | "updates";
 

@@ -1,4 +1,4 @@
-import type { Story, StoryCategory } from "../../generated/client.js";
+import type { Story, StoryCategory } from "@prisma/client";
 
 const STORY_CATEGORY_LABELS: Record<StoryCategory, string> = {
   editorial: "Editorial",

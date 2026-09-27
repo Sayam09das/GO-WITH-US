@@ -1,4 +1,4 @@
-import type { BudgetTier, Destination, Experience, Prisma, Stay } from "../../generated/client.js";
+import type { BudgetTier, Destination, Experience, Prisma, Stay } from "@prisma/client";
 import { prisma } from "../../lib/db.js";
 import type { DestinationSearchInput, DestinationSort } from "./destinations.schemas.js";
 

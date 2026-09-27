@@ -1,4 +1,4 @@
-import type { TravelDocumentCategory } from "../../generated/client.js";
+import type { TravelDocumentCategory } from "@prisma/client";
 import { AppError } from "../../lib/errors.js";
 import { deleteUserFile, storageEnv, uploadUserFile } from "../../lib/supabase-storage.js";
 import { assertDocumentMime, formatFileSize } from "../../lib/upload.js";

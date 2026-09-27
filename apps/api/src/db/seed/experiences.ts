@@ -1,3 +1,4 @@
+import type { PrismaClient } from "@prisma/client";
 import { DESTINATION_SEEDS } from "./destinations.js";
 import {
   type CatalogIds,
@@ -60,10 +61,7 @@ const EXPERIENCE_TITLES = [
   "Wildflower meadow hike in spring bloom",
 ];
 
-export async function seedExperiences(
-  prisma: import("../../generated/client.js").PrismaClient,
-  ids: CatalogIds,
-): Promise<void> {
+export async function seedExperiences(prisma: PrismaClient, ids: CatalogIds): Promise<void> {
   for (let index = 0; index < EXPERIENCE_TITLES.length; index += 1) {
     const title = EXPERIENCE_TITLES[index] ?? "Guided local experience";
     const slug = slugify(title);

@@ -1,4 +1,4 @@
-import type { User } from "../../generated/client.js";
+import type { User } from "@prisma/client";
 
 export type PublicUser = {
   id: string;

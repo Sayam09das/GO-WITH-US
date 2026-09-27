@@ -1,7 +1,13 @@
 {
   "extends": "@gowithus/config/tsconfig/base.json",
   "compilerOptions": {
-    "lib": ["ES2022"]
+    "lib": ["ES2022"],
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "noEmit": false,
+    "declaration": true,
+    "moduleResolution": "bundler",
+    "module": "ESNext"
   },
   "include": ["src/**/*.ts"]
 }

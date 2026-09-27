@@ -1,4 +1,4 @@
-import type { ItemType, Prisma } from "../generated/client.js";
+import type { ItemType, Prisma } from "@prisma/client";
 import { buildRatingDistribution } from "./catalog-utils.js";
 import { prisma } from "./db.js";
 

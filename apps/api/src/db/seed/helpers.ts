@@ -1,9 +1,4 @@
-import type {
-  BudgetTier,
-  ExperienceCategory,
-  PlaceCategory,
-  PropertyType,
-} from "../../generated/client.js";
+import type { BudgetTier, ExperienceCategory, PlaceCategory, PropertyType } from "@prisma/client";
 
 export const HERO_IMAGES = [
   "/landingImg/travelimg/travel-1.jpg",

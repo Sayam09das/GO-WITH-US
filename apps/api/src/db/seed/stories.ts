@@ -1,4 +1,4 @@
-import type { StoryCategory } from "../../generated/client.js";
+import type { PrismaClient, StoryCategory } from "@prisma/client";
 import { pickHeroImage } from "./helpers.js";
 
 type StorySeed = {
@@ -134,9 +134,7 @@ const STORY_SEEDS: StorySeed[] = [
   },
 ];
 
-export async function seedStories(
-  prisma: import("../../generated/client.js").PrismaClient,
-): Promise<void> {
+export async function seedStories(prisma: PrismaClient): Promise<void> {
   for (const story of STORY_SEEDS) {
     const coverImage = pickHeroImage(story.imageIndex);
 

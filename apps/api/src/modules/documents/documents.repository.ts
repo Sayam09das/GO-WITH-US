@@ -1,4 +1,4 @@
-import type { TravelDocumentCategory } from "../../generated/client.js";
+import type { TravelDocumentCategory } from "@prisma/client";
 import { prisma } from "../../lib/db.js";
 
 export const documentsRepository = {

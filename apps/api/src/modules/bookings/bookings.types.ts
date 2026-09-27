@@ -8,7 +8,7 @@ import type {
   Payment,
   PaymentStatus,
   Stay,
-} from "../../generated/client.js";
+} from "@prisma/client";
 import { AppError } from "../../lib/errors.js";
 import { buildStayAvailability } from "../stays/stays.types.js";
 

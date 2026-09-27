@@ -1,3 +1,4 @@
+import type { PrismaClient } from "@prisma/client";
 import { DESTINATION_SEEDS } from "./destinations.js";
 import {
   type CatalogIds,
@@ -60,10 +61,7 @@ const STAY_NAMES = [
   "North Star Boutique Hotel",
 ];
 
-export async function seedStays(
-  prisma: import("../../generated/client.js").PrismaClient,
-  ids: CatalogIds,
-): Promise<void> {
+export async function seedStays(prisma: PrismaClient, ids: CatalogIds): Promise<void> {
   for (let index = 0; index < STAY_NAMES.length; index += 1) {
     const name = STAY_NAMES[index] ?? "Curated stay";
     const slug = slugify(name);

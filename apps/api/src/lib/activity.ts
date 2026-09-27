@@ -1,4 +1,4 @@
-import type { Prisma, UserActivityType } from "../generated/client.js";
+import type { Prisma, UserActivityType } from "@prisma/client";
 import { prisma } from "./db.js";
 
 export async function logUserActivity(input: {

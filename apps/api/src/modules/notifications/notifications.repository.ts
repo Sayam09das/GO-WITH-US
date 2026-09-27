@@ -1,4 +1,4 @@
-import type { NotificationType } from "../../generated/client.js";
+import type { NotificationType } from "@prisma/client";
 import { prisma } from "../../lib/db.js";
 
 export const notificationsRepository = {

@@ -5,7 +5,7 @@ import type {
   UserProfile,
 } from "@gowithus/types";
 import { PROFILE_INTEREST_IDS, PROFILE_STYLE_TAG_IDS } from "@gowithus/types";
-import type { Prisma, User } from "../../generated/client.js";
+import type { Prisma, User } from "@prisma/client";
 
 function parseProfilePreferences(value: Prisma.JsonValue | null | undefined): ProfilePreferences {
   if (!value || typeof value !== "object" || Array.isArray(value)) {

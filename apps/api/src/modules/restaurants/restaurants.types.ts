@@ -1,4 +1,4 @@
-import type { Destination, Restaurant } from "../../generated/client.js";
+import type { Destination, Restaurant } from "@prisma/client";
 
 export type RestaurantDestinationSummary = {
   id: string;

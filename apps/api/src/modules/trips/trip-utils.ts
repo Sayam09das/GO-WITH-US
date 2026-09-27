@@ -1,4 +1,4 @@
-import type { TripStatus } from "../../generated/client.js";
+import type { TripStatus } from "@prisma/client";
 
 export type TripStatusFilter =
   | "draft"

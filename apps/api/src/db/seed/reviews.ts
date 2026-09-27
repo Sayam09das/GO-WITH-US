@@ -1,4 +1,4 @@
-import type { ItemType } from "../../generated/client.js";
+import type { ItemType, PrismaClient } from "@prisma/client";
 import type { CatalogIds } from "./helpers.js";
 
 const REVIEW_BODIES = [
@@ -41,10 +41,7 @@ function buildTargets(ids: CatalogIds): ReviewTarget[] {
   return targets;
 }
 
-export async function seedReviews(
-  prisma: import("../../generated/client.js").PrismaClient,
-  ids: CatalogIds,
-): Promise<void> {
+export async function seedReviews(prisma: PrismaClient, ids: CatalogIds): Promise<void> {
   const userIds = [...ids.users.values()];
   const targets = buildTargets(ids);
 
@@ -102,10 +99,7 @@ export async function seedReviews(
   await refreshReviewAggregates(prisma, ids);
 }
 
-async function refreshReviewAggregates(
-  prisma: import("../../generated/client.js").PrismaClient,
-  ids: CatalogIds,
-): Promise<void> {
+async function refreshReviewAggregates(prisma: PrismaClient, ids: CatalogIds): Promise<void> {
   async function refreshTable(
     itemType: ItemType,
     table: "destination" | "stay" | "experience" | "restaurant" | "place",
