@@ -25,16 +25,6 @@ export async function getFeaturedInspirationStory(): Promise<InspirationStory | 
 
 export async function getInspirationStories(): Promise<InspirationStory[]> {
   try {
-    const response = await apiFetch<StoryListResponse>("/stories/featured");
-    const mapped = orderInspirationStories(response.stories.map(mapInspirationStory));
-    if (mapped.length > 0) {
-      return mapped;
-    }
-  } catch {
-    // Fall through to full catalog list.
-  }
-
-  try {
     return orderInspirationStories(await fetchStoryList(12));
   } catch {
     return [];

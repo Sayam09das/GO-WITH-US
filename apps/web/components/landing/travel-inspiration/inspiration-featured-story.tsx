@@ -12,41 +12,66 @@ import { TRAVEL_INSPIRATION_COPY } from "@/lib/landing/travel-inspiration";
 import { cn } from "@/lib/utils";
 import type { InspirationStory } from "@/types/inspiration";
 
+const FALLBACK_INSPIRATION_IMAGE = "/landingImg/travelimg/travel-1.jpg";
+
 interface InspirationFeaturedStoryProps {
   story: InspirationStory;
+  part: "media" | "copy";
 }
 
-function InspirationFeaturedStory({ story }: InspirationFeaturedStoryProps) {
+function InspirationFeaturedStory({ story, part }: InspirationFeaturedStoryProps) {
   const reducedMotion = useReducedMotion();
+  const imageSrc = story.heroImage?.trim() || FALLBACK_INSPIRATION_IMAGE;
+
+  if (part === "media") {
+    return (
+      <div data-ti-featured-media>
+        <motion.div
+          initial={reducedMotion ? false : { opacity: 0, y: 16 }}
+          whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.45, ease: [0, 0, 0.2, 1] }}
+        >
+          <Link
+            href={`/inspiration/${story.slug}`}
+            className="group block overflow-hidden rounded-[1.25rem] bg-soft-gray shadow-sm ring-1 ring-border/70 transition-shadow duration-200 hover:shadow-md focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:rounded-[1.5rem]"
+            aria-label={story.title}
+          >
+            <div
+              data-ti-image-mask
+              className="relative aspect-[16/10] overflow-hidden sm:aspect-[5/3]"
+            >
+              <motion.div
+                className="absolute inset-0 will-change-transform"
+                whileHover={reducedMotion ? undefined : { scale: 1.03 }}
+                transition={{ duration: 0.5, ease: [0, 0, 0.2, 1] }}
+              >
+                <Image
+                  src={imageSrc}
+                  alt={story.imageAlt}
+                  fill
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 58vw"
+                  quality={85}
+                  className={cn("object-cover", story.objectPosition ?? "object-center")}
+                />
+              </motion.div>
+            </div>
+          </Link>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
-    <div data-ti-featured>
+    <div data-ti-featured-copy>
       <motion.div
-        whileHover={reducedMotion ? undefined : { y: -4 }}
-        transition={{ duration: 0.22, ease: [0, 0, 0.2, 1] }}
+        initial={reducedMotion ? false : { opacity: 0, y: 16 }}
+        whileInView={reducedMotion ? undefined : { opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-40px" }}
+        transition={{ duration: 0.45, delay: 0.06, ease: [0, 0, 0.2, 1] }}
       >
-        <Card className="gap-0 overflow-hidden border-border/70 py-0 shadow-sm transition-shadow duration-200 hover:shadow-md">
-          <div
-            data-ti-image-mask
-            className="relative aspect-[16/10] overflow-hidden bg-soft-gray sm:aspect-[5/3]"
-          >
-            <motion.div
-              className="absolute inset-0 will-change-transform"
-              whileHover={reducedMotion ? undefined : { scale: 1.03 }}
-              transition={{ duration: 0.5, ease: [0, 0, 0.2, 1] }}
-            >
-              <Image
-                src={story.heroImage}
-                alt={story.imageAlt}
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 58vw"
-                quality={85}
-                className={cn("object-cover", story.objectPosition ?? "object-center")}
-              />
-            </motion.div>
-          </div>
-
+        <Card className="gap-0 overflow-hidden border-border/70 py-0 shadow-sm">
           <CardContent className="flex flex-col gap-3 px-5 py-5 sm:gap-4 sm:px-6 sm:py-6">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="secondary" className="text-[0.6875rem] uppercase tracking-[0.12em]">

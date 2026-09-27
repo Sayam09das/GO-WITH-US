@@ -165,10 +165,12 @@ function DestinationsCatalogSection({ initialDestinations }: DestinationsCatalog
           <p className="text-sm text-muted-foreground" aria-live="polite">
             {resultsLabel}
           </p>
-          {isPending ? <span className="text-xs text-muted-foreground">Updating…</span> : null}
+          {isPending ? (
+            <span className="text-xs font-medium text-muted-foreground">Updating results…</span>
+          ) : null}
         </div>
 
-        {results.length === 0 ? (
+        {results.length === 0 && !isPending ? (
           <EmptyState
             title={DESTINATIONS_CATALOG_COPY.emptyTitle}
             description={DESTINATIONS_CATALOG_COPY.emptyDescription}

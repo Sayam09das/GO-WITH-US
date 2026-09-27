@@ -1,3 +1,5 @@
+export const TRAVEL_INSPIRATION_HOMEPAGE_STORY_COUNT = 5;
+
 export const TRAVEL_INSPIRATION_COPY = {
   eyebrow: "TRAVEL INSPIRATION",
   headline: "Stories worth packing for.",
