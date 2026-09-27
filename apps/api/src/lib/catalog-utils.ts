@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import type { ItemType } from "../generated/client.js";
+import type { ItemType } from "@prisma/client";
 
 const REFERENCE_PREFIX = "GWU-";
 

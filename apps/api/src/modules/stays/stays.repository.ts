@@ -1,4 +1,4 @@
-import type { Prisma, PropertyType } from "../../generated/client.js";
+import type { Prisma, PropertyType } from "@prisma/client";
 import { prisma } from "../../lib/db.js";
 import type { ListStaysQuery, StaySearchInput, StaySort } from "./stays.schemas.js";
 

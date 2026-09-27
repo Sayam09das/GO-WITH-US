@@ -1,12 +1,10 @@
+import type { PrismaClient } from "@prisma/client";
 import { CATALOG_CATEGORIES } from "./categories.js";
 import { DESTINATION_SEEDS } from "./destinations.js";
 import { type CatalogIds, normalizeRating, pickHeroImage } from "./helpers.js";
 import { pickTags } from "./tags.js";
 
-export async function seedDestinations(
-  prisma: import("../../generated/client.js").PrismaClient,
-  ids: CatalogIds,
-): Promise<void> {
+export async function seedDestinations(prisma: PrismaClient, ids: CatalogIds): Promise<void> {
   for (let index = 0; index < DESTINATION_SEEDS.length; index += 1) {
     const destination = DESTINATION_SEEDS[index];
     if (!destination) {

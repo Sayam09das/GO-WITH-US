@@ -1,3 +1,4 @@
+import type { PrismaClient } from "@prisma/client";
 import { hash } from "argon2";
 import type { CatalogIds } from "./helpers.js";
 
@@ -21,10 +22,7 @@ const DEMO_USERS = [
 
 const DEMO_PASSWORD = "CatalogReview123!";
 
-export async function seedDemoUsers(
-  prisma: import("../../generated/client.js").PrismaClient,
-  ids: CatalogIds,
-): Promise<void> {
+export async function seedDemoUsers(prisma: PrismaClient, ids: CatalogIds): Promise<void> {
   const passwordHash = await hash(DEMO_PASSWORD);
 
   for (const user of DEMO_USERS) {

@@ -1,4 +1,4 @@
-import type { ItineraryItemType, Prisma, TripStatus } from "../../generated/client.js";
+import type { ItineraryItemType, Prisma, TripStatus } from "@prisma/client";
 import { prisma } from "../../lib/db.js";
 import {
   addDaysToDate,

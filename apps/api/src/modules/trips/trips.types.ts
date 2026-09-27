@@ -6,7 +6,7 @@ import type {
   Trip,
   TripDay,
   TripStatus,
-} from "../../generated/client.js";
+} from "@prisma/client";
 import { formatDateOnly, formatTimeString } from "./trip-utils.js";
 
 export type TripListItem = {

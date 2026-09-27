@@ -1,4 +1,4 @@
-import type { Prisma, SecurityEventType } from "../../generated/client.js";
+import type { Prisma, SecurityEventType } from "@prisma/client";
 import { prisma } from "../../lib/db.js";
 import { hashToken } from "../../lib/tokens.js";
 

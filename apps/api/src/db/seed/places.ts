@@ -1,3 +1,4 @@
+import type { PrismaClient } from "@prisma/client";
 import { DESTINATION_SEEDS } from "./destinations.js";
 import {
   type CatalogIds,
@@ -61,10 +62,7 @@ const PLACE_NAMES = [
   "Historic Bridge & River Walk",
 ];
 
-export async function seedPlaces(
-  prisma: import("../../generated/client.js").PrismaClient,
-  ids: CatalogIds,
-): Promise<void> {
+export async function seedPlaces(prisma: PrismaClient, ids: CatalogIds): Promise<void> {
   for (let index = 0; index < PLACE_NAMES.length; index += 1) {
     const title = PLACE_NAMES[index] ?? "Landmark place";
     const slug = slugify(title);

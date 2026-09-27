@@ -1,4 +1,4 @@
-import type { Prisma, StoryCategory } from "../../generated/client.js";
+import type { Prisma, StoryCategory } from "@prisma/client";
 import { prisma } from "../../lib/db.js";
 import type { StorySearchInput } from "./stories.schemas.js";
 

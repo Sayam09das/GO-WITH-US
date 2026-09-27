@@ -1,4 +1,4 @@
-import type { PrismaClient } from "../../generated/client.js";
+import type { PrismaClient } from "@prisma/client";
 import { seedExperiences } from "./experiences.js";
 import type { CatalogIds } from "./helpers.js";
 import { seedPlaces } from "./places.js";

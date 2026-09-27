@@ -1,4 +1,4 @@
-import type { BookingStatus, BookingType, Prisma } from "../../generated/client.js";
+import type { BookingStatus, BookingType, Prisma } from "@prisma/client";
 import { prisma } from "../../lib/db.js";
 import { AppError } from "../../lib/errors.js";
 import type { BookingStatusFilter } from "./bookings.schemas.js";

@@ -1,4 +1,4 @@
-import { Prisma } from "../../generated/client.js";
+import { Prisma } from "@prisma/client";
 import { logUserActivity } from "../../lib/activity.js";
 import { AppError } from "../../lib/errors.js";
 import { inferTimeSlot, parseTimeString } from "./trip-utils.js";

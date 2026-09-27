@@ -1,3 +1,4 @@
+import type { PrismaClient } from "@prisma/client";
 import { DESTINATION_SEEDS } from "./destinations.js";
 import { type CatalogIds, normalizeRating, pickHeroImage, slugify } from "./helpers.js";
 import { pickTags } from "./tags.js";
@@ -73,10 +74,7 @@ const CUISINES = [
   "European",
 ];
 
-export async function seedRestaurants(
-  prisma: import("../../generated/client.js").PrismaClient,
-  ids: CatalogIds,
-): Promise<void> {
+export async function seedRestaurants(prisma: PrismaClient, ids: CatalogIds): Promise<void> {
   for (let index = 0; index < RESTAURANT_NAMES.length; index += 1) {
     const title = RESTAURANT_NAMES[index] ?? "Neighborhood restaurant";
     const slug = slugify(title);

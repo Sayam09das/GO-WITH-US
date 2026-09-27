@@ -1,4 +1,4 @@
-import type { ExperienceCategory, Prisma } from "../../generated/client.js";
+import type { ExperienceCategory, Prisma } from "@prisma/client";
 import { prisma } from "../../lib/db.js";
 import type {
   ExperienceCategoryInput,

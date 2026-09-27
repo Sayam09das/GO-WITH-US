@@ -4,20 +4,20 @@ import type {
   ProfilePreferences,
   ProfileTravelInterestId,
   ProfileTravelStyleTagId,
-} from "./profile";
+} from "./profile.js";
 
 export type {
   ProfilePreferences,
   ProfileTravelInterestId,
   ProfileTravelStyleTagId,
   UserProfileStats,
-} from "./profile";
+} from "./profile.js";
 export {
   PROFILE_INTEREST_IDS,
   PROFILE_STYLE_TAG_IDS,
   PROFILE_TRAVEL_INTERESTS,
   PROFILE_TRAVEL_STYLE_TAGS,
-} from "./profile";
+} from "./profile.js";
 
 export type PublicUser = {
   id: string;

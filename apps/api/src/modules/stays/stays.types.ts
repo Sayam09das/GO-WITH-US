@@ -1,10 +1,4 @@
-import type {
-  BudgetTier,
-  Destination,
-  Experience,
-  PropertyType,
-  Stay,
-} from "../../generated/client.js";
+import type { BudgetTier, Destination, Experience, PropertyType, Stay } from "@prisma/client";
 import { decimalToNumber } from "../../lib/decimal.js";
 
 export type StayDestinationSummary = {
