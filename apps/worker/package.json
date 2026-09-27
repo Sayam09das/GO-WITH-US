@@ -5,13 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/worker.ts",
-    "build": "pnpm --filter @gowithus/utils build && tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json",
     "start": "node dist/worker.js",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@gowithus/jobs": "workspace:*",
-    "@gowithus/utils": "workspace:*",
     "bullmq": "^5.56.0",
     "dotenv": "^16.5.0",
     "ioredis": "^5.6.1",

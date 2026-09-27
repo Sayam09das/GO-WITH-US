@@ -1,7 +1,7 @@
-import { renderTransactionalEmail } from "@gowithus/utils";
 import nodemailer from "nodemailer";
 import { env } from "../config/env.js";
 import { logger } from "../infrastructure/logging/logger.js";
+import { renderTransactionalEmail } from "./email-templates.js";
 
 const transporter =
   env.smtpHost.length > 0

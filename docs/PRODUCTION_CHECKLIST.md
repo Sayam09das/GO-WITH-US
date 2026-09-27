@@ -24,6 +24,12 @@ Production builds **fail** if `NEXT_PUBLIC_SITE_URL` is missing or localhost (`a
 
 ## Render (API)
 
+**Build command (repo root):** `pnpm install && pnpm --filter @gowithus/api build`
+
+**Start command:** `pnpm --filter @gowithus/api db:migrate:deploy && pnpm --filter @gowithus/api start`
+
+Email templates live in `apps/api/src/lib/email-templates.ts` (compiled to `dist/`). Do not import Node-only email code from `@gowithus/utils` (web-only `cn()` helper).
+
 | Variable | Required value |
 | :--- | :--- |
 | `APP_ORIGIN` | `https://go-with-us-web.vercel.app` |

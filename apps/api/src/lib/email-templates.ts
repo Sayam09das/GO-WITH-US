@@ -22,9 +22,7 @@ export type TransactionalEmailContent = {
   greetingName: string;
   paragraphs: string[];
   cta?: TransactionalEmailCta;
-  /** Short line under the button (expiry, security, etc.). */
   footnote?: string;
-  /** Optional highlighted detail (e.g. booking reference). */
   highlight?: string;
 };
 
@@ -41,7 +39,6 @@ const BRAND = {
   textMuted: "#94A3B8",
   border: "#E2E8F0",
   accent: "#0D9488",
-  accentHover: "#0F766E",
 } as const;
 
 function stripHtml(value: string): string {
