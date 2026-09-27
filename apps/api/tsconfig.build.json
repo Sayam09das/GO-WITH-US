@@ -3,6 +3,8 @@
   "compilerOptions": {
     "noEmit": false,
     "outDir": "dist",
-    "declaration": false
+    "declaration": false,
+    "module": "ESNext",
+    "moduleResolution": "Bundler"
   }
 }

@@ -12,6 +12,8 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "check": "pnpm lint && pnpm typecheck",
+    "docker:build": "docker compose build",
+    "docker:up": "docker compose up -d",
     "db:seed": "pnpm --filter @gowithus/api db:seed",
     "prepare": "husky"
   },
