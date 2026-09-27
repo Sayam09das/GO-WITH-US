@@ -58,7 +58,7 @@ export const EXPLORE_DESTINATION_PANELS: ExploreDestinationPanel[] = [
   },
   {
     id: "explore-ubud",
-    slug: "bali-coast",
+    slug: "bali",
     name: "Ubud",
     location: "Ubud",
     country: "Indonesia",

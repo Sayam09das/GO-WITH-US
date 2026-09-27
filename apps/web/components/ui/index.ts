@@ -3,6 +3,17 @@
  * Feature components belong in `components/<feature>/`, not here.
  */
 
+export {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "./alert-dialog";
 export { Badge, badgeVariants } from "./badge";
 export { Button, type ButtonProps, buttonVariants } from "./button";
 export {

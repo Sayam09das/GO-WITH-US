@@ -1,5 +1,6 @@
 import type {
   DashboardOverview,
+  PublicUser,
   SavedDestinationSummary,
   SavedExperienceSummary,
   SavedStaySummary,
@@ -11,6 +12,7 @@ import type { DashboardUser } from "@/lib/account/dashboard/config";
 import type { RecentlyViewedItem, RecentlyViewedType } from "@/lib/account/dashboard/recent-config";
 import type { SavedPlaceItem } from "@/lib/account/dashboard/saved-places-config";
 import type { UpcomingTrip } from "@/lib/account/dashboard/upcoming-trip-config";
+import { getUserFirstName, getUserInitials } from "@/lib/auth/user-display";
 
 const DEFAULT_IMAGE = {
   src: "/landingImg/travelimg/travel-5.jpg",
@@ -47,6 +49,16 @@ function countNights(startDate: string | null, endDate: string | null): number |
   const end = new Date(`${endDate}T00:00:00.000Z`).getTime();
   const nights = Math.round((end - start) / (1000 * 60 * 60 * 24));
   return nights > 0 ? nights : null;
+}
+
+export function mapPublicUserToDashboardUser(user: PublicUser): DashboardUser {
+  const firstName = getUserFirstName(user);
+  return {
+    firstName,
+    fullName: user.fullName,
+    email: user.email,
+    initials: getUserInitials(user.fullName),
+  };
 }
 
 export function mapUserProfileToDashboardUser(user: UserProfile): DashboardUser {

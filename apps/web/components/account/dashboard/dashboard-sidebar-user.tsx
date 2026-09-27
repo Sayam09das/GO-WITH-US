@@ -4,6 +4,7 @@ import { ChevronRight } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { useDashboardUser } from "@/components/account/dashboard/dashboard-user-context";
+import { useDashboardLogout } from "@/components/account/dashboard/use-dashboard-logout";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -12,7 +13,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { DASHBOARD_SIDEBAR_USER_COPY, DASHBOARD_SIDEBAR_USER_LINKS } from "@/lib/account";
+import {
+  DASHBOARD_HEADER_COPY,
+  DASHBOARD_SIDEBAR_USER_COPY,
+  DASHBOARD_SIDEBAR_USER_LINKS,
+} from "@/lib/account";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +28,7 @@ interface DashboardSidebarUserProps {
 function DashboardSidebarUser({ className }: DashboardSidebarUserProps) {
   const reducedMotion = useReducedMotion();
   const user = useDashboardUser();
+  const handleLogout = useDashboardLogout();
 
   return (
     <div data-dash-reveal className={cn("will-change-transform", className)}>
@@ -54,14 +60,20 @@ function DashboardSidebarUser({ className }: DashboardSidebarUserProps) {
           </motion.button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" side="top" className="min-w-52">
-          {DASHBOARD_SIDEBAR_USER_LINKS.map((link, index) => (
-            <div key={link.href}>
-              {index === DASHBOARD_SIDEBAR_USER_LINKS.length - 1 ? <DropdownMenuSeparator /> : null}
-              <DropdownMenuItem asChild>
-                <Link href={link.href}>{link.label}</Link>
-              </DropdownMenuItem>
-            </div>
+          {DASHBOARD_SIDEBAR_USER_LINKS.map((link) => (
+            <DropdownMenuItem key={link.href} asChild>
+              <Link href={link.href}>{link.label}</Link>
+            </DropdownMenuItem>
           ))}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onSelect={(event) => {
+              event.preventDefault();
+              void handleLogout();
+            }}
+          >
+            {DASHBOARD_HEADER_COPY.profileLinks.logOut}
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

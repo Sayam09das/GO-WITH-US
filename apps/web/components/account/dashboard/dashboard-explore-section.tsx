@@ -8,10 +8,15 @@ import { getExploreDestinations } from "@/lib/account";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
 import { cn } from "@/lib/utils";
 
-function DashboardExploreSection() {
+interface DashboardExploreSectionProps {
+  savedDestinationSlugs?: string[];
+}
+
+function DashboardExploreSection({ savedDestinationSlugs = [] }: DashboardExploreSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const reducedMotion = useReducedMotion();
   const destinations = getExploreDestinations();
+  const savedSlugSet = new Set(savedDestinationSlugs);
 
   useDashboardExploreAnimation(sectionRef, reducedMotion);
 
@@ -30,7 +35,11 @@ function DashboardExploreSection() {
           <DashboardExploreHeader />
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:grid-rows-2 lg:gap-5">
             {destinations.map((destination) => (
-              <DashboardExplorePanel key={destination.id} destination={destination} />
+              <DashboardExplorePanel
+                key={destination.id}
+                destination={destination}
+                initialSaved={savedSlugSet.has(destination.slug)}
+              />
             ))}
           </div>
         </div>

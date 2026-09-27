@@ -1,6 +1,7 @@
 export {
   DASHBOARD_HEADER_COPY,
   DASHBOARD_PROFILE_LINKS,
+  DASHBOARD_PROFILE_NAV_LINKS,
   DASHBOARD_USER,
   type DashboardNavItem,
   type DashboardUser,

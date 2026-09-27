@@ -3,6 +3,8 @@
 import { ChevronDown } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
+import { useDashboardUser } from "@/components/account/dashboard/dashboard-user-context";
+import { useDashboardLogout } from "@/components/account/dashboard/use-dashboard-logout";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -11,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { DASHBOARD_HEADER_COPY, DASHBOARD_PROFILE_LINKS, DASHBOARD_USER } from "@/lib/account";
+import { DASHBOARD_HEADER_COPY, DASHBOARD_PROFILE_NAV_LINKS } from "@/lib/account";
 import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +24,8 @@ interface DashboardProfileMenuProps {
 
 function DashboardProfileMenu({ compact = false, className }: DashboardProfileMenuProps) {
   const reducedMotion = useReducedMotion();
+  const user = useDashboardUser();
+  const handleLogout = useDashboardLogout();
 
   return (
     <DropdownMenu>
@@ -40,13 +44,13 @@ function DashboardProfileMenu({ compact = false, className }: DashboardProfileMe
         >
           <Avatar size="sm" className="size-9 bg-primary/10 text-primary">
             <AvatarFallback className="bg-primary/10 text-sm font-semibold text-primary">
-              {DASHBOARD_USER.initials}
+              {user.initials}
             </AvatarFallback>
           </Avatar>
           {!compact ? (
             <>
               <span className="hidden max-w-[8rem] truncate text-sm font-medium text-heading sm:inline">
-                {DASHBOARD_USER.firstName}
+                {user.firstName}
               </span>
               <ChevronDown aria-hidden="true" className="size-4 text-muted-foreground" />
             </>
@@ -54,14 +58,20 @@ function DashboardProfileMenu({ compact = false, className }: DashboardProfileMe
         </motion.button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-44">
-        {DASHBOARD_PROFILE_LINKS.map((link, index) => (
-          <div key={link.href}>
-            {index === DASHBOARD_PROFILE_LINKS.length - 1 ? <DropdownMenuSeparator /> : null}
-            <DropdownMenuItem asChild>
-              <Link href={link.href}>{link.label}</Link>
-            </DropdownMenuItem>
-          </div>
+        {DASHBOARD_PROFILE_NAV_LINKS.map((link) => (
+          <DropdownMenuItem key={link.href} asChild>
+            <Link href={link.href}>{link.label}</Link>
+          </DropdownMenuItem>
         ))}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onSelect={(event) => {
+            event.preventDefault();
+            void handleLogout();
+          }}
+        >
+          {DASHBOARD_HEADER_COPY.profileLinks.logOut}
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
